@@ -1,0 +1,245 @@
+[
+{
+    "pk": 1, 
+    "model": "nerdeez_server_app.schoolgroup", 
+    "fields": {
+        "description": "IIT - Israel's Institute of Technology", 
+        "parent": null, 
+        "title": "Technion", 
+        "grade": "3.5", 
+        "creation_date": "2013-09-25T05:24:16Z", 
+        "school_type": 3, 
+        "modified_data": "2013-09-25T05:24:48.404Z"
+    }
+},
+{
+    "pk": 2, 
+    "model": "nerdeez_server_app.schoolgroup", 
+    "fields": {
+        "description": "Technion's Computer Science faculty", 
+        "parent": 1, 
+        "title": "Computer Science", 
+        "grade": "3.5", 
+        "creation_date": "2013-09-25T05:25:35Z", 
+        "school_type": 2, 
+        "modified_data": "2013-09-25T05:26:08.557Z"
+    }
+},
+{
+    "pk": 3, 
+    "model": "nerdeez_server_app.schoolgroup", 
+    "fields": {
+        "description": "Matam course in Computer Science faculty in Technion University", 
+        "parent": 2, 
+        "title": "234122", 
+        "grade": "3.5", 
+        "creation_date": "2013-09-25T05:26:38Z", 
+        "school_type": 1, 
+        "modified_data": "2013-09-25T05:28:11.685Z"
+    }
+},
+{
+    "pk": 4, 
+    "model": "nerdeez_server_app.schoolgroup", 
+    "fields": {
+        "description": "Atam course in Technion", 
+        "parent": 2, 
+        "title": "234118", 
+        "grade": "3.5", 
+        "creation_date": "2013-09-25T05:40:38Z", 
+        "school_type": 1, 
+        "modified_data": "2013-09-25T05:41:08.366Z"
+    }
+},
+{
+    "pk": 1, 
+    "model": "auth.user", 
+    "fields": {
+        "username": "1", 
+        "first_name": "", 
+        "last_name": "", 
+        "is_active": true, 
+        "is_superuser": true, 
+        "is_staff": true, 
+        "last_login": "2013-10-03T17:14:20.558Z", 
+        "groups": [], 
+        "user_permissions": [], 
+        "password": "pbkdf2_sha256$10000$9ufnSQ6YbVLS$6tRfJlnHKveTtUWmicnJgKIpC09QuDBPjBSznrM78lo=", 
+        "email": "ywarezk@gmail.com", 
+        "date_joined": "2013-06-20T15:16:48.403Z"
+    }
+},
+{
+    "pk": 2, 
+    "model": "auth.user", 
+    "fields": {
+        "username": "12", 
+        "first_name": "", 
+        "last_name": "", 
+        "is_active": true, 
+        "is_superuser": false, 
+        "is_staff": false, 
+        "last_login": "2013-09-26T14:34:44.316Z", 
+        "groups": [], 
+        "user_permissions": [], 
+        "password": "pbkdf2_sha256$10000$VSBQNwXzysk6$bjj9N+QlYFlzp4yu0POyrjlcjw8htxvaepH49hMdaR8=", 
+        "email": "yariv@nerdeez.com", 
+        "date_joined": "2013-09-25T04:00:58.339Z"
+    }
+},
+{
+    "pk": 3, 
+    "model": "auth.user", 
+    "fields": {
+        "username": "123", 
+        "first_name": "", 
+        "last_name": "", 
+        "is_active": true, 
+        "is_superuser": false, 
+        "is_staff": false, 
+        "last_login": "2013-09-25T18:18:44.327Z", 
+        "groups": [], 
+        "user_permissions": [], 
+        "password": "", 
+        "email": "ceo@ykapps.com", 
+        "date_joined": "2013-09-25T18:18:44.327Z"
+    }
+},
+{
+    "pk": 4, 
+    "model": "auth.user", 
+    "fields": {
+        "username": "1234", 
+        "first_name": "", 
+        "last_name": "", 
+        "is_active": true, 
+        "is_superuser": false, 
+        "is_staff": false, 
+        "last_login": "2013-09-26T06:35:14.841Z", 
+        "groups": [], 
+        "user_permissions": [], 
+        "password": "d4cf720f038330bb795e9414f8ed09", 
+        "email": "", 
+        "date_joined": "2013-09-26T06:35:14.842Z"
+    }
+},
+{
+    "pk": 5, 
+    "model": "auth.user", 
+    "fields": {
+        "username": "ywarezk", 
+        "first_name": "", 
+        "last_name": "", 
+        "is_active": true, 
+        "is_superuser": false, 
+        "is_staff": false, 
+        "last_login": "2013-09-26T06:37:37.542Z", 
+        "groups": [], 
+        "user_permissions": [], 
+        "password": "98be98d149a7c902ca4242462f3dc0", 
+        "email": "", 
+        "date_joined": "2013-09-26T06:37:37.543Z"
+    }
+},
+{
+    "pk": 1, 
+    "model": "nerdeez_server_app.userprofile", 
+    "fields": {
+        "email_hash": "91cf5077e90a6ba46d6522d07c47e6806ed522e9", 
+        "modified_data": "2013-09-25T04:00:58.605Z", 
+        "creation_date": "2013-09-25T04:00:58Z", 
+        "twitter_oauth_token": "", 
+        "user": 4, 
+        "twitter_oauth_token_secret": ""
+    }
+},
+{
+    "pk": 2, 
+    "model": "nerdeez_server_app.userprofile", 
+    "fields": {
+        "email_hash": "", 
+        "modified_data": "2013-09-26T06:35:24.260Z", 
+        "creation_date": "2013-09-26T06:35:24Z", 
+        "twitter_oauth_token": "", 
+        "user": 1, 
+        "twitter_oauth_token_secret": ""
+    }
+},
+{
+    "pk": 3, 
+    "model": "nerdeez_server_app.userprofile", 
+    "fields": {
+        "email_hash": "", 
+        "modified_data": "2013-09-26T06:37:37.596Z", 
+        "creation_date": "2013-09-26T06:37:37Z", 
+        "twitter_oauth_token": "571540045-KQjgPk2Xat5XoHyos8JEGutJXCXbB9ym1neNVByb", 
+        "user": 5, 
+        "twitter_oauth_token_secret": "IbJVHDpM9nWseFANQdMrUpnVci93ersHAr6u0"
+    }
+},
+{
+    "pk": 1, 
+    "model": "nerdeez_server_app.enroll", 
+    "fields": {
+        "user": 1, 
+        "school_group": 1, 
+        "modified_data": "2013-10-03T17:16:04.124Z", 
+        "creation_date": "2013-10-03T17:15:50Z"
+    }
+},
+{
+    "pk": 2, 
+    "model": "nerdeez_server_app.enroll", 
+    "fields": {
+        "user": 1, 
+        "school_group": 2, 
+        "modified_data": "2013-10-03T17:16:28.976Z", 
+        "creation_date": "2013-10-03T17:16:20Z"
+    }
+},
+{
+    "pk": 1, 
+    "model": "tastypie.apikey", 
+    "fields": {
+        "user": 1, 
+        "key": "12345678", 
+        "created": "2013-09-25T18:18:52.905Z"
+    }
+},
+{
+    "pk": 2, 
+    "model": "tastypie.apikey", 
+    "fields": {
+        "user": 2, 
+        "key": "12345678", 
+        "created": "2013-09-26T06:36:43.841Z"
+    }
+},
+{
+    "pk": 3, 
+    "model": "tastypie.apikey", 
+    "fields": {
+        "user": 3, 
+        "key": "12345678", 
+        "created": "2013-09-26T06:41:34.556Z"
+    }
+},
+{
+    "pk": 4, 
+    "model": "tastypie.apikey", 
+    "fields": {
+        "user": 4, 
+        "key": "12345678", 
+        "created": "2013-09-26T09:30:54.305Z"
+    }
+},
+{
+    "pk": 5, 
+    "model": "tastypie.apikey", 
+    "fields": {
+        "user": 5, 
+        "key": "12345678", 
+        "created": "2013-09-26T14:34:44.389Z"
+    }
+}
+]
