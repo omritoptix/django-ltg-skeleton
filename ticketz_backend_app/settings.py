@@ -1,8 +1,15 @@
-# Django settings for nerdeez_server_app project.
+'''
+Will contain the settings for our django app
+
+Created November 7, 2013
+@author: Yariv Katz
+@version: 1.0
+@copyright: Nerdeez
+'''
 
 import os
 
-DEBUG = True
+DEBUG = os.environ.get('IS_DEBUG', 'TRUE') == 'TRUE'
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -87,7 +94,7 @@ except:
     pass
 
 #when sending mail the user will see this address
-FROM_EMAIL_ADDRESS = 'noreply@nerdeez.com'
+FROM_EMAIL_ADDRESS = os.environ.get('FROM_EMAIL_ADDRESS', 'noreply@nerdeez.com')
 
 # List of finder classes that know how to find static files in
 # various locations.
@@ -118,10 +125,10 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'nerdeez_server_app.urls'
+ROOT_URLCONF = 'ticketz_backend_app.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'nerdeez_server_app.wsgi.application'
+WSGI_APPLICATION = 'ticketz_backend_app.wsgi.application'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
@@ -181,19 +188,19 @@ DATABASES['default'] =  dj_database_url.config()
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 INSTALLED_APPS = INSTALLED_APPS + ('gunicorn',)
 INSTALLED_APPS = INSTALLED_APPS + ('south',)
-INSTALLED_APPS = INSTALLED_APPS + ('nerdeez_server_app',)
+INSTALLED_APPS = INSTALLED_APPS + ('ticketz_backend_app',)
 INSTALLED_APPS = INSTALLED_APPS + ('tastypie',)
 # INSTALLED_APPS = INSTALLED_APPS + ('django_facebook',)
 
 #s3 storage
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-AWS_ACCESS_KEY_ID = os.environ['NERDEEZ_ENV_AWS_ACCESS_KEY_ID']
-AWS_SECRET_ACCESS_KEY = os.environ['NERDEEZ_ENV_AWS_SECRET_ACCESS_KEY']
-AWS_STORAGE_BUCKET_NAME = os.environ['NERDEEZ_ENV_AWS_STORAGE_BUCKET_NAME']
+AWS_ACCESS_KEY_ID = os.environ.get('TICKETZ_ENV_AWS_ACCESS_KEY_ID', None)
+AWS_SECRET_ACCESS_KEY = os.environ.get('TICKETZ_ENV_AWS_SECRET_ACCESS_KEY', None)
+AWS_STORAGE_BUCKET_NAME = os.environ.get('TICKETZ_ENV_AWS_STORAGE_BUCKET_NAME', None)
 STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 
 #tell django about the user profile
-AUTH_PROFILE_MODULE = "nerdeez_server_app.UserProfile"
+AUTH_PROFILE_MODULE = "ticketz_backend_app.UserProfile"
 
 #for send grid
 try:
@@ -204,9 +211,6 @@ try:
     EMAIL_HOST_PASSWORD = os.environ['SENDGRID_PASSWORD']
 except:
     pass
-
-#when sending mail the user will see this address
-FROM_EMAIL_ADDRESS = 'noreply@nerdeez.com'
 
 #for facebook auth
 FACEBOOK_APP_SECRET = os.environ.get('FACEBOOK_APP_SECRET', '')

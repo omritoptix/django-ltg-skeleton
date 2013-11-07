@@ -1,6 +1,6 @@
 '''
 our server urls are defined in this page
-Created on Jun 20, 2013
+Created on November 7, 2013
 
 @author: Yariv Katz
 @version: 1.0
@@ -14,8 +14,8 @@ Created on Jun 20, 2013
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from tastypie.api import Api
-from nerdeez_server_app.nerdeez_api.api import *
-import nerdeez_server_app.views
+from ticketz_backend_app.ticketz_api.api import *
+import ticketz_backend_app.views
 
 #===============================================================================
 # end imports
@@ -26,13 +26,6 @@ admin.autodiscover()
 
 #register rest urls
 v1_api = Api(api_name='v1')
-v1_api.register(SchoolGroupResource())
-v1_api.register(FlatpageResource())
-v1_api.register(UtilitiesResource())
-v1_api.register(UserProfileResource())
-v1_api.register(EnrollResource())
-v1_api.register(HwResource())
-v1_api.register(FileResource())
 
 #register urls
 urlpatterns = patterns('',
@@ -40,8 +33,8 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
     
     #urls for the cross domain comunications
-    ('^$', nerdeez_server_app.views.porthole),
-    ('^proxy/', nerdeez_server_app.views.proxy),
+    ('^$', ticketz_backend_app.views.porthole),
+    ('^proxy/', ticketz_backend_app.views.proxy),
     
     #urls for tastypie
     (r'^api/', include(v1_api.urls)),

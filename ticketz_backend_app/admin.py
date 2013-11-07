@@ -1,6 +1,6 @@
 '''
 will hold the admin interface models
-Created on Jun 20, 2013
+Created on November 7, 2013
 
 @author: Yariv Katz
 @version: 1.0
@@ -11,7 +11,7 @@ Created on Jun 20, 2013
 # begin imports
 #===============================================================================
 from django.contrib import admin
-from nerdeez_server_app.models import *
+from ticketz_backend_app.models import *
 
 #===============================================================================
 # end imports
@@ -21,25 +21,26 @@ from nerdeez_server_app.models import *
 # begin admin models
 #===============================================================================
 
-
-class SchoolGroupAdmin(admin.ModelAdmin):
-    pass
-
-class FlatpageAdmin(admin.ModelAdmin):
+class FlatPageAdmin(admin.ModelAdmin):
     pass
 
 class UserProfileAdmin(admin.ModelAdmin):
     pass
 
-class EnrollAdmin(admin.ModelAdmin):
+class RegionAdmin(admin.ModelAdmin):
     pass
 
-class HwAdmin(admin.ModelAdmin):
+class CityAdmin(admin.ModelAdmin):
     pass
 
-class FileAdmin(admin.ModelAdmin):
+class UserPrefrenceAdmin(admin.ModelAdmin):
     pass
 
+class CategoryAdmin(admin.ModelAdmin):
+    pass
+
+class BusinessAdmin(admin.ModelAdmin):
+    pass
 
 #===============================================================================
 # end admin models
@@ -49,13 +50,13 @@ class FileAdmin(admin.ModelAdmin):
 # begin admin site regitration
 #===============================================================================
 
-admin.site.register(SchoolGroup, SchoolGroupAdmin)
-admin.site.register(Flatpage, FlatpageAdmin)
+admin.site.register(FlatPage, FlatPageAdmin)
 admin.site.register(UserProfile, UserProfileAdmin)
-admin.site.register(Enroll, EnrollAdmin)
-admin.site.register(Hw, HwAdmin)
-admin.site.register(File, FileAdmin)
-
+admin.site.register(Region, RegionAdmin)
+admin.site.register(City, CityAdmin)
+admin.site.register(UserPrefrence, UserPrefrenceAdmin)
+admin.site.register(Category, CategoryAdmin)
+admin.site.register(Business, BusinessAdmin)
 
 #===============================================================================
 # end admin site registration
