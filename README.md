@@ -1,4 +1,4 @@
-nerdeez-backend
+ticketz-backend
 ==============
 
 Backend project for the 90 minute ticket sell application
