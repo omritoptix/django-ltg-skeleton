@@ -86,4 +86,7 @@ class EncryptedCharField(BaseEncryptedField):
     def formfield(self, **kwargs):
         defaults = {'max_length': self.max_length}
         defaults.update(kwargs)
-        return super(EncryptedCharField, self).formfield(**defaults))
+        return super(EncryptedCharField, self).formfield(**defaults)
+    
+from south.modelsinspector import add_introspection_rules
+add_introspection_rules([], ["^ticketz_backend_app\.encryption\.EncryptedCharField"])

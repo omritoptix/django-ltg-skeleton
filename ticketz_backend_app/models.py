@@ -74,7 +74,7 @@ class UserProfile(NerdeezModel):
         return self.user.email
     
     def owner(self):
-        return self.user
+        return self.user.username
     
         
 class FlatPage(NerdeezModel):
@@ -110,7 +110,7 @@ class UserPrefrence(NerdeezModel):
         return self.user_profile.user.email
     
     def owner(self):
-        return self.user_profile.user
+        return self.user_profile.user.username
     
 class Category(NerdeezModel):
     '''
@@ -151,5 +151,6 @@ User.profile = property(lambda u: UserProfile.objects.get_or_create(user=u)[0])
 #===============================================================================
 # end signals
 #===============================================================================
+
 
 

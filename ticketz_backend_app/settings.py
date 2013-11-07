@@ -219,3 +219,8 @@ FACEBOOK_APP_ID = os.environ.get('FACEBOOK_APP_ID', '')
 #for twitter auth
 TWITTER_KEY = os.environ.get('TWITTER_KEY', '')
 TWITTER_SECRET = os.environ.get('TWITTER_SECRET', '')
+
+ADMIN_MAIL = os.environ.get('ADMIN_MAIL', 'yariv@nerdeez.com')
+
+os.environ['LANG'] = 'en_US.UTF-8'
+

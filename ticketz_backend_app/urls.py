@@ -26,6 +26,14 @@ admin.autodiscover()
 
 #register rest urls
 v1_api = Api(api_name='v1')
+v1_api.register(FlatpageResource())
+v1_api.register(UserProfileResource())
+v1_api.register(RegionResource())
+v1_api.register(CityResource())
+v1_api.register(UserPrefrenceResource())
+v1_api.register(CategoryResource())
+v1_api.register(BusinessResource())
+v1_api.register(UtilitiesResource())
 
 #register urls
 urlpatterns = patterns('',
