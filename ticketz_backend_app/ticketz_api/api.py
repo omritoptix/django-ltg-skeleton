@@ -29,6 +29,10 @@ from django.conf.urls import url
 from tastypie.utils import trailing_slash
 from django.utils import simplejson
 from tastypie.exceptions import Unauthorized
+from tastypie.http import HttpUnauthorized
+from django.contrib import auth
+from tastypie.models import ApiKey
+from django.utils import simplejson as json
 
 #===============================================================================
 # end imports
@@ -236,6 +240,9 @@ class UtilitiesResource(NerdeezResource):
             url(r"^(?P<resource_name>%s)/contact%s$" %
                 (self._meta.resource_name, trailing_slash()),
                 self.wrap_view('contact'), name="api_contact"),
+            url(r"^(?P<resource_name>%s)/login%s$" %
+                (self._meta.resource_name, trailing_slash()),
+                self.wrap_view('login'), name="api_login"),
         ]
         
     def contact(self, request=None, **kwargs):
@@ -264,6 +271,66 @@ class UtilitiesResource(NerdeezResource):
         return self.create_response(request, {
                     'success': True,
                     'message': 'Successfully sent your message',
+                    }, HttpAccepted )
+        
+    def login(self, request=None, **kwargs):
+        '''
+        login request is sent here
+        @param password: the user password 
+        @param email: the user email 
+        @return: 401 if login failed with a disctionary with a message, if success will return the following object
+        {
+            'success': True,
+            'message': 'Successfully logged in',
+            "user_profile": <The user profile object>,
+            'api_key': <the api key of the user valid for a day>,
+            'username': <the username of the password>
+        }
+        '''
+        
+        #get the params
+        post = simplejson.loads(request.body)
+        password = post.get('password')
+        email = post.get('email')
+        
+        #get the user with that email address
+        try:
+            user = User.objects.get(email=email)
+        except:
+            return self.create_response(request, {
+                    'success': False,
+                    'message': 'Invalid email or password',
+                    }, HttpUnauthorized )
+        
+        user = auth.authenticate(username=user.username, password=password)
+        if user is None:
+            return self.create_response(request, {
+                    'success': False,
+                    'message': 'Invalid email or password',
+                    }, HttpUnauthorized )
+        if not user.is_active:
+            return self.create_response(request, {
+                    'success': False,
+                    'message': 'Account not activated',
+                    }, HttpUnauthorized )
+                    
+        # Correct password, and the user is marked "active"
+        auth.login(request, user)
+        
+        #successfull login delete all the old api key of the user and create a new one
+        api_keys = ApiKey.objects.filter(user=user)
+        api_keys.delete()
+        api_key, created = ApiKey.objects.get_or_create(user=user)
+        api_key.save()
+
+        ur = UserProfileResource()
+        ur_bundle = ur.build_bundle(obj=user.profile, request=request)
+        return self.create_response(request, {
+                    'success': True,
+                    'message': 'Successfully logged in',
+                    "user_profile": json.loads(ur.serialize(None, ur.full_dehydrate(ur_bundle), 'application/json')),
+                    'api_key': api_key.key,
+                    'username': user.username
                     }, HttpAccepted )
                     
 #===============================================================================
