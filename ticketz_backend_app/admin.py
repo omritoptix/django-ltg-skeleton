@@ -40,7 +40,11 @@ class CategoryAdmin(admin.ModelAdmin):
     pass
 
 class BusinessAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('title', 'business_id', 'get_email', 'phone', 'send_activation')
+    def get_email(self, business):
+        return business.user_profile.user.email
+    def send_activation(self, business):
+        pass
 
 #===============================================================================
 # end admin models

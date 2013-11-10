@@ -129,13 +129,16 @@ class Business(NerdeezModel):
     field that will hold specific api data that toptix or titan or other service requires.
     Question: Should that data be encrypted?
     '''
-    title = models.CharField(max_length=100, blank=False, null=False, unique=True)
+    user_profile = models.ForeignKey(UserProfile)
+    title = models.CharField(max_length=100, blank=False, null=False)
+    business_id = models.CharField(max_length=20, blank=False, null=False, unique=True)
+    phone = models.CharField(max_length=20, blank=False, null=False)
     city = models.ForeignKey(City, blank=True, null=True, default=None)
     address = models.CharField(max_length=200, blank=True, null=True, default=None)
     web_service_url = models.CharField(max_length=300, blank=True, null=True, default=None)
     adapter_class = models.CharField(max_length=50, blank=True, null=True, default=None)
-    paymill_private_key = EncryptedCharField(max_length=200)
     adapter_object = PickledObjectField()
+    
     
     
 #===============================================================================

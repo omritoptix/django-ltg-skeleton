@@ -29,10 +29,12 @@ from django.conf.urls import url
 from tastypie.utils import trailing_slash
 from django.utils import simplejson
 from tastypie.exceptions import Unauthorized
-from tastypie.http import HttpUnauthorized
+from tastypie.http import HttpUnauthorized, HttpConflict, HttpCreated, HttpBadRequest
 from django.contrib import auth
 from tastypie.models import ApiKey
 from django.utils import simplejson as json
+from ticketz_backend_app.forms import UserCreateForm
+from django.contrib.auth import authenticate, login
 
 #===============================================================================
 # end imports
@@ -243,6 +245,9 @@ class UtilitiesResource(NerdeezResource):
             url(r"^(?P<resource_name>%s)/login%s$" %
                 (self._meta.resource_name, trailing_slash()),
                 self.wrap_view('login'), name="api_login"),
+            url(r"^(?P<resource_name>%s)/register%s$" %
+                (self._meta.resource_name, trailing_slash()),
+                self.wrap_view('register'), name="api_register"),
         ]
         
     def contact(self, request=None, **kwargs):
@@ -332,6 +337,99 @@ class UtilitiesResource(NerdeezResource):
                     'api_key': api_key.key,
                     'username': user.username
                     }, HttpAccepted )
+        
+    def register(self, request=None, **kwargs):
+        '''
+        will try and register the user
+        we expect here an email and a password sent as post params
+        @return:    201 if user is created
+                    500 failed to send emails
+                    409 conflict with existing account
+        '''
+        
+        #get params
+        post = simplejson.loads(request.body)
+        email = post.get('email')
+        business_id = post.get('business_id')
+        phone = post.get('phone')
+        address = post.get('address')
+        city = post.get('city')
+        title = post.get('title')
+        
+        #create the username
+        api_key = ApiKey()
+        username = api_key.generate_key()[0:30]
+        password = api_key.generate_key()[0:30]
+        
+        #set the request post to contain email password and username
+        post_values = {}
+        post_values['username'] = username
+        post_values['password1'] = password
+        post_values['password2'] = password
+        post_values['email'] = email
+        
+        #is the email already exists?
+        try:
+            user = User.objects.get(email=email)
+            return self.create_response(request, {
+                    'success': False,
+                    'message': 'User with this mail address already exists',
+                    }, HttpConflict )
+        except:
+            pass
+        
+        #validation success
+        user_form = UserCreateForm(post_values)
+        if user_form.is_valid():
+            
+            #create the user
+            username = user_form.clean_username()
+            password = user_form.clean_password2()
+            user_form.save()
+            user = authenticate(username=username,
+                                password=password)
+            login(request, user)
+            user.is_active = False
+            user.save()
+            
+            #create the business 
+            business = Business()
+            business.title = title
+            business.business_id = business_id
+            business.phone = phone
+            if city != None:
+                business.city = City.objects.get(id=city)
+            business.address = address
+            business.user_profile = user.profile
+            business.save()
+            
+            #send the verification mail
+            if is_send_grid():
+                t = get_template('emails/register_approval_mail.html')
+                html = t.render(Context({'admin_mail': settings.ADMIN_MAIL, 'admin_phone': settings.ADMIN_PHONE}))
+                text_content = strip_tags(html)
+                msg = EmailMultiAlternatives('2Nite Registration', text_content, settings.FROM_EMAIL_ADDRESS, [email])
+                msg.attach_alternative(html, "text/html")
+                try:
+                    msg.send()
+                except SMTPSenderRefused, e:
+                    return self.create_response(request, {
+                        'success': False,
+                        'message': 'Failed to send mail',
+                        }, HttpApplicationError )
+            
+            #return the status code
+            return self.create_response(request, {
+                    'success': True,
+                    'message': 'Successfully created the account, Account pending approval',
+                    }, HttpCreated )
+            
+        #validation failed    
+        else:
+            return self.create_response(request, {
+                    'success': False,
+                    'message': [(k, v[0]) for k, v in user_form.errors.items()],
+                    }, HttpBadRequest )
                     
 #===============================================================================
 # end teh actual rest api

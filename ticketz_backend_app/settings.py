@@ -221,6 +221,7 @@ TWITTER_KEY = os.environ.get('TWITTER_KEY', '')
 TWITTER_SECRET = os.environ.get('TWITTER_SECRET', '')
 
 ADMIN_MAIL = os.environ.get('ADMIN_MAIL', 'yariv@nerdeez.com')
+ADMIN_PHONE = os.environ.get('ADMIN_PHONE', '0522441431')
 
 os.environ['LANG'] = 'en_US.UTF-8'
 
