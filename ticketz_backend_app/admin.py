@@ -41,10 +41,19 @@ class CategoryAdmin(admin.ModelAdmin):
 
 class BusinessAdmin(admin.ModelAdmin):
     list_display = ('title', 'business_id', 'get_email', 'phone', 'send_activation')
+    search_fields = ['user_profile__user__email','title', 'business_id']
+    list_filter = ('modified_data','creation_date')
     def get_email(self, business):
         return business.user_profile.user.email
     def send_activation(self, business):
-        pass
+        '''
+        will turn the business as active and send an activation mail with the password for the business
+        @param business: the business model
+        @return true on success false on failure 
+        '''
+    
+        #turn the user to active
+        user = business
 
 #===============================================================================
 # end admin models
