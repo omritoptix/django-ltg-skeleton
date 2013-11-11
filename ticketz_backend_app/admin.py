@@ -47,13 +47,11 @@ class BusinessAdmin(admin.ModelAdmin):
         return business.user_profile.user.email
     def send_activation(self, business):
         '''
-        will turn the business as active and send an activation mail with the password for the business
+        will redirect to a business approval page
         @param business: the business model
-        @return true on success false on failure 
         '''
-    
-        #turn the user to active
-        user = business
+        return "<a href='/confirm-business/%s'>Activate</a>" % (business.id)
+    send_activation.allow_tags = True
 
 #===============================================================================
 # end admin models

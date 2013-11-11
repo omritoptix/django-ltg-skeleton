@@ -51,4 +51,8 @@ urlpatterns = patterns('',
     (r'^grappelli/', include('grappelli.urls')),
     
     
+    (r'^confirm-business/(\d+)', ticketz_backend_app.views.confirm_activate_business),
+    (r'^activate-business/(\d+)', ticketz_backend_app.views.activate_business),
+    
+    
 )

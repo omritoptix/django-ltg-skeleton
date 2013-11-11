@@ -1,0 +1,38 @@
+[
+    {
+        "pk": 1, 
+        "model": "auth.user", 
+        "fields": {
+            "username": "ywarezk", 
+            "first_name": "", 
+            "last_name": "", 
+            "is_active": true, 
+            "is_superuser": true, 
+            "is_staff": true, 
+            "last_login": "2013-11-10T10:56:38.244Z", 
+            "groups": [], 
+            "user_permissions": [], 
+            "password": "pbkdf2_sha256$10000$TMJaRquYHsfy$mfF4ESBoQxB1Lu9GQ8B+s4Lw1qZhmcsOPB36ZMUYVNo=", 
+            "email": "ywarezk@gmail.com", 
+            "date_joined": "2013-11-07T13:20:47.037Z"
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "auth.user", 
+        "fields": {
+            "username": "301dcd61a2cc02647cc1d7a90ba4a3", 
+            "first_name": "", 
+            "last_name": "", 
+            "is_active": false, 
+            "is_superuser": false, 
+            "is_staff": false, 
+            "last_login": "2013-11-10T13:35:09.901Z", 
+            "groups": [], 
+            "user_permissions": [], 
+            "password": "pbkdf2_sha256$10000$2bpfy5rvLM23$DPr4aQ5QAQzA5am3thP2fkx/XuhXLfREQg8TpM5paio=", 
+            "email": "yariv@nerdeez.com", 
+            "date_joined": "2013-11-10T13:35:09.434Z"
+        }
+    }
+]

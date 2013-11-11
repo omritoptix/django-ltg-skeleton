@@ -29,12 +29,13 @@ from django.conf.urls import url
 from tastypie.utils import trailing_slash
 from django.utils import simplejson
 from tastypie.exceptions import Unauthorized
-from tastypie.http import HttpUnauthorized, HttpConflict, HttpCreated, HttpBadRequest
+from tastypie.http import HttpUnauthorized, HttpConflict, HttpCreated, HttpBadRequest, HttpNotFound
 from django.contrib import auth
 from tastypie.models import ApiKey
 from django.utils import simplejson as json
 from ticketz_backend_app.forms import UserCreateForm
 from django.contrib.auth import authenticate, login
+import random
 
 #===============================================================================
 # end imports
@@ -248,6 +249,9 @@ class UtilitiesResource(NerdeezResource):
             url(r"^(?P<resource_name>%s)/register%s$" %
                 (self._meta.resource_name, trailing_slash()),
                 self.wrap_view('register'), name="api_register"),
+            url(r"^(?P<resource_name>%s)/forgot-password%s$" %
+                (self._meta.resource_name, trailing_slash()),
+                self.wrap_view('forgot_password'), name="api_forgot_password"),
         ]
         
     def contact(self, request=None, **kwargs):
@@ -417,6 +421,17 @@ class UtilitiesResource(NerdeezResource):
                         'success': False,
                         'message': 'Failed to send mail',
                         }, HttpApplicationError )
+                    
+                #send the admin mail that he should activate the business
+                t = get_template('emails/admin_new_business_mail.html')
+                html = t.render(Context({}))
+                text_content = strip_tags(html)
+                msg = EmailMultiAlternatives('Business approval', text_content, settings.FROM_EMAIL_ADDRESS, [settings.ADMIN_MAIL])
+                msg.attach_alternative(html, "text/html")
+                try:
+                    msg.send()
+                except SMTPSenderRefused, e:
+                    pass
             
             #return the status code
             return self.create_response(request, {
@@ -430,6 +445,64 @@ class UtilitiesResource(NerdeezResource):
                     'success': False,
                     'message': [(k, v[0]) for k, v in user_form.errors.items()],
                     }, HttpBadRequest )
+            
+    def forgot_password(self, request=None, **kwargs):
+        '''
+        api for the user to create a new password
+        return 200 on success
+        return 401 on unuthorized (account not activated)
+        return 404 on account not found
+        return 500 if failed to send mail
+        '''
+        post = simplejson.loads(request.body)
+        email = post.get('email')
+        
+        #get the profile for that mail
+        try:
+            user = User.objects.get(email=email)
+            user_profile = user.profile
+        except:
+            return self.create_response(request, {
+                    'success': False,
+                    'message': "Account with that mail doesn't exist",
+                    }, HttpNotFound)
+        
+        #if the user is not activated by admin yet
+        if not user.is_active:
+            return self.create_response(request, {
+                    'success': False,
+                    'message': "Account not activated",
+                    }, HttpUnauthorized)
+            
+        #set the new password
+        api_key = ApiKey()
+        pass_length = random.randint(8, 15)
+        password = api_key.generate_key()[0:pass_length]
+        user.set_password(password)
+        user.save()
+        
+        #semd mail to the business about the account activation
+        if is_send_grid():
+            t = get_template('emails/confirm_approve_business.html')
+            html = t.render(Context({'admin_mail': settings.ADMIN_MAIL, 'admin_phone': settings.ADMIN_PHONE, 'provider_url': settings.PROVIDER_URL, 'password': password}))
+            text_content = strip_tags(html)
+            msg = EmailMultiAlternatives('2Nite Registration', text_content, settings.FROM_EMAIL_ADDRESS, [user.email])
+            msg.attach_alternative(html, "text/html")
+            try:
+                msg.send()
+            except SMTPSenderRefused, e:
+                return self.create_response(request, {
+                    'success': False,
+                    'message': "Failed to send the mail",
+                    }, HttpApplicationError)
+        
+        #success
+        return self.create_response(request, {
+                    'success': True,
+                    'message': "Your new password was sent to your mail",
+                    }, HttpAccepted)
+            
+        
                     
 #===============================================================================
 # end teh actual rest api

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Activate Business</h1>
+<table>
+	<tr>
+		<td>
+			title
+		</td>
+		<td>
+			{{business.title}}
+		</td>
+	</tr>
+	<tr>
+		<td>
+			business_id
+		</td>
+		<td>
+			{{business.business_id}}
+		</td>
+	</tr>
+	<tr>
+		<td>
+			phone
+		</td>
+		<td>
+			{{business.phone}}
+		</td>
+	</tr>
+	<tr>
+		<td>
+			city
+		</td>
+		<td>
+			{{business.city.title}}
+		</td>
+	</tr>
+	<tr>
+		<td>
+			address
+		</td>
+		<td>
+			{{business.address}}
+		</td>
+	</tr>
+</table>
+<a href="/activate-business/{{business.id}}">
+	Activate
+</a>
+{% endblock %}

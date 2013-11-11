@@ -225,3 +225,5 @@ ADMIN_PHONE = os.environ.get('ADMIN_PHONE', '0522441431')
 
 os.environ['LANG'] = 'en_US.UTF-8'
 
+PROVIDER_URL = os.environ.get('PROVIDER_URL', 'http://ticketz-provider-frontend-dev.herokuapp.com')
+
