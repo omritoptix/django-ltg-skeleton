@@ -9,19 +9,19 @@
             "is_active": true, 
             "is_superuser": true, 
             "is_staff": true, 
-            "last_login": "2013-11-10T10:56:38.244Z", 
+            "last_login": "2013-11-12T15:02:10.419Z", 
             "groups": [], 
             "user_permissions": [], 
-            "password": "pbkdf2_sha256$10000$TMJaRquYHsfy$mfF4ESBoQxB1Lu9GQ8B+s4Lw1qZhmcsOPB36ZMUYVNo=", 
+            "password": "pbkdf2_sha256$10000$BfwmjoRHreI7$BNNRza87A+VIzSE6I4AtoIDlAWr0lgIFyZ+ELqKMpxg=", 
             "email": "ywarezk@gmail.com", 
             "date_joined": "2013-11-07T13:20:47.037Z"
         }
-    }, 
+    },
     {
         "pk": 2, 
         "model": "auth.user", 
         "fields": {
-            "username": "301dcd61a2cc02647cc1d7a90ba4a3", 
+            "username": "yariv", 
             "first_name": "", 
             "last_name": "", 
             "is_active": false, 
@@ -33,6 +33,117 @@
             "password": "pbkdf2_sha256$10000$2bpfy5rvLM23$DPr4aQ5QAQzA5am3thP2fkx/XuhXLfREQg8TpM5paio=", 
             "email": "yariv@nerdeez.com", 
             "date_joined": "2013-11-10T13:35:09.434Z"
+        }
+    },
+    {
+        "pk": 1, 
+        "model": "tastypie.apikey", 
+        "fields": {
+            "user": 1, 
+            "key": "12345678", 
+            "created": "2013-11-11T16:29:54.453Z"
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "tastypie.apikey", 
+        "fields": {
+            "user": 2, 
+            "key": "12345678", 
+            "created": "2013-11-11T16:32:56.779Z"
+        }
+    },
+    {
+        "pk": 1, 
+        "model": "ticketz_backend_app.userprofile", 
+        "fields": {
+            "uuid": null, 
+            "phone": null, 
+            "user": 1, 
+            "modified_data": "2013-11-10T10:56:38.407Z", 
+            "creation_date": "2013-11-10T10:56:38Z"
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "ticketz_backend_app.userprofile", 
+        "fields": {
+            "uuid": null, 
+            "phone": null, 
+            "user": 2, 
+            "modified_data": "2013-11-10T13:35:10.062Z", 
+            "creation_date": "2013-11-10T13:35:09Z"
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "ticketz_backend_app.region", 
+        "fields": {
+            "title": "north", 
+            "modified_data": "2013-11-12T15:39:07.301Z", 
+            "creation_date": "2013-11-12T15:39:02Z"
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "ticketz_backend_app.city", 
+        "fields": {
+            "region": 1, 
+            "title": "haifa", 
+            "modified_data": "2013-11-12T15:39:26.717Z", 
+            "creation_date": "2013-11-12T15:39:18Z"
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "ticketz_backend_app.business", 
+        "fields": {
+            "city": 1, 
+            "web_service_url": null, 
+            "modified_data": "2013-11-10T13:35:10.078Z", 
+            "title": "Nerdeez", 
+            "adapter_object": "gAJVAC4=", 
+            "user_profile": 1, 
+            "business_id": "036856540", 
+            "creation_date": "2013-11-10T13:35:09Z", 
+            "phone": "0522441431", 
+            "address": "52 no life lane", 
+            "adapter_class": null
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "ticketz_backend_app.business", 
+        "fields": {
+            "city": 1, 
+            "web_service_url": null, 
+            "modified_data": "2013-11-11T16:47:47.513Z", 
+            "title": "asdf", 
+            "adapter_object": "gAJVAC4=", 
+            "user_profile": 2, 
+            "business_id": "dgsdfg", 
+            "creation_date": "2013-11-11T16:47:47Z", 
+            "phone": "12345", 
+            "address": "sdf", 
+            "adapter_class": null
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "ticketz_backend_app.deal", 
+        "fields": {
+            "status": 0, 
+            "original_price": "100.000", 
+            "valid_from": "2013-11-13T02:00:00Z", 
+            "description": "new beer promotion in a software company? kind of makes you wonder what the hell are they doing there", 
+            "business": 1, 
+            "title": "1+1 beers", 
+            "discounted_price": "50.000", 
+            "image": "img/deal/17061_wpm_hires.jpg", 
+            "valid_to": "2013-11-13T03:00:00Z", 
+            "creation_date": "2013-11-12T12:58:10Z", 
+            "num_total_places": 10, 
+            "modified_data": "2013-11-12T13:00:23.715Z"
         }
     }
 ]

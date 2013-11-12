@@ -194,6 +194,7 @@ class FlatpageResource(NerdeezResource):
                      }
      
 class UserProfileResource(NerdeezResource):
+    business = fields.ToOneField('ticketz_backend_app.ticketz_api.api.BusinessResource', 'business', full=True, null=True)
     class Meta(NerdeezResource.Meta):
         queryset = UserProfile.objects.all()
         authentication = NerdeezApiKeyAuthentication()
@@ -224,10 +225,28 @@ class CategoryResource(NerdeezResource):
         queryset = Category.objects.all()
         
 class BusinessResource(NerdeezResource):
+    city = fields.ToOneField(CityResource, 'city', null=True, full=True)
     class Meta(NerdeezResource.Meta):
         queryset = Business.objects.all()
         authentication = NerdeezApiKeyAuthentication()
         authorization = NerdeezOnlyOwnerCanReadAuthorization()
+        
+class DealResource(NerdeezResource):
+    business = fields.ToOneField(BusinessResource, 'business', null=True, full=False)
+    class Meta(NerdeezResource.Meta):
+        queryset = Deal.objects.all()
+        authentication = ApiKeyAuthentication()
+        authorization = NerdeezOnlyOwnerCanReadAuthorization()
+        allowed_methods = ['get', 'put', 'post']
+        
+    def obj_update(self, bundle, request=None, **kwargs):
+        bundle.data['status'] = 1
+        return super(DealResource, self).obj_update(bundle, **kwargs)
+        
+    def obj_create(self, bundle, **kwargs):
+        bundle.data['business'] = API_URL + 'business/' + str(bundle.request.user.profile.business.all()[0].id) + '/'
+        bundle.data['status'] = 1
+        return super(DealResource, self).obj_create(bundle, **kwargs)
         
 class UtilitiesResource(NerdeezResource):
     '''

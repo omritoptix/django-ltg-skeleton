@@ -33,6 +33,7 @@ v1_api.register(CityResource())
 v1_api.register(UserPrefrenceResource())
 v1_api.register(CategoryResource())
 v1_api.register(BusinessResource())
+v1_api.register(DealResource())
 v1_api.register(UtilitiesResource())
 
 #register urls

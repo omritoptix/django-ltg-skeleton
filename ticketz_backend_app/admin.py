@@ -39,6 +39,9 @@ class UserPrefrenceAdmin(admin.ModelAdmin):
 class CategoryAdmin(admin.ModelAdmin):
     pass
 
+class DealAdmin(admin.ModelAdmin):
+    pass
+
 class BusinessAdmin(admin.ModelAdmin):
     list_display = ('title', 'business_id', 'get_email', 'phone', 'send_activation')
     search_fields = ['user_profile__user__email','title', 'business_id']
@@ -68,6 +71,7 @@ admin.site.register(City, CityAdmin)
 admin.site.register(UserPrefrence, UserPrefrenceAdmin)
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Business, BusinessAdmin)
+admin.site.register(Deal, DealAdmin)
 
 #===============================================================================
 # end admin site registration

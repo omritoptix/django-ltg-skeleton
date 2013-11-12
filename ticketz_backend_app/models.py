@@ -25,6 +25,11 @@ from picklefield.fields import PickledObjectField
 # begin constants
 #===============================================================================
 
+DEAL_STATUS = (
+    (0, 'Inactive'),
+    (1, 'Pending'),
+    (2,  'Active'),
+)
 
 #===============================================================================
 # end constants
@@ -129,7 +134,7 @@ class Business(NerdeezModel):
     field that will hold specific api data that toptix or titan or other service requires.
     Question: Should that data be encrypted?
     '''
-    user_profile = models.ForeignKey(UserProfile)
+    user_profile = models.ForeignKey(UserProfile, related_name='business')
     title = models.CharField(max_length=100, blank=False, null=False)
     business_id = models.CharField(max_length=20, blank=False, null=False, unique=True)
     phone = models.CharField(max_length=20, blank=False, null=False)
@@ -138,6 +143,27 @@ class Business(NerdeezModel):
     web_service_url = models.CharField(max_length=300, blank=True, null=True, default=None)
     adapter_class = models.CharField(max_length=50, blank=True, null=True, default=None)
     adapter_object = PickledObjectField()
+    
+class Deal(NerdeezModel):
+    '''
+    will hold the table for the deals a business is making
+    '''
+    business = models.ForeignKey(Business)
+    title = models.CharField(max_length=150, blank=False, null=False)
+    description = models.CharField(max_length=300, blank=True, null=True)
+    valid_from = models.DateTimeField(default=lambda: datetime.datetime.now().replace(microsecond=0))
+    valid_to = models.DateTimeField(default=lambda: datetime.datetime.now().replace(microsecond=0))
+    num_total_places = models.PositiveIntegerField(default=0)
+    image = models.ImageField(upload_to='img/deal', default=None, blank=True, null=True)
+    original_price = models.DecimalField(max_digits = 6, decimal_places = 3)
+    discounted_price = models.DecimalField(max_digits = 6, decimal_places = 3)
+    status = models.PositiveIntegerField(choices=DEAL_STATUS, default=0)
+    
+    def owner(self):
+        return self.business.user_profile.user.username
+    
+    
+    
     
     
     
