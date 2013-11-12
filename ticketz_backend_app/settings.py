@@ -116,11 +116,14 @@ TEMPLATE_LOADERS = (
 
 
 MIDDLEWARE_CLASSES = (
+    'ticketz_backend_app.crossdomain_middleware.XsSharing',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    #'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'ticketz_backend_app.jsonp_middleware.JsonpMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
@@ -226,4 +229,8 @@ ADMIN_PHONE = os.environ.get('ADMIN_PHONE', '0522441431')
 os.environ['LANG'] = 'en_US.UTF-8'
 
 PROVIDER_URL = os.environ.get('PROVIDER_URL', 'http://ticketz-provider-frontend-dev.herokuapp.com')
+
+XS_SHARING_ALLOWED_ORIGINS = '*'
+XS_SHARING_ALLOWED_METHODS = ['POST','GET','OPTIONS', 'PUT', 'DELETE']
+XS_SHARING_ALLOWED_HEADERS = ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization']
 
