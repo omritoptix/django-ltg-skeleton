@@ -58,10 +58,11 @@
         "model": "ticketz_backend_app.userprofile", 
         "fields": {
             "uuid": null, 
+            "business": 1, 
+            "creation_date": "2013-11-10T10:56:38Z", 
             "phone": null, 
             "user": 1, 
-            "modified_data": "2013-11-10T10:56:38.407Z", 
-            "creation_date": "2013-11-10T10:56:38Z"
+            "modified_data": "2013-11-10T10:56:38.407Z"
         }
     }, 
     {
@@ -69,10 +70,11 @@
         "model": "ticketz_backend_app.userprofile", 
         "fields": {
             "uuid": null, 
+            "business": null, 
+            "creation_date": "2013-11-10T13:35:09Z", 
             "phone": null, 
             "user": 2, 
-            "modified_data": "2013-11-10T13:35:10.062Z", 
-            "creation_date": "2013-11-10T13:35:09Z"
+            "modified_data": "2013-11-10T13:35:10.062Z"
         }
     }, 
     {
@@ -98,52 +100,34 @@
         "pk": 1, 
         "model": "ticketz_backend_app.business", 
         "fields": {
-            "city": 1, 
-            "web_service_url": null, 
-            "modified_data": "2013-11-10T13:35:10.078Z", 
+            "city": null, 
+            "web_service_url": "", 
+            "modified_data": "2013-11-12T17:04:34.478Z", 
             "title": "Nerdeez", 
             "adapter_object": "gAJVAC4=", 
-            "user_profile": 1, 
             "business_id": "036856540", 
             "creation_date": "2013-11-10T13:35:09Z", 
             "phone": "0522441431", 
             "address": "52 no life lane", 
-            "adapter_class": null
+            "adapter_class": ""
         }
-    }, 
-    {
-        "pk": 2, 
-        "model": "ticketz_backend_app.business", 
-        "fields": {
-            "city": 1, 
-            "web_service_url": null, 
-            "modified_data": "2013-11-11T16:47:47.513Z", 
-            "title": "asdf", 
-            "adapter_object": "gAJVAC4=", 
-            "user_profile": 2, 
-            "business_id": "dgsdfg", 
-            "creation_date": "2013-11-11T16:47:47Z", 
-            "phone": "12345", 
-            "address": "sdf", 
-            "adapter_class": null
-        }
-    }, 
+    },
     {
         "pk": 1, 
         "model": "ticketz_backend_app.deal", 
         "fields": {
-            "status": 0, 
+            "status": 2, 
             "original_price": "100.000", 
-            "valid_from": "2013-11-13T02:00:00Z", 
+            "valid_from": "2013-11-12T17:56:14Z", 
             "description": "new beer promotion in a software company? kind of makes you wonder what the hell are they doing there", 
             "business": 1, 
             "title": "1+1 beers", 
             "discounted_price": "50.000", 
-            "image": "img/deal/17061_wpm_hires.jpg", 
-            "valid_to": "2013-11-13T03:00:00Z", 
-            "creation_date": "2013-11-12T12:58:10Z", 
+            "image": "", 
+            "valid_to": "2013-11-12T17:56:14Z", 
+            "creation_date": "2013-11-12T17:56:14Z", 
             "num_total_places": 10, 
-            "modified_data": "2013-11-12T13:00:23.715Z"
+            "modified_data": "2013-11-12T17:57:02.407Z"
         }
     }
 ]

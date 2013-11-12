@@ -41,9 +41,8 @@ class ApiTest(ResourceTestCase):
         resp = self.api_client.post(uri='/api/v1/utilities/login/', format='json', data={'email': 'ywarezk@gmail.com', 'password': 'housekitten4'})
         print resp.status_code
         print resp.content
-        #TODO
-#         self.assertHttpAccepted(resp)
-#         self.assertTrue(self.deserialize(resp)['success'])
+        self.assertHttpAccepted(resp)
+        self.assertTrue(self.deserialize(resp)['success'])
         
         #test user is not active
         resp = self.api_client.post(uri='/api/v1/utilities/login/', format='json', data={'email': 'yariv@nerdeez.com', 'password': '12345'})
@@ -150,6 +149,7 @@ class ApiTest(ResourceTestCase):
         )
         self.assertHttpAccepted(resp)
         self.assertEqual(Deal.objects.get(id=1).status, 1)
+        
         
         
         

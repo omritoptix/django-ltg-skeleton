@@ -244,7 +244,7 @@ class DealResource(NerdeezResource):
         return super(DealResource, self).obj_update(bundle, **kwargs)
         
     def obj_create(self, bundle, **kwargs):
-        bundle.data['business'] = API_URL + 'business/' + str(bundle.request.user.profile.business.all()[0].id) + '/'
+        bundle.data['business'] = API_URL + 'business/' + str(bundle.request.user.profile.business.id) + '/'
         bundle.data['status'] = 1
         return super(DealResource, self).obj_create(bundle, **kwargs)
         
@@ -423,8 +423,10 @@ class UtilitiesResource(NerdeezResource):
             if city != None:
                 business.city = City.objects.get(id=city)
             business.address = address
-            business.user_profile = user.profile
             business.save()
+            user_profile = user.profile
+            user_profile.business = business
+            user_profile.save()
             
             #send the verification mail
             if is_send_grid():

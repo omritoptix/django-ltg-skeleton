@@ -73,7 +73,7 @@ class UserProfile(NerdeezModel):
     user = models.ForeignKey(User, unique=True)
     phone = models.CharField(max_length=20, default=None, blank=True, null=True)
     uuid = models.CharField(max_length=50, default=None, blank=True, null=True)
-    
+    business = models.ForeignKey('Business', related_name='user_profile', default=None, blank=True, null=True)
     
     def __unicode__(self):
         return self.user.email
@@ -134,7 +134,6 @@ class Business(NerdeezModel):
     field that will hold specific api data that toptix or titan or other service requires.
     Question: Should that data be encrypted?
     '''
-    user_profile = models.ForeignKey(UserProfile, related_name='business')
     title = models.CharField(max_length=100, blank=False, null=False)
     business_id = models.CharField(max_length=20, blank=False, null=False, unique=True)
     phone = models.CharField(max_length=20, blank=False, null=False)
@@ -160,7 +159,7 @@ class Deal(NerdeezModel):
     status = models.PositiveIntegerField(choices=DEAL_STATUS, default=0)
     
     def owner(self):
-        return self.business.user_profile.user.username
+        return self.business.user_profile.all()[0].user.username
     
     
     
