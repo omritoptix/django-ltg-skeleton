@@ -103,14 +103,8 @@ class ApiTest(ResourceTestCase):
         '''
         
         resp = self.api_client.get(uri='/api/v1/deal/', format='json', data={})
-        self.assertHttpUnauthorized(resp)
-        
-        resp = self.api_client.get(uri='/api/v1/deal/?username=yariv&api_key=12345678', format='json', data={})
-        self.assertHttpUnauthorized(resp)
-        
-        resp = self.api_client.get(uri='/api/v1/deal/?username=ywarezk&api_key=12345678', format='json', data={})
         self.assertHttpOK(resp)
-        self.assertEqual(len(self.deserialize(resp)['objects']), 1)
+        
         
         resp = self.api_client.post(uri='/api/v1/deal/?username=yariv&api_key=12345678', format='json', 
                                     data={

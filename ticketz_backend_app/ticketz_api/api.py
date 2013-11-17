@@ -235,8 +235,8 @@ class DealResource(NerdeezResource):
     business = fields.ToOneField(BusinessResource, 'business', null=True, full=False)
     class Meta(NerdeezResource.Meta):
         queryset = Deal.objects.all()
-        authentication = ApiKeyAuthentication()
-        authorization = NerdeezOnlyOwnerCanReadAuthorization()
+        authentication = NerdeezReadForFreeAuthentication()
+        authorization = NerdeezReadForFreeAuthorization()
         allowed_methods = ['get', 'put', 'post']
         
     def obj_update(self, bundle, request=None, **kwargs):
