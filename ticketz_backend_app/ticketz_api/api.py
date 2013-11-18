@@ -36,6 +36,7 @@ from django.utils import simplejson as json
 from ticketz_backend_app.forms import UserCreateForm
 from django.contrib.auth import authenticate, login
 import random
+from tastypie.resources import ALL_WITH_RELATIONS
 
 #===============================================================================
 # end imports
@@ -238,6 +239,10 @@ class DealResource(NerdeezResource):
         authentication = NerdeezReadForFreeAuthentication()
         authorization = NerdeezReadForFreeAuthorization()
         allowed_methods = ['get', 'put', 'post']
+        filtering = {
+                     'status': ALL_WITH_RELATIONS
+                     }
+                     
         
     def obj_update(self, bundle, request=None, **kwargs):
         bundle.data['status'] = 1
@@ -271,6 +276,9 @@ class UtilitiesResource(NerdeezResource):
             url(r"^(?P<resource_name>%s)/forgot-password%s$" %
                 (self._meta.resource_name, trailing_slash()),
                 self.wrap_view('forgot_password'), name="api_forgot_password"),
+            url(r"^(?P<resource_name>%s)/register-user%s$" %
+                (self._meta.resource_name, trailing_slash()),
+                self.wrap_view('register_user'), name="api_register_user"),
         ]
         
     def contact(self, request=None, **kwargs):
@@ -522,6 +530,21 @@ class UtilitiesResource(NerdeezResource):
                     'success': True,
                     'message': "Your new password was sent to your mail",
                     }, HttpAccepted)
+        
+    def register_user(self):
+        '''
+        api for user registration will get the following post params
+        @param first_name: 
+        @param last_name: 
+        @param phone: 
+        @param email:
+        @return: error 0 409 if phone exists, 409 if email exists 
+                 success - 201 if created containing the following details
+                 {
+                     
+                 } 
+        '''
+        pass
             
         
                     

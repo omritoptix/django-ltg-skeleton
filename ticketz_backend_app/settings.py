@@ -255,3 +255,5 @@ INTERNAL_IPS = (
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
+
+PAYMILL_PRIVATE_KEY = os.environ.get('PAYMILL_PRIVATE_KEY', '')

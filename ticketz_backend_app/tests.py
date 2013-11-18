@@ -144,6 +144,14 @@ class ApiTest(ResourceTestCase):
         self.assertHttpAccepted(resp)
         self.assertEqual(Deal.objects.get(id=1).status, 1)
         
+    def test_deal_filter(self):
+        '''
+        test that the filtering works
+        '''
+        resp = self.api_client.get(uri='/api/v1/deal/', format='json', data={'status': 1})
+        self.assertHttpOK(resp)
+        self.assertEqual(len(self.deserialize(resp)['objects']), 0)
+        
         
         
         
