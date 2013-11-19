@@ -135,7 +135,7 @@ class Business(NerdeezModel):
     Question: Should that data be encrypted?
     '''
     title = models.CharField(max_length=100, blank=False, null=False)
-    business_id = models.CharField(max_length=20, blank=False, null=False, unique=True)
+    business_number = models.CharField(max_length=20, blank=True, null=True, unique=True, default=None)
     phone = models.CharField(max_length=20, blank=False, null=False)
     city = models.ForeignKey(City, blank=True, null=True, default=None)
     address = models.CharField(max_length=200, blank=True, null=True, default=None)
