@@ -31,6 +31,12 @@ DEAL_STATUS = (
     (2,  'Active'),
 )
 
+TRANSACTION_STATUS = (
+    (0, 'Inactive'),
+    (1, 'Reserved'),
+    (2,  'Confirmed'),
+)
+
 #===============================================================================
 # end constants
 #===============================================================================
@@ -74,6 +80,8 @@ class UserProfile(NerdeezModel):
     phone = models.CharField(max_length=20, default=None, blank=True, null=True)
     uuid = models.CharField(max_length=50, default=None, blank=True, null=True)
     business = models.ForeignKey('Business', related_name='user_profile', default=None, blank=True, null=True)
+    client_id = models.CharField(max_length=50, default=None, blank=True, null=True)
+    payment_id = models.CharField(max_length=50, default=None, blank=True, null=True)
     
     def __unicode__(self):
         return self.user.email
@@ -160,6 +168,16 @@ class Deal(NerdeezModel):
     
     def owner(self):
         return self.business.user_profile.all()[0].user.username
+    
+class Transaction(NerdeezModel):
+    '''
+    will hold the table for a transaction
+    '''
+    user_profile = models.ForeignKey(UserProfile, blank=False, null=False)
+    deal = models.ForeignKey(Deal, blank=False, null=False)
+    status = models.PositiveSmallIntegerField(choices=TRANSACTION_STATUS, default=0)
+    
+    
     
     
     
