@@ -29,7 +29,7 @@ from django.conf.urls import url
 from tastypie.utils import trailing_slash
 from django.utils import simplejson
 from tastypie.exceptions import Unauthorized
-from tastypie.http import HttpUnauthorized, HttpConflict, HttpCreated, HttpBadRequest, HttpNotFound
+from tastypie.http import HttpUnauthorized, HttpConflict, HttpCreated, HttpBadRequest, HttpNotFound, HttpBadRequest
 from django.contrib import auth
 from tastypie.models import ApiKey
 from django.utils import simplejson as json
@@ -37,6 +37,7 @@ from ticketz_backend_app.forms import UserCreateForm
 from django.contrib.auth import authenticate, login
 import random
 from tastypie.resources import ALL_WITH_RELATIONS
+import pymill
 
 #===============================================================================
 # end imports
@@ -279,6 +280,9 @@ class UtilitiesResource(NerdeezResource):
             url(r"^(?P<resource_name>%s)/register-user%s$" %
                 (self._meta.resource_name, trailing_slash()),
                 self.wrap_view('register_user'), name="api_register_user"),
+            url(r"^(?P<resource_name>%s)/payment%s$" %
+                (self._meta.resource_name, trailing_slash()),
+                self.wrap_view('payment'), name="api_payment"),
         ]
         
     def contact(self, request=None, **kwargs):
@@ -595,6 +599,149 @@ class UtilitiesResource(NerdeezResource):
                     'api_key': api_key.key,
                     'username': user.username
                     }, HttpAccepted)
+            
+    def payment(self, request=None, **kwargs):
+        '''
+        api for the payment for a deal will accept the following post params, all the params are optional except the deal and the amount
+        @param amount: how many deals did the user want to purchase
+        @param email: the email of the user purchasing
+        @param phone: the phone of the user purchasing
+        @param first_name:   
+        @param last_name:
+        @param token: from the credit card info paymill will create a token
+        @return 400 if bad param - you can check the message for the reason   
+        '''
+        #get params
+        post = simplejson.loads(request.body)
+        email = post.get('email', '')
+        token = post.get('token', '')
+        phone = post.get('phone')
+        first_name = post.get('first_name')
+        last_name = post.get('last_name')
+        amount = post.get('amount')
+        deal_id = post.get('deal_id')
+        
+        #auth
+        auth = NerdeezApiKeyAuthentication()
+        auth.is_authenticated(request)
+        
+        #get the user profile
+        user = request.user
+        try:
+            user_profile = user.get_profile()
+        except:
+            return self.create_response(request, {
+                    'success': False,
+                    'message': 'You are not authorized for this action',
+                    }, HttpUnauthorized )
+            
+        #update the user object with the data entered
+        user.first_name = first_name
+        user.last_name = last_name
+        user.email = email
+        user.save()
+        user_profile.phone = phone
+        user_profile.save()
+            
+        #create a paymill instance
+        private_key = settings.PAYMILL_PRIVATE_KEY
+        p = pymill.Pymill(private_key)
+            
+        #get or create the client
+        client_id = user_profile.paymill_client_id
+        if client_id == None:
+            if email == '':
+                return self.create_response(request, {
+                    'success': False,
+                    'message': "user doesn't have a client defined - you must pass an email",
+                    }, HttpBadRequest )
+            try:
+                client = p.new_client(
+                      email=user.email,
+                      description='{id: %d, Name: "%s %s", Email: "%s", Phone: "%s"}' % (user_profile.id, first_name, last_name, email, phone)
+                )
+            except Exception,e:
+                return self.create_response(request, {
+                    'success': False,
+                    'message': e.message,
+                    }, HttpApplicationError )
+                
+            client_id = client.id
+            user_profile.paymill_client_id = client_id
+            user_profile.save()
+            
+        #get or create the payment
+        payment_id = user_profile.paymill_payment_id
+        if payment_id == None:
+            if token == '':
+                return self.create_response(request, {
+                    'success': False,
+                    'message': "user doesn't have a payment defined - you must pass a token",
+                    }, HttpBadRequest )
+            try:
+                payment = p.new_card(
+                    token=token,
+                    client=client_id
+                )
+            except Exception,e:
+                return self.create_response(request, {
+                    'success': False,
+                    'message': e.message,
+                    }, HttpApplicationError )
+            payment_id = payment.id
+            user_profile.paymill_payment_id = payment_id
+            user_profile.save()
+            
+        #get the deal
+        try:
+            deal = Deal.objects.get(id=int(deal_id))
+        except:
+            return self.create_response(request, {
+                    'success': False,
+                    'message': 'Failed to fetch the deal - did you pass the right deal id? my guess is no',
+                    }, HttpApplicationError )
+            
+        #do the payment
+        total_price = deal.discounted_price * amount
+        try:
+            transaction = p.transact(
+                        amount=int(total_price),
+                        currency='ILS',
+                        description='{user_profile_id: %d, amount_purchased: %d, deal_id: %d, first_name: "%s", last_name: "%s", email: "%s", phone: "%s"}' % (user_profile.id, amount, deal.id, user.first_name, user.last_name, user.email, user_profile.phone),
+                        payment=payment_id
+                    )
+        except Exception,e:
+                return self.create_response(request, {
+                    'success': False,
+                    'message': e.message,
+                    }, HttpApplicationError )
+                
+        #create the transaction object
+        transaction = Transaction()
+        transaction.user_profile = user_profile
+        transaction.deal = deal
+        transaction.status = 2
+        transaction.amount = amount
+        api_key = ApiKey()
+        hash = api_key.generate_key()[0:5]
+        transaction.hash = hash
+        transaction.save()
+        
+        #send the user a cnfirmation email
+        if is_send_grid():
+            t = get_template('emails/confirm_purchase.html')
+            html = t.render(Context({'admin_mail': settings.ADMIN_MAIL, 'admin_phone': settings.ADMIN_PHONE, 'deal': deal, 'amount': amount}))
+            text_content = strip_tags(html)
+            msg = EmailMultiAlternatives('2Nite Confirm Purchase', text_content, settings.FROM_EMAIL_ADDRESS, [user.email])
+            msg.attach_alternative(html, "text/html")
+            try:
+                msg.send()
+            except SMTPSenderRefused, e:
+                return self.create_response(request, {
+                    'success': False,
+                    'message': "Failed to send the mail",
+                    }, HttpApplicationError)
+                
             
         
 #===============================================================================
