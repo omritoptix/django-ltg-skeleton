@@ -103,7 +103,7 @@ class ApiTest(ResourceTestCase):
         '''
         
         resp = self.api_client.get(uri='/api/v1/deal/', format='json', data={})
-        self.assertHttpOK(resp)
+        self.assertHttpUnauthorized(resp)
         
         
         resp = self.api_client.post(uri='/api/v1/deal/?username=yariv&api_key=12345678', format='json', 
@@ -148,9 +148,26 @@ class ApiTest(ResourceTestCase):
         '''
         test that the filtering works
         '''
-        resp = self.api_client.get(uri='/api/v1/deal/', format='json', data={'status': 1})
+        resp = self.api_client.get(uri='/api/v1/deal/', format='json', data={'status': 1, 'username': 'ywarezk', 'api_key': '12345678'})
         self.assertHttpOK(resp)
         self.assertEqual(len(self.deserialize(resp)['objects']), 0)
+        
+    def test_register_user(self):
+        '''
+        test the user registration through uuid
+        '''
+        
+        resp = self.api_client.post(uri='/api/v1/utilities/register-user/', format='json', data={'uuid': 'helloworld'})
+        self.assertHttpCreated(resp)
+        
+    def test_register_and_deals(self):
+        resp = self.api_client.post(uri='/api/v1/utilities/register-user/', format='json', data={'uuid': 'helloworld'})
+        self.assertHttpCreated(resp)
+        username = self.deserialize(resp)['username']
+        api_key = self.deserialize(resp)['api_key']
+        resp = self.api_client.get(uri='/api/v1/deal/', format='json', data={'username': username, 'api_key': api_key})
+        self.assertHttpOK(resp)
+        
         
         
         

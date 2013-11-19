@@ -78,7 +78,7 @@ class UserProfile(NerdeezModel):
     '''
     user = models.ForeignKey(User, unique=True)
     phone = models.CharField(max_length=20, default=None, blank=True, null=True)
-    uuid = models.CharField(max_length=50, default=None, blank=True, null=True)
+    uuid = models.CharField(max_length=50, default=None, blank=True, null=True, unique=True)
     business = models.ForeignKey('Business', related_name='user_profile', default=None, blank=True, null=True)
     client_id = models.CharField(max_length=50, default=None, blank=True, null=True)
     payment_id = models.CharField(max_length=50, default=None, blank=True, null=True)

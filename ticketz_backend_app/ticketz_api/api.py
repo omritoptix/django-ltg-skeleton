@@ -157,7 +157,7 @@ class NerdeezReadForFreeAuthorization( DjangoAuthorization ):
     
 class NerdeezOnlyOwnerCanReadAuthorization( NerdeezReadForFreeAuthorization ):
     '''
-    Authorizes every authenticated user to perform GET, for all others
+    Authorizes every authenticated owner to perform GET, for all others
     performs NerdeezReadForFreeAuthorization.
     '''
     
@@ -236,7 +236,7 @@ class DealResource(NerdeezResource):
     business = fields.ToOneField(BusinessResource, 'business', null=True, full=False)
     class Meta(NerdeezResource.Meta):
         queryset = Deal.objects.all()
-        authentication = NerdeezReadForFreeAuthentication()
+        authentication = NerdeezApiKeyAuthentication()
         authorization = NerdeezReadForFreeAuthorization()
         allowed_methods = ['get', 'put', 'post']
         filtering = {
@@ -531,23 +531,72 @@ class UtilitiesResource(NerdeezResource):
                     'message': "Your new password was sent to your mail",
                     }, HttpAccepted)
         
-    def register_user(self):
+    def register_user(self, request=None, **kwargs):
         '''
         api for user registration will get the following post params
-        @param first_name: 
-        @param last_name: 
-        @param phone: 
-        @param email:
-        @return: error 0 409 if phone exists, 409 if email exists 
+        @param uuid: 
                  success - 201 if created containing the following details
                  {
-                     
-                 } 
+                     success: true
+                     message: 'registered a new device'
+                     api_key: 'api key for the user'
+                     username: 'username of the user'    
+                 }
+                 success - 202 if user exists containing the following details
+                 {
+                     success: true
+                     message: 'user is already registered'
+                     api_key: 'api key for the user'
+                     username: 'username of the user'    
+                 }
+                  
         '''
-        pass
+        #get the params
+        post = simplejson.loads(request.body)
+        uuid = post.get('uuid')
+        
+        #find a user profile with this uuid if none exist than create one
+        try:
+            user_profile = UserProfile.get(uuid=uuid)
+            user = user_profile.user
+            is_created = False
+        except:
+            #create the username
+            api_key = ApiKey()
+            username = api_key.generate_key()[0:30]
+            password = api_key.generate_key()[0:30]
+            user = User()
+            user.username = username
+            user.set_password(password)
+            user.save()
+            user_profile = UserProfile()
+            user_profile.uuid = uuid
+            user_profile.user = user
+            user_profile.save()
+            is_created = True
+            
+        #create a new api key for the user
+        api_keys = ApiKey.objects.filter(user=user)
+        api_keys.delete()
+        api_key, created = ApiKey.objects.get_or_create(user=user)
+        api_key.save()
+        
+        if is_created:
+            return self.create_response(request, {
+                    'success': True,
+                    'message': "registered a new device",
+                    'api_key': api_key.key,
+                    'username': user.username
+                    }, HttpCreated)
+        else:
+            return self.create_response(request, {
+                    'success': True,
+                    'message': "user is already registered",
+                    'api_key': api_key.key,
+                    'username': user.username
+                    }, HttpAccepted)
             
         
-                    
 #===============================================================================
 # end teh actual rest api
 #===============================================================================
