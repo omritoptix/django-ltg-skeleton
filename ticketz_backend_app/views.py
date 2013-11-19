@@ -61,7 +61,7 @@ def activate_business(request, id):
     '''
     #activate the business
     business = Business.objects.get(id=id)
-    user = business.user_profile.user
+    user = business.user_profile.all()[0].user
     user.is_active = True
     api_key = ApiKey()
     pass_length = random.randint(8, 15)
