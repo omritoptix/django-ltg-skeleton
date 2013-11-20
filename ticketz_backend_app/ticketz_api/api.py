@@ -582,6 +582,7 @@ class UtilitiesResource(NerdeezResource):
             user = User()
             user.username = username
             user.set_password(password)
+            user.is_active = True
             user.save()
             user_profile = UserProfile()
             user_profile.uuid = uuid

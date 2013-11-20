@@ -129,5 +129,15 @@
             "num_total_places": 10, 
             "modified_data": "2013-11-12T17:57:02.407Z"
         }
+    },
+    {
+        "pk": 1, 
+        "model": "ticketz_backend_app.category", 
+        "fields": {
+            "image": "img/category/arrowleft.png", 
+            "title": "bars", 
+            "modified_data": "2013-11-20T13:37:28.127Z", 
+            "creation_date": "2013-11-20T13:36:21Z"
+        }
     }
 ]

@@ -182,6 +182,33 @@ class ApiTest(ResourceTestCase):
         resp = self.api_client.get(uri='/api/v1/deal/', format='json', data={'username': 'ywarezk', 'api_key': '12345678', 'order': '-valid_to'})
         self.assertTrue('num_available_places' in self.deserialize(resp)['objects'][0])
         
+    def test_deal_category(self):
+        '''
+        reported bug: saving the category in deal creation is not saved
+        '''
+        resp = self.api_client.post(uri='/api/v1/deal/', format='json', data={
+                                                                              'username': 'ywarezk', 
+                                                                              'api_key': '12345678', 
+                                                                              "title":"aaa",
+                                                                              "description":"a",
+                                                                              "valid_from":"Wed, 20 Nov 2013 12:53:00 GMT",
+                                                                              "valid_to":"Wed, 20 Nov 2013 14:53:00 GMT",
+                                                                              "num_total_places":5,
+                                                                              "image":None,
+                                                                              "original_price":5,
+                                                                              "discounted_price":2,
+                                                                              "status":0,
+                                                                              "num_available_places":5,
+                                                                              "creation_date":None,
+                                                                              "business":"/api/v1/business/1/",
+                                                                              "category":"/api/v1/category/1/"})
+        self.assertHttpCreated(resp)
+        num_deals = Deal.objects.all().count()
+        deals = Deal.objects.all()
+        new_deal = deals[num_deals - 1]
+        self.assertEqual(new_deal.category.id, 1)
+        
+        
         
         
         
