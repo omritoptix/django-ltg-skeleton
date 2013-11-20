@@ -159,6 +159,8 @@ class ApiTest(ResourceTestCase):
         
         resp = self.api_client.post(uri='/api/v1/utilities/register-user/', format='json', data={'uuid': 'helloworld'})
         self.assertHttpCreated(resp)
+        resp = self.api_client.post(uri='/api/v1/utilities/register-user/', format='json', data={'uuid': 'helloworld'})
+        self.assertHttpAccepted(resp)
         
     def test_register_and_deals(self):
         resp = self.api_client.post(uri='/api/v1/utilities/register-user/', format='json', data={'uuid': 'helloworld'})

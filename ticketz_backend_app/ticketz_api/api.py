@@ -561,7 +561,7 @@ class UtilitiesResource(NerdeezResource):
         
         #find a user profile with this uuid if none exist than create one
         try:
-            user_profile = UserProfile.get(uuid=uuid)
+            user_profile = UserProfile.objects.get(uuid=uuid)
             user = user_profile.user
             is_created = False
         except:
