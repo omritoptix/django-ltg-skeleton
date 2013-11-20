@@ -25,7 +25,7 @@ class FlatPageAdmin(admin.ModelAdmin):
     pass
 
 class UserProfileAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('id', 'phone', 'uuid')
 
 class RegionAdmin(admin.ModelAdmin):
     pass
