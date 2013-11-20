@@ -163,7 +163,7 @@ class Deal(NerdeezModel):
     valid_from = models.DateTimeField(default=lambda: datetime.datetime.now().replace(microsecond=0))
     valid_to = models.DateTimeField(default=lambda: datetime.datetime.now().replace(microsecond=0))
     num_total_places = models.PositiveIntegerField(default=0)
-    image = models.ImageField(upload_to='img/deal', default=None, blank=True, null=True)
+    image = models.ImageField(upload_to='img/deal', default=None, blank=True, null=True, max_length=1000)
     original_price = models.DecimalField(max_digits = 6, decimal_places = 3)
     discounted_price = models.DecimalField(max_digits = 6, decimal_places = 3)
     status = models.PositiveIntegerField(choices=DEAL_STATUS, default=0)

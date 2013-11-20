@@ -147,7 +147,20 @@ class ApiTest(ResourceTestCase):
         resp = self.api_client.put(uri='/api/v1/deal/1/?username=ywarezk&api_key=12345678', format='json', 
                                     data={
                                             "original_price": 70,
-                                            'business':  '/api/v1/business/2/sadfasdf'
+                                            "title":"a",
+                                            "description":"a",
+                                            "valid_from":"Tue, 19 Nov 2013 08:47:00 GMT",
+                                            "valid_to":"Tue, 19 Nov 2013 09:47:00 GMT",
+                                            "num_total_places":5,
+                                            "image":"XT2nMnzYSmejzB4Zy9iO_Screenshot%20from%202013-11-18%2015%3A40%3A46.png?Signature=jgRezlgyOardG%2B7WYyC3dfwV9yg%3D&Expires=1384970036&AWSAccessKeyId=AKIAIJRI4JLYPRLYWKKA",
+                                            "original_price":50,
+                                            "discounted_price":30,
+                                            "status":0,
+                                            "num_available_places":5,
+                                            "creation_date":"Tue, 19 Nov 2013 08:48:15 GMT",
+                                            "business":"/api/v1/business/3/",
+                                            "username":"ywarezk",
+                                            "api_key":"12345678"
                                         }
         )
         self.assertHttpAccepted(resp)
@@ -227,6 +240,8 @@ class ApiTest(ResourceTestCase):
         )
         self.assertHttpUnauthorized(resp)
         self.assertEqual(Logger.objects.count(), 1)
+        
+        
         
         
         
