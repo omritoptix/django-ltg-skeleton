@@ -170,6 +170,19 @@ class ApiTest(ResourceTestCase):
         resp = self.api_client.get(uri='/api/v1/deal/', format='json', data={'username': username, 'api_key': api_key})
         self.assertHttpOK(resp)
         
+    def test_category_in_deal(self):
+        resp = self.api_client.get(uri='/api/v1/deal/', format='json', data={'username': 'ywarezk', 'api_key': '12345678'})
+        self.assertTrue('category' in self.deserialize(resp)['objects'][0])
+        
+    def test_order_validto(self):
+        resp = self.api_client.get(uri='/api/v1/deal/', format='json', data={'username': 'ywarezk', 'api_key': '12345678', 'order': '-valid_to'})
+        self.assertTrue('category' in self.deserialize(resp)['objects'][0])
+        
+    def test_num_available_places(self):
+        resp = self.api_client.get(uri='/api/v1/deal/', format='json', data={'username': 'ywarezk', 'api_key': '12345678', 'order': '-valid_to'})
+        self.assertTrue('num_available_places' in self.deserialize(resp)['objects'][0])
+        
+        
         
         
         

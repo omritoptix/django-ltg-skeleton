@@ -29,6 +29,7 @@ DEAL_STATUS = (
     (0, 'Inactive'),
     (1, 'Pending'),
     (2,  'Active'),
+    (3,  'Close'),
 )
 
 TRANSACTION_STATUS = (
@@ -166,6 +167,7 @@ class Deal(NerdeezModel):
     original_price = models.DecimalField(max_digits = 6, decimal_places = 3)
     discounted_price = models.DecimalField(max_digits = 6, decimal_places = 3)
     status = models.PositiveIntegerField(choices=DEAL_STATUS, default=0)
+    category = models.ForeignKey(Category, blank=True, null=True, default=None)
     
     def owner(self):
         return self.business.user_profile.all()[0].user.username

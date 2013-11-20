@@ -235,6 +235,7 @@ class BusinessResource(NerdeezResource):
         
 class DealResource(NerdeezResource):
     business = fields.ToOneField(BusinessResource, 'business', null=True, full=False)
+    category = fields.ToOneField(CategoryResource, 'category', null=True, full=True)
     class Meta(NerdeezResource.Meta):
         queryset = Deal.objects.all()
         authentication = NerdeezApiKeyAuthentication()
@@ -243,6 +244,7 @@ class DealResource(NerdeezResource):
         filtering = {
                      'status': ALL_WITH_RELATIONS
                      }
+        ordering = ['valid_to']
                      
         
     def obj_update(self, bundle, request=None, **kwargs):
@@ -253,6 +255,14 @@ class DealResource(NerdeezResource):
         bundle.data['business'] = API_URL + 'business/' + str(bundle.request.user.profile.business.id) + '/'
         bundle.data['status'] = 1
         return super(DealResource, self).obj_create(bundle, **kwargs)
+    
+    def dehydrate(self, bundle):
+        
+        #calculate the number of purchases
+        transactions = Transaction.objects.filter(deal=bundle.obj, status__gte=2)
+        total_baught = sum([transaction.amount for transaction in transactions])
+        bundle.data['num_available_places'] = bundle.obj.num_total_places - total_baught          
+        return super(DealResource, self).dehydrate(bundle)
         
 class UtilitiesResource(NerdeezResource):
     '''
