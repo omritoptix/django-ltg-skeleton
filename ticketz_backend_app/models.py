@@ -182,6 +182,20 @@ class Transaction(NerdeezModel):
     amount = models.PositiveIntegerField(default=1)
     hash = models.CharField(max_length=20, default=None, blank=True, null=True)
     
+class Logger(NerdeezModel):
+    '''
+    will load failed transaction
+    '''
+    path = models.CharField(max_length=100, blank=True, null=True, default=None)
+    post = models.CharField(max_length=1000, blank=True, null=True, default=None)
+    get = models.CharField(max_length=1000, blank=True, null=True, default=None)
+    content = models.CharField(max_length=1000, blank=True, null=True, default=None)
+    
+    def __unicode__(self):
+        return self.path
+    
+    
+    
     
     
     

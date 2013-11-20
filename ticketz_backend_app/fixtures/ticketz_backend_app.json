@@ -113,6 +113,22 @@
         }
     },
     {
+        "pk": 2, 
+        "model": "ticketz_backend_app.business", 
+        "fields": {
+            "city": null, 
+            "web_service_url": "", 
+            "modified_data": "2013-11-12T17:04:34.478Z", 
+            "title": "Nerdeez", 
+            "adapter_object": "gAJVAC4=", 
+            "business_number": "0368565401", 
+            "creation_date": "2013-11-10T13:35:09Z", 
+            "phone": "0522441431", 
+            "address": "52 no life lane", 
+            "adapter_class": ""
+        }
+    },
+    {
         "pk": 1, 
         "model": "ticketz_backend_app.deal", 
         "fields": {

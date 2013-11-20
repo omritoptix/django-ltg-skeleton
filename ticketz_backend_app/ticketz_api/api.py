@@ -249,6 +249,7 @@ class DealResource(NerdeezResource):
         
     def obj_update(self, bundle, request=None, **kwargs):
         bundle.data['status'] = 1
+        bundle.data['business'] = API_URL + 'business/' + str(bundle.request.user.profile.business.id) + '/'
         return super(DealResource, self).obj_update(bundle, **kwargs)
         
     def obj_create(self, bundle, **kwargs):

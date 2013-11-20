@@ -144,6 +144,14 @@ class ApiTest(ResourceTestCase):
         self.assertHttpAccepted(resp)
         self.assertEqual(Deal.objects.get(id=1).status, 1)
         
+        resp = self.api_client.put(uri='/api/v1/deal/1/?username=ywarezk&api_key=12345678', format='json', 
+                                    data={
+                                            "original_price": 70,
+                                            'business':  '/api/v1/business/2/sadfasdf'
+                                        }
+        )
+        self.assertHttpAccepted(resp)
+        
     def test_deal_filter(self):
         '''
         test that the filtering works
@@ -207,6 +215,18 @@ class ApiTest(ResourceTestCase):
         deals = Deal.objects.all()
         new_deal = deals[num_deals - 1]
         self.assertEqual(new_deal.category.id, 1)
+        
+    def test_logger(self):
+        '''
+        test that our logger is documenting failed communication
+        '''
+        resp = self.api_client.put(uri='/api/v1/deal/1/?username=yariv&api_key=12345678', format='json', 
+                                    data={
+                                            "original_price": 80, 
+                                        }
+        )
+        self.assertHttpUnauthorized(resp)
+        self.assertEqual(Logger.objects.count(), 1)
         
         
         

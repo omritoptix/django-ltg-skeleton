@@ -123,6 +123,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'ticketz_backend_app.exception_middleware.ProcessExceptionMiddleware',
     'ticketz_backend_app.jsonp_middleware.JsonpMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -257,3 +258,7 @@ AUTHENTICATION_BACKENDS = (
 )
 
 PAYMILL_PRIVATE_KEY = os.environ.get('PAYMILL_PRIVATE_KEY', '')
+
+#twilio cradentials
+TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID', '')
+TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN', '')
