@@ -40,7 +40,7 @@ class CategoryAdmin(admin.ModelAdmin):
     pass
 
 class DealAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('id', 'business', 'title', 'description', 'valid_from', 'valid_to', 'num_total_places', 'original_price', 'discounted_price', 'status', 'category')
 
 class BusinessAdmin(admin.ModelAdmin):
     list_display = ('title', 'business_number', 'get_email', 'phone', 'send_activation')
@@ -55,6 +55,12 @@ class BusinessAdmin(admin.ModelAdmin):
         '''
         return "<a href='/confirm-business/%s'>Activate</a>" % (business.id)
     send_activation.allow_tags = True
+    
+class LoggerAdmin(admin.ModelAdmin):
+    list_display = ('path', 'post', 'get', 'content')
+    search_fields = ['path', 'post', 'get', 'content']
+    
+
 
 #===============================================================================
 # end admin models
@@ -72,6 +78,7 @@ admin.site.register(UserPrefrence, UserPrefrenceAdmin)
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Business, BusinessAdmin)
 admin.site.register(Deal, DealAdmin)
+admin.site.register(Logger, LoggerAdmin)
 
 #===============================================================================
 # end admin site registration
