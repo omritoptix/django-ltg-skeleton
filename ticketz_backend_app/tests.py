@@ -144,7 +144,7 @@ class ApiTest(ResourceTestCase):
         self.assertHttpAccepted(resp)
         self.assertEqual(Deal.objects.get(id=1).status, 1)
         
-        resp = self.api_client.put(uri='/api/v1/deal/1/?username=ywarezk&api_key=12345678', format='json', 
+        resp = self.api_client.put(uri='/api/v1/deal/1/', format='json', 
                                     data={
                                             "original_price": 70,
                                             "title":"a",
@@ -152,7 +152,7 @@ class ApiTest(ResourceTestCase):
                                             "valid_from":"Tue, 19 Nov 2013 08:47:00 GMT",
                                             "valid_to":"Tue, 19 Nov 2013 09:47:00 GMT",
                                             "num_total_places":5,
-                                            "image":"XT2nMnzYSmejzB4Zy9iO_Screenshot%20from%202013-11-18%2015%3A40%3A46.png?Signature=jgRezlgyOardG%2B7WYyC3dfwV9yg%3D&Expires=1384970036&AWSAccessKeyId=AKIAIJRI4JLYPRLYWKKA",
+                                            "image":"ClQgPkY6Rz6HXrBISsbn_TESTEST.png?Signature=2L1gApCKqIpdD7F4iZUTrA4vtRU%3D&Expires=1385033306&AWSAccessKeyId=AKIAIJRI4JLYPRLYWKKA",
                                             "original_price":50,
                                             "discounted_price":30,
                                             "status":0,
@@ -163,6 +163,7 @@ class ApiTest(ResourceTestCase):
                                             "api_key":"12345678"
                                         }
         )
+        print resp.status_code
         self.assertHttpAccepted(resp)
         
     def test_deal_filter(self):

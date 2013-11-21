@@ -38,6 +38,8 @@ from django.contrib.auth import authenticate, login
 import random
 from tastypie.resources import ALL_WITH_RELATIONS
 import pymill
+from twilio.rest import TwilioRestClient
+
 
 #===============================================================================
 # end imports
@@ -69,6 +71,18 @@ class NerdeezResource(ModelResource):
         always_return_data = True
         ordering = ['title']
         
+    @staticmethod
+    def send_sms(to, body):
+        '''
+        will send an sms to the phone number with a message
+        @param str to: the phone number to send the message to
+        @param str body: the body of the message 
+        '''
+        account_sid = settings.TWILIO_ACCOUNT_SID
+        auth_token = settings.TWILIO_AUTH_TOKEN
+        client = TwilioRestClient(account_sid, auth_token)
+        message = client.messages.create(from_=settings.TWILIO_PHONE, to=to, body=body)
+        return message
         
 #===============================================================================
 # end abstract resources
@@ -97,7 +111,7 @@ def is_send_grid():
 class NerdeezApiKeyAuthentication(ApiKeyAuthentication):
     def extract_credentials(self, request):
         username, api_key = super(NerdeezApiKeyAuthentication, self).extract_credentials(request)
-        if username == None and api_key == None and request.method == 'POST':
+        if username == None and api_key == None and (request.method == 'POST' or request.method == 'PUT'):
             post = simplejson.loads(request.body)
             username = post.get('username')
             api_key = post.get('api_key')
