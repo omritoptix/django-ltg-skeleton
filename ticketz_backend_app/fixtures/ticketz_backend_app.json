@@ -60,9 +60,11 @@
             "uuid": null, 
             "business": 1, 
             "creation_date": "2013-11-10T10:56:38Z", 
-            "phone": null, 
+            "phone": "+972522441431", 
             "user": 1, 
-            "modified_data": "2013-11-10T10:56:38.407Z"
+            "modified_data": "2013-11-10T10:56:38.407Z",
+            "paymill_client_id": "client_17f5a09043e0e60497c6",
+            "paymill_payment_id": "pay_d11e842b123d3d16970249eb"
         }
     }, 
     {

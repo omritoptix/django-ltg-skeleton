@@ -640,9 +640,9 @@ class UtilitiesResource(NerdeezResource):
         post = simplejson.loads(request.body)
         email = post.get('email', '')
         token = post.get('token', '')
-        phone = post.get('phone')
-        first_name = post.get('first_name')
-        last_name = post.get('last_name')
+        phone = post.get('phone', '')
+        first_name = post.get('first_name', '')
+        last_name = post.get('last_name', '')
         amount = post.get('amount')
         deal_id = post.get('deal_id')
         
@@ -661,12 +661,16 @@ class UtilitiesResource(NerdeezResource):
                     }, HttpUnauthorized )
             
         #update the user object with the data entered
-        user.first_name = first_name
-        user.last_name = last_name
-        user.email = email
+        if first_name != '':
+            user.first_name = first_name
+        if last_name != '':
+            user.last_name = last_name
+        if email != '':
+            user.email = email
         user.save()
-        user_profile.phone = phone
-        user_profile.save()
+        if phone != '':
+            user_profile.phone = phone
+            user_profile.save()
             
         #create a paymill instance
         private_key = settings.PAYMILL_PRIVATE_KEY
@@ -735,6 +739,7 @@ class UtilitiesResource(NerdeezResource):
                         description='{user_profile_id: %d, amount_purchased: %d, deal_id: %d, first_name: "%s", last_name: "%s", email: "%s", phone: "%s"}' % (user_profile.id, amount, deal.id, user.first_name, user.last_name, user.email, user_profile.phone),
                         payment=payment_id
                     )
+            transaction_id = transaction.id
         except Exception,e:
                 return self.create_response(request, {
                     'success': False,
@@ -747,8 +752,10 @@ class UtilitiesResource(NerdeezResource):
         transaction.deal = deal
         transaction.status = 2
         transaction.amount = amount
-        api_key = ApiKey()
-        hash = api_key.generate_key()[0:5]
+        transaction.paymill_transaction_id = transaction_id
+        hash = ''
+        for i in range(0,5):
+            hash = hash + str(random.randrange(start=0, stop=10))
         transaction.hash = hash
         transaction.save()
         
@@ -767,6 +774,23 @@ class UtilitiesResource(NerdeezResource):
                     'message': "Failed to send the mail",
                     }, HttpApplicationError)
                 
+        #sms the hash 
+#         try:
+        message = 'Your order confirmation code is: %s' % (hash)
+        NerdeezResource.send_sms(user_profile.phone, message)
+#         except Exception,e:
+#             return self.create_response(request, {
+#                     'success': False,
+#                     'message': "Failed to send the sms",
+#                     'exception': e.message
+#                     }, HttpApplicationError)
+            
+        return self.create_response(request, {
+                    'success': True,
+                    'message': "Successfully charged the credit card",
+                    'amount_charged': int(total_price),
+                    'phone': user_profile.phone
+                    }, HttpCreated)
             
         
 #===============================================================================

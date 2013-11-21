@@ -242,6 +242,17 @@ class ApiTest(ResourceTestCase):
         self.assertHttpUnauthorized(resp)
         self.assertEqual(Logger.objects.count(), 1)
         
+    def test_transaction(self):
+        '''
+        will check the payment transactions
+        for this test i put a user profile with a client id and payment id
+        we need to pass deal and amount
+        '''
+        resp = self.api_client.post(uri='/api/v1/utilities/payment/?username=ywarezk&api_key=12345678', format='json', data={'deal_id': 1, 'amount': 3})
+        print resp.content
+        self.assertHttpCreated(resp)
+        
+        
         
         
         
