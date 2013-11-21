@@ -233,7 +233,7 @@ PROVIDER_URL = os.environ.get('PROVIDER_URL', 'http://ticketz-provider-frontend-
 
 XS_SHARING_ALLOWED_ORIGINS = '*'
 XS_SHARING_ALLOWED_METHODS = ['POST','GET','OPTIONS', 'PUT', 'DELETE']
-XS_SHARING_ALLOWED_HEADERS = ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization']
+XS_SHARING_ALLOWED_HEADERS = ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization', 'Accept-Encoding']
 
 INTERNAL_IPS = (
     '127.0.0.1',
