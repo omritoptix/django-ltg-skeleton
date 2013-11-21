@@ -734,7 +734,7 @@ class UtilitiesResource(NerdeezResource):
         total_price = deal.discounted_price * amount
         try:
             transaction = p.transact(
-                        amount=int(total_price),
+                        amount=int(total_price) * 100,
                         currency='ILS',
                         description='{user_profile_id: %d, amount_purchased: %d, deal_id: %d, first_name: "%s", last_name: "%s", email: "%s", phone: "%s"}' % (user_profile.id, amount, deal.id, user.first_name, user.last_name, user.email, user_profile.phone),
                         payment=payment_id
