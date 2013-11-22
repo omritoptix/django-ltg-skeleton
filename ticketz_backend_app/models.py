@@ -189,6 +189,9 @@ class Transaction(NerdeezModel):
     hash = models.CharField(max_length=20, default=None, blank=True, null=True)
     paymill_transaction_id = models.CharField(max_length=50, default=None, blank=True, null=True)
     
+    def owner(self):
+        return self.deal.business.user_profile.all()[0].user.username
+    
 class UnpaidTransaction(NerdeezModel):
     '''
     a transaction that is not paid
@@ -200,6 +203,12 @@ class UnpaidTransaction(NerdeezModel):
     
     class Meta(NerdeezModel.Meta):
         unique_together = (("user_profile", "deal"),)
+        
+    def __unicode__(self):
+        return "User: %s Purchased deal: %d" % (self.user_profile.user.username, self.deal.id)
+    
+    def owner(self):
+        return self.deal.business.user_profile.all()[0].user.username
     
     
 class Logger(NerdeezModel):

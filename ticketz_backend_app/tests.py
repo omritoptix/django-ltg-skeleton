@@ -260,6 +260,14 @@ class ApiTest(ResourceTestCase):
         self.assertHttpCreated(resp)
         self.assertEquals(UserProfile.objects.get(id=1).phone, '+972522441431')
         
+    def test_unpaid_transaction(self):
+        '''
+        will check the api for the unpaid transaction
+        '''
+        resp = self.api_client.post(uri='/api/v1/unpaidtransaction/?username=ywarezk&api_key=12345678', format='json', data={'deal': '/api/v1/deal/1/','phone': '+972522441431'})
+        self.assertHttpCreated(resp)
+        self.assertEquals(UserProfile.objects.get(id=1).phone, '+972522441431')
+        
         
         
         

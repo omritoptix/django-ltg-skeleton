@@ -36,6 +36,7 @@ v1_api.register(BusinessResource())
 v1_api.register(DealResource())
 v1_api.register(UtilitiesResource())
 v1_api.register(TransactionResource())
+v1_api.register(UnpaidTransactionResource())
 
 #register urls
 urlpatterns = patterns('',

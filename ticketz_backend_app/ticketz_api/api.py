@@ -306,7 +306,7 @@ class DealResource(NerdeezResource):
         return super(DealResource, self).dehydrate(bundle)
     
 class TransactionResource(NerdeezResource):
-    user_profile = fields.ToOneField(UserProfileResource, 'user_profile', null=True, full=True)
+    user_profile = fields.ToOneField(UserProfileResource, 'user_profile', null=True, full=False)
     deal = fields.ToOneField(DealResource, 'deal', null=True, full=False)
     
     class Meta(NerdeezResource.Meta):
@@ -449,6 +449,52 @@ class TransactionResource(NerdeezResource):
                     }, HttpApplicationError)
             
         return super(TransactionResource, self).obj_create(bundle, **kwargs)
+    
+
+class UnpaidTransactionResource(NerdeezResource):
+    user_profile = fields.ToOneField(UserProfileResource, 'user_profile', null=True, full=False)
+    deal = fields.ToOneField(DealResource, 'deal', null=True, full=False)
+    
+    class Meta(NerdeezResource.Meta):
+        queryset = UnpaidTransaction.objects.all()
+        authentication = NerdeezApiKeyAuthentication()
+        authorization = NerdeezOnlyOwnerCanReadAuthorization()
+        allowed_methods = ['get', 'post']
+        
+    def hydrate(self, bundle):
+        bundle.data['status'] = 1
+        bundle.data['user_profile'] = API_URL + 'userprofile/' + str(bundle.request.user.profile.id) + '/'
+        return super(UnpaidTransactionResource, self).hydrate(bundle)
+    
+    def obj_create(self, bundle, **kwargs):
+        
+        #update the phone if needed
+        phone = bundle.data.get('phone', '')
+        user_profile = bundle.request.user.get_profile()
+        if phone != '':
+            user_profile.phone = phone
+            user_profile.save()
+            
+        #create the hash and put it in bundle
+        hash = ''
+        for i in range(0,5):
+            hash = hash + str(random.randrange(start=0, stop=10))
+        bundle.data['hash'] = hash
+        
+        result =  super(UnpaidTransactionResource, self).obj_create(bundle, **kwargs)
+        
+        #send the sms to the user
+        try:
+            message = 'Your order confirmation code is: %s' % (hash)
+            NerdeezResource.send_sms(user_profile.phone, message)
+        except Exception,e:
+            return self.create_response(bundle.request, {
+                    'success': False,
+                    'message': "Failed to send the sms",
+                    'exception': e.message
+                    }, HttpApplicationError)
+            
+        return result
         
     
         
