@@ -60,6 +60,12 @@ class LoggerAdmin(admin.ModelAdmin):
     list_display = ('path', 'post', 'get', 'content')
     search_fields = ['path', 'post', 'get', 'content']
     
+class TransactionAdmin(admin.ModelAdmin):
+    pass
+
+class UnpaidTransactionAdmin(admin.ModelAdmin):
+    pass
+    
 
 
 #===============================================================================
@@ -79,6 +85,8 @@ admin.site.register(Category, CategoryAdmin)
 admin.site.register(Business, BusinessAdmin)
 admin.site.register(Deal, DealAdmin)
 admin.site.register(Logger, LoggerAdmin)
+admin.site.register(Transaction, TransactionAdmin)
+admin.site.register(UnpaidTransaction, UnpaidTransactionAdmin)
 
 #===============================================================================
 # end admin site registration
