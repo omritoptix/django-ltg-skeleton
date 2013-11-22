@@ -83,6 +83,13 @@ class NerdeezResource(ModelResource):
         client = TwilioRestClient(account_sid, auth_token)
         message = client.messages.create(from_=settings.TWILIO_PHONE, to=to, body=body)
         return message
+    
+    def hydrate(self, bundle):
+        read_only_fields = self.Meta.read_only_fields
+        for field in read_only_fields:
+            if field in bundle.data:
+                del bundle.data[field]
+        return super(NerdeezResource, self).hydrate(bundle)
         
 #===============================================================================
 # end abstract resources
@@ -216,6 +223,7 @@ class UserProfileResource(NerdeezResource):
         authentication = NerdeezApiKeyAuthentication()
         authorization = NerdeezOnlyOwnerCanReadAuthorization()
         allowed_methods = ['get', 'put']
+        read_only_fields = ['paymill_client_id', 'paymill_client_id']
         
 class RegionResource(NerdeezResource):
     class Meta(NerdeezResource.Meta):
@@ -277,6 +285,11 @@ class DealResource(NerdeezResource):
         total_baught = sum([transaction.amount for transaction in transactions])
         bundle.data['num_available_places'] = bundle.obj.num_total_places - total_baught          
         return super(DealResource, self).dehydrate(bundle)
+    
+class TransactionResource(NerdeezResource):
+    user_profile = fields.ToOneField(UserProfileResource, 'user_profile', null=True, full=False)
+    deal = fields.ToOneField(DealResource, 'deal', null=True, full=True)
+    
         
 class UtilitiesResource(NerdeezResource):
     '''

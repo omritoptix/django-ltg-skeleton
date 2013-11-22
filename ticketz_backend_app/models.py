@@ -39,6 +39,12 @@ TRANSACTION_STATUS = (
     (3,  'Claimed'),
 )
 
+UNPAID_TRANSACTION_STATUS = (
+    (0, 'Inactive'),
+    (1, 'Created'),
+    (2,  'Claimed'),
+)
+
 #===============================================================================
 # end constants
 #===============================================================================
@@ -182,6 +188,19 @@ class Transaction(NerdeezModel):
     amount = models.PositiveIntegerField(default=1)
     hash = models.CharField(max_length=20, default=None, blank=True, null=True)
     paymill_transaction_id = models.CharField(max_length=50, default=None, blank=True, null=True)
+    
+class UnpaidTransaction(NerdeezModel):
+    '''
+    a transaction that is not paid
+    '''
+    user_profile = models.ForeignKey(UserProfile, blank=False, null=False)
+    deal = models.ForeignKey(Deal, blank=False, null=False)
+    status = models.PositiveSmallIntegerField(choices=UNPAID_TRANSACTION_STATUS, default=0)
+    hash = models.CharField(max_length=20, default=None, blank=True, null=True)
+    
+    class Meta(NerdeezModel.Meta):
+        unique_together = (("user_profile", "deal"),)
+    
     
 class Logger(NerdeezModel):
     '''

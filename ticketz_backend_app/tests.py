@@ -172,7 +172,7 @@ class ApiTest(ResourceTestCase):
         '''
         resp = self.api_client.get(uri='/api/v1/deal/', format='json', data={'status': 1, 'username': 'ywarezk', 'api_key': '12345678'})
         self.assertHttpOK(resp)
-        self.assertEqual(len(self.deserialize(resp)['objects']), 0)
+        self.assertEqual(len(self.deserialize(resp)['objects']), 2)
         
     def test_register_user(self):
         '''
@@ -197,8 +197,15 @@ class ApiTest(ResourceTestCase):
         self.assertTrue('category' in self.deserialize(resp)['objects'][0])
         
     def test_order_validto(self):
-        resp = self.api_client.get(uri='/api/v1/deal/', format='json', data={'username': 'ywarezk', 'api_key': '12345678', 'order': '-valid_to'})
-        self.assertTrue('category' in self.deserialize(resp)['objects'][0])
+        '''
+        test the order by -valid_to
+        '''
+        resp = self.api_client.get(uri='/api/v1/deal/', format='json', data={'username': 'ywarezk', 'api_key': '12345678', 'order_by': '-valid_to'})
+        objects = self.deserialize(resp)['objects']
+        self.assertEqual(len(objects), 3)
+        self.assertEqual(objects[0]['id'], 2)
+        self.assertEqual(objects[1]['id'], 3)
+        self.assertEqual(objects[2]['id'], 1)
         
     def test_num_available_places(self):
         resp = self.api_client.get(uri='/api/v1/deal/', format='json', data={'username': 'ywarezk', 'api_key': '12345678', 'order': '-valid_to'})
@@ -251,6 +258,7 @@ class ApiTest(ResourceTestCase):
         resp = self.api_client.post(uri='/api/v1/utilities/payment/?username=ywarezk&api_key=12345678', format='json', data={'deal_id': 1, 'amount': 3})
         print resp.content
         self.assertHttpCreated(resp)
+        
         
         
         
