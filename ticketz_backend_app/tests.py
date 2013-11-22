@@ -268,6 +268,13 @@ class ApiTest(ResourceTestCase):
         self.assertHttpCreated(resp)
         self.assertEquals(UserProfile.objects.get(id=1).phone, '+972522441431')
         
+    def test_logger_api(self):
+        '''
+        test i can post to the logger
+        '''
+        resp = self.api_client.post(uri='/api/v1/logger/', format='json', data={'path': 'sdfsd', 'post': 'dfsdf', 'get': 'sdsdf', 'content': 'sdsd', 'free_text': 'sfdsdf'})
+        self.assertHttpCreated(resp)
+        
         
         
         

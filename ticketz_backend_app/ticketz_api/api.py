@@ -13,8 +13,8 @@ Created on Jun 20, 2013
 
 from tastypie.resources import ModelResource, ALL
 from tastypie import fields
-from tastypie.authorization import DjangoAuthorization
-from tastypie.authentication import ApiKeyAuthentication
+from tastypie.authorization import DjangoAuthorization, Authorization
+from tastypie.authentication import ApiKeyAuthentication, Authentication
 from ticketz_backend_app.models import *
 import os
 from django.template.loader import get_template
@@ -495,6 +495,13 @@ class UnpaidTransactionResource(NerdeezResource):
                     }, HttpApplicationError)
             
         return result
+    
+class LoggerResource(NerdeezResource):
+    class Meta(NerdeezResource.Meta):
+        allowed_methods = ['post']
+        queryset = Logger.objects.all()
+        authentication = Authentication()
+        authorization = Authorization()
         
     
         

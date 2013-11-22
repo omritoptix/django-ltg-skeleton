@@ -219,6 +219,7 @@ class Logger(NerdeezModel):
     post = models.CharField(max_length=1000, blank=True, null=True, default=None)
     get = models.CharField(max_length=1000, blank=True, null=True, default=None)
     content = models.CharField(max_length=1000, blank=True, null=True, default=None)
+    free_text = models.CharField(max_length=1000, blank=True, null=True, default=None)
     
     def __unicode__(self):
         return self.path
