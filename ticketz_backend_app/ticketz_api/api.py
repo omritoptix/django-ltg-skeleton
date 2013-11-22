@@ -39,6 +39,7 @@ import random
 from tastypie.resources import ALL_WITH_RELATIONS
 import pymill
 from twilio.rest import TwilioRestClient
+from django.core.urlresolvers import resolve, get_script_prefix
 
 
 #===============================================================================
@@ -70,6 +71,7 @@ class NerdeezResource(ModelResource):
         allowed_methods = ['get']
         always_return_data = True
         ordering = ['title']
+        read_only_fields = ['creation_date', 'modified_data']
         
     @staticmethod
     def send_sms(to, body):
@@ -83,6 +85,27 @@ class NerdeezResource(ModelResource):
         client = TwilioRestClient(account_sid, auth_token)
         message = client.messages.create(from_=settings.TWILIO_PHONE, to=to, body=body)
         return message
+    
+    @staticmethod
+    def get_pk_from_uri(uri):
+        '''
+        gets a uri and return the pk from the url
+        @param uri: the url
+        @return: string the pk 
+        '''
+        
+        prefix = get_script_prefix()
+        chomped_uri = uri
+    
+        if prefix and chomped_uri.startswith(prefix):
+            chomped_uri = chomped_uri[len(prefix)-1:]
+    
+        try:
+            view, args, kwargs = resolve(chomped_uri)
+        except:
+            return 0
+    
+        return kwargs['pk']
     
     def hydrate(self, bundle):
         read_only_fields = self.Meta.read_only_fields
@@ -223,7 +246,7 @@ class UserProfileResource(NerdeezResource):
         authentication = NerdeezApiKeyAuthentication()
         authorization = NerdeezOnlyOwnerCanReadAuthorization()
         allowed_methods = ['get', 'put']
-        read_only_fields = ['paymill_client_id', 'paymill_client_id']
+        read_only_fields = ['paymill_client_id', 'paymill_client_id', 'user', 'phone', 'uuid', 'business']
         
 class RegionResource(NerdeezResource):
     class Meta(NerdeezResource.Meta):
@@ -243,6 +266,7 @@ class UserPrefrenceResource(NerdeezResource):
         authentication = NerdeezApiKeyAuthentication()
         authorization = NerdeezOnlyOwnerCanReadAuthorization()
         allowed_methods = ['get', 'put']
+        read_only_fields = ['user_profile']
         
 class CategoryResource(NerdeezResource):
     class Meta(NerdeezResource.Meta):
@@ -267,17 +291,12 @@ class DealResource(NerdeezResource):
                      'status': ALL_WITH_RELATIONS
                      }
         ordering = ['valid_to']
-                     
-    def obj_update(self, bundle, request=None, **kwargs):
-        bundle.data['status'] = 1
-        bundle.data['business'] = API_URL + 'business/' + str(bundle.request.user.profile.business.id) + '/'
-        return super(DealResource, self).obj_update(bundle, **kwargs)
         
-    def obj_create(self, bundle, **kwargs):
-        bundle.data['business'] = API_URL + 'business/' + str(bundle.request.user.profile.business.id) + '/'
+    def hydrate(self, bundle):
         bundle.data['status'] = 1
-        return super(DealResource, self).obj_create(bundle, **kwargs)
-    
+        bundle.data['business'] = API_URL + 'business/' + str(bundle.request.user.profile.business.id) + '/'
+        return super(DealResource, self).hydrate(bundle)
+                     
     def dehydrate(self, bundle):
         
         #calculate the number of purchases
@@ -287,8 +306,150 @@ class DealResource(NerdeezResource):
         return super(DealResource, self).dehydrate(bundle)
     
 class TransactionResource(NerdeezResource):
-    user_profile = fields.ToOneField(UserProfileResource, 'user_profile', null=True, full=False)
-    deal = fields.ToOneField(DealResource, 'deal', null=True, full=True)
+    user_profile = fields.ToOneField(UserProfileResource, 'user_profile', null=True, full=True)
+    deal = fields.ToOneField(DealResource, 'deal', null=True, full=False)
+    
+    class Meta(NerdeezResource.Meta):
+        queryset = Transaction.objects.all()
+        authentication = NerdeezApiKeyAuthentication()
+        authorization = NerdeezOnlyOwnerCanReadAuthorization()
+        allowed_methods = ['get', 'post']
+        read_only_fields = ['paymill_transaction_id']
+        
+    def hydrate(self, bundle):
+        bundle.data['status'] = 2
+        bundle.data['user_profile'] = API_URL + 'userprofile/' + str(bundle.request.user.profile.id) + '/'
+        return super(TransactionResource, self).hydrate(bundle)
+    
+    def obj_create(self, bundle, **kwargs):
+        
+        #get params
+        email = bundle.data.get('email', '')
+        token = bundle.data.get('token','')
+        first_name = bundle.data.get('first_name', '')
+        last_name = bundle.data.get('last_name', '')
+        phone = bundle.data.get('phone', '')
+        amount = int(bundle.data.get('amount', 0))
+        
+        #get the user profile
+        user = bundle.request.user
+        user_profile = user.get_profile()
+            
+        #update the user object with the data entered
+        if first_name != '':
+            user.first_name = first_name
+        if last_name != '':
+            user.last_name = last_name
+        if email != '':
+            user.email = email
+        if phone != '':
+            user_profile.phone = phone
+            user_profile.save()
+        user.save()
+            
+        #create a paymill instance
+        private_key = settings.PAYMILL_PRIVATE_KEY
+        p = pymill.Pymill(private_key)
+            
+        #get or create the client
+        client_id = user_profile.paymill_client_id
+        if client_id == None:
+            if user.email != None:
+                return self.create_response(bundle.request, {
+                    'success': False,
+                    'message': "user doesn't have a client defined - you must pass an email",
+                    }, HttpBadRequest )
+            try:
+                client = p.new_client(
+                      email=user.email,
+                      description='{id: %d, Name: "%s %s", Email: "%s", Phone: "%s"}' % (user_profile.id, user.first_name, user.last_name, user.email, user_profile.phone)
+                )
+            except Exception,e:
+                return self.create_response(bundle.request, {
+                    'success': False,
+                    'message': e.message,
+                    }, HttpApplicationError )
+                
+            client_id = client.id
+            user_profile.paymill_client_id = client_id
+            user_profile.save()
+            
+        #get or create the payment
+        payment_id = user_profile.paymill_payment_id
+        if payment_id == None:
+            if token == '':
+                return self.create_response(bundle.request, {
+                    'success': False,
+                    'message': "user doesn't have a payment defined - you must pass a token",
+                    }, HttpBadRequest )
+            try:
+                payment = p.new_card(
+                    token=token,
+                    client=client_id
+                )
+            except Exception,e:
+                return self.create_response(bundle.request, {
+                    'success': False,
+                    'message': e.message,
+                    }, HttpApplicationError )
+            payment_id = payment.id
+            user_profile.paymill_payment_id = payment_id
+            user_profile.save()
+            
+        #get the deal
+        deal_id = NerdeezResource.get_pk_from_uri(bundle.data['deal'])
+        deal = Deal.objects.get(id=deal_id)
+            
+        #do the payment
+        total_price = deal.discounted_price * bundle.data['amount']
+        try:
+            transaction = p.transact(
+                        amount=int(total_price) * 100,
+                        currency='ILS',
+                        description='{user_profile_id: %d, amount_purchased: %d, deal_id: %d, first_name: "%s", last_name: "%s", email: "%s", phone: "%s"}' % (user_profile.id, amount, deal.id, user.first_name, user.last_name, user.email, user_profile.phone),
+                        payment=payment_id
+                    )
+            transaction_id = transaction.id
+        except Exception,e:
+                return self.create_response(bundle.request, {
+                    'success': False,
+                    'message': e.message,
+                    }, HttpApplicationError )
+                
+        bundle.data['paymill_transaction_id'] = transaction_id
+        
+        #send the user a cnfirmation email
+        if is_send_grid():
+            t = get_template('emails/confirm_purchase.html')
+            html = t.render(Context({'admin_mail': settings.ADMIN_MAIL, 'admin_phone': settings.ADMIN_PHONE, 'deal': deal, 'amount': amount}))
+            text_content = strip_tags(html)
+            msg = EmailMultiAlternatives('2Nite Confirm Purchase', text_content, settings.FROM_EMAIL_ADDRESS, [user.email])
+            msg.attach_alternative(html, "text/html")
+            try:
+                msg.send()
+            except SMTPSenderRefused, e:
+                return self.create_response(bundle.request, {
+                    'success': False,
+                    'message': "Failed to send the mail",
+                    }, HttpApplicationError)
+                
+        #sms the hash
+        hash = ''
+        for i in range(0,5):
+            hash = hash + str(random.randrange(start=0, stop=10))
+        bundle.data['hash'] = hash
+        try:
+            message = 'Your order confirmation code is: %s' % (bundle.data['hash'])
+            NerdeezResource.send_sms(user_profile.phone, message)
+        except Exception,e:
+            return self.create_response(bundle.request, {
+                    'success': False,
+                    'message': "Failed to send the sms",
+                    'exception': e.message
+                    }, HttpApplicationError)
+            
+        return super(TransactionResource, self).obj_create(bundle, **kwargs)
+        
     
         
 class UtilitiesResource(NerdeezResource):
@@ -638,172 +799,6 @@ class UtilitiesResource(NerdeezResource):
                     'username': user.username
                     }, HttpAccepted)
             
-    def payment(self, request=None, **kwargs):
-        '''
-        api for the payment for a deal will accept the following post params, all the params are optional except the deal and the amount
-        @param amount: how many deals did the user want to purchase
-        @param email: the email of the user purchasing
-        @param phone: the phone of the user purchasing
-        @param first_name:   
-        @param last_name:
-        @param token: from the credit card info paymill will create a token
-        @return 400 if bad param - you can check the message for the reason   
-        '''
-        #get params
-        post = simplejson.loads(request.body)
-        email = post.get('email', '')
-        token = post.get('token', '')
-        phone = post.get('phone', '')
-        first_name = post.get('first_name', '')
-        last_name = post.get('last_name', '')
-        amount = post.get('amount')
-        deal_id = post.get('deal_id')
-        
-        #auth
-        auth = NerdeezApiKeyAuthentication()
-        auth.is_authenticated(request)
-        
-        #get the user profile
-        user = request.user
-        try:
-            user_profile = user.get_profile()
-        except:
-            return self.create_response(request, {
-                    'success': False,
-                    'message': 'You are not authorized for this action',
-                    }, HttpUnauthorized )
-            
-        #update the user object with the data entered
-        if first_name != '':
-            user.first_name = first_name
-        if last_name != '':
-            user.last_name = last_name
-        if email != '':
-            user.email = email
-        user.save()
-        if phone != '':
-            user_profile.phone = phone
-            user_profile.save()
-            
-        #create a paymill instance
-        private_key = settings.PAYMILL_PRIVATE_KEY
-        p = pymill.Pymill(private_key)
-            
-        #get or create the client
-        client_id = user_profile.paymill_client_id
-        if client_id == None:
-            if email == '':
-                return self.create_response(request, {
-                    'success': False,
-                    'message': "user doesn't have a client defined - you must pass an email",
-                    }, HttpBadRequest )
-            try:
-                client = p.new_client(
-                      email=user.email,
-                      description='{id: %d, Name: "%s %s", Email: "%s", Phone: "%s"}' % (user_profile.id, first_name, last_name, email, phone)
-                )
-            except Exception,e:
-                return self.create_response(request, {
-                    'success': False,
-                    'message': e.message,
-                    }, HttpApplicationError )
-                
-            client_id = client.id
-            user_profile.paymill_client_id = client_id
-            user_profile.save()
-            
-        #get or create the payment
-        payment_id = user_profile.paymill_payment_id
-        if payment_id == None:
-            if token == '':
-                return self.create_response(request, {
-                    'success': False,
-                    'message': "user doesn't have a payment defined - you must pass a token",
-                    }, HttpBadRequest )
-            try:
-                payment = p.new_card(
-                    token=token,
-                    client=client_id
-                )
-            except Exception,e:
-                return self.create_response(request, {
-                    'success': False,
-                    'message': e.message,
-                    }, HttpApplicationError )
-            payment_id = payment.id
-            user_profile.paymill_payment_id = payment_id
-            user_profile.save()
-            
-        #get the deal
-        try:
-            deal = Deal.objects.get(id=int(deal_id))
-        except:
-            return self.create_response(request, {
-                    'success': False,
-                    'message': 'Failed to fetch the deal - did you pass the right deal id? my guess is no',
-                    }, HttpApplicationError )
-            
-        #do the payment
-        total_price = deal.discounted_price * amount
-        try:
-            transaction = p.transact(
-                        amount=int(total_price) * 100,
-                        currency='ILS',
-                        description='{user_profile_id: %d, amount_purchased: %d, deal_id: %d, first_name: "%s", last_name: "%s", email: "%s", phone: "%s"}' % (user_profile.id, amount, deal.id, user.first_name, user.last_name, user.email, user_profile.phone),
-                        payment=payment_id
-                    )
-            transaction_id = transaction.id
-        except Exception,e:
-                return self.create_response(request, {
-                    'success': False,
-                    'message': e.message,
-                    }, HttpApplicationError )
-                
-        #create the transaction object
-        transaction = Transaction()
-        transaction.user_profile = user_profile
-        transaction.deal = deal
-        transaction.status = 2
-        transaction.amount = amount
-        transaction.paymill_transaction_id = transaction_id
-        hash = ''
-        for i in range(0,5):
-            hash = hash + str(random.randrange(start=0, stop=10))
-        transaction.hash = hash
-        transaction.save()
-        
-        #send the user a cnfirmation email
-        if is_send_grid():
-            t = get_template('emails/confirm_purchase.html')
-            html = t.render(Context({'admin_mail': settings.ADMIN_MAIL, 'admin_phone': settings.ADMIN_PHONE, 'deal': deal, 'amount': amount}))
-            text_content = strip_tags(html)
-            msg = EmailMultiAlternatives('2Nite Confirm Purchase', text_content, settings.FROM_EMAIL_ADDRESS, [user.email])
-            msg.attach_alternative(html, "text/html")
-            try:
-                msg.send()
-            except SMTPSenderRefused, e:
-                return self.create_response(request, {
-                    'success': False,
-                    'message': "Failed to send the mail",
-                    }, HttpApplicationError)
-                
-        #sms the hash 
-#         try:
-        message = 'Your order confirmation code is: %s' % (hash)
-        NerdeezResource.send_sms(user_profile.phone, message)
-#         except Exception,e:
-#             return self.create_response(request, {
-#                     'success': False,
-#                     'message': "Failed to send the sms",
-#                     'exception': e.message
-#                     }, HttpApplicationError)
-            
-        return self.create_response(request, {
-                    'success': True,
-                    'message': "Successfully charged the credit card",
-                    'amount_charged': int(total_price),
-                    'phone': user_profile.phone
-                    }, HttpCreated)
             
         
 #===============================================================================
