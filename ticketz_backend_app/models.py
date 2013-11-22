@@ -16,6 +16,8 @@ import datetime
 from django.contrib.auth.models import User
 from ticketz_backend_app.encryption import EncryptedCharField
 from picklefield.fields import PickledObjectField
+from djorm_pgfulltext.models import SearchManager
+from djorm_pgfulltext.fields import VectorField
 
 #===============================================================================
 # end imports
@@ -175,8 +177,27 @@ class Deal(NerdeezModel):
     status = models.PositiveIntegerField(choices=DEAL_STATUS, default=0)
     category = models.ForeignKey(Category, blank=True, null=True, default=None)
     
+    search_index = VectorField()
+
+    objects = SearchManager(
+        fields = ('title', 'description'),
+        config = 'pg_catalog.english', # this is default
+        search_field = 'search_index', # this is default
+        auto_update_search_field = True
+    )
+    
     def owner(self):
         return self.business.user_profile.all()[0].user.username
+    
+    @classmethod
+    def search(cls, query):
+        '''
+        used for searching using contains
+        @param query: string of the query to search
+        @return: {QuerySet} all the objects matching the search
+        '''
+        
+        return cls.objects.search(query).distinct()
     
 class Transaction(NerdeezModel):
     '''
@@ -223,14 +244,6 @@ class Logger(NerdeezModel):
     
     def __unicode__(self):
         return self.path
-    
-    
-    
-    
-    
-    
-    
-    
     
     
 #===============================================================================

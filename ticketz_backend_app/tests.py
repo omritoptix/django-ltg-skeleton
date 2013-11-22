@@ -275,6 +275,24 @@ class ApiTest(ResourceTestCase):
         resp = self.api_client.post(uri='/api/v1/logger/', format='json', data={'path': 'sdfsd', 'post': 'dfsdf', 'get': 'sdsdf', 'content': 'sdsd', 'free_text': 'sfdsdf'})
         self.assertHttpCreated(resp)
         
+    def test_deal_business_filter(self):
+        '''
+        test the filter deal by business
+        '''
+        resp = self.api_client.get(uri='/api/v1/deal/?business__id=2&username=ywarezk&api_key=12345678', format='json', data={})
+        print resp.content
+        self.assertHttpOK(resp)
+        self.assertEqual(len(self.deserialize(resp)['objects']), 0)
+        
+    def test_search(self):
+        '''
+        test the api for the search deals
+        '''
+        resp = self.api_client.get(uri='/api/v1/deal/?search=promotion&username=ywarezk&api_key=12345678', format='json')
+        self.assertHttpOK(resp)
+        self.assertEqual(len(self.deserialize(resp)['objects']), 1)
+        
+        
         
         
         

@@ -10,6 +10,7 @@ django-picklefield==0.3.0
 django-redis-cache==0.10.0
 django-storages==1.1.8
 django-tastypie==0.9.12
+djorm-ext-pgfulltext==0.8
 gunicorn==0.17.2
 httplib2==0.8
 johnny-cache==1.4

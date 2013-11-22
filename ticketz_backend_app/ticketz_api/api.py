@@ -40,6 +40,7 @@ from tastypie.resources import ALL_WITH_RELATIONS
 import pymill
 from twilio.rest import TwilioRestClient
 from django.core.urlresolvers import resolve, get_script_prefix
+from django.db.models import Q
 
 
 #===============================================================================
@@ -278,6 +279,9 @@ class BusinessResource(NerdeezResource):
         queryset = Business.objects.all()
         authentication = NerdeezApiKeyAuthentication()
         authorization = NerdeezOnlyOwnerCanReadAuthorization()
+        filtering = {
+                     'id': ALL_WITH_RELATIONS
+                     }
         
 class DealResource(NerdeezResource):
     business = fields.ToOneField(BusinessResource, 'business', null=True, full=False)
@@ -288,7 +292,8 @@ class DealResource(NerdeezResource):
         authorization = NerdeezReadForFreeAuthorization()
         allowed_methods = ['get', 'put', 'post']
         filtering = {
-                     'status': ALL_WITH_RELATIONS
+                     'status': ALL_WITH_RELATIONS,
+                     'business': ALL_WITH_RELATIONS
                      }
         ordering = ['valid_to']
         
@@ -304,6 +309,16 @@ class DealResource(NerdeezResource):
         total_baught = sum([transaction.amount for transaction in transactions])
         bundle.data['num_available_places'] = bundle.obj.num_total_places - total_baught          
         return super(DealResource, self).dehydrate(bundle)
+    
+    def get_object_list(self, request):
+        '''
+        search group logic
+        '''
+        if request.GET.get('search') != None:
+            return self.Meta.object_class.search(request.GET.get('search'))
+        else:
+            return super(DealResource, self).get_object_list(request)
+    
     
 class TransactionResource(NerdeezResource):
     user_profile = fields.ToOneField(UserProfileResource, 'user_profile', null=True, full=False)
