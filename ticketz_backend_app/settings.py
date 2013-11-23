@@ -265,3 +265,19 @@ PAYMILL_PRIVATE_KEY = os.environ.get('PAYMILL_PRIVATE_KEY', '')
 TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID', '')
 TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN', '')
 TWILIO_PHONE = os.environ.get('TWILIO_PHONE', '')
+
+#celery
+INSTALLED_APPS += ("kombu.transport.django", )
+INSTALLED_APPS += ("djcelery", )
+# django-celery
+BROKER_BACKEND = 'django'
+CELERY_IMPORTS = ("ticketz_backend_app.tasks", )
+CELERY_ROUTES = {#"tasks.videoprocessing.prepareVideo": {"queue": "videoprocessing"}
+                 "tasks.close_deals": {"queue": "closedeals"},
+                 # "tasks.CountViews": {},
+                 #"tasks.GetLeastLoadedServer": {"queue": "polling"},
+                 #"tasks.UpdateWowza": {"queue": "polling"}
+                 }
+
+import djcelery
+djcelery.setup_loader()

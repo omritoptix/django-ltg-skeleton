@@ -14,6 +14,7 @@ Created on November 7, 2013
 from tastypie.test import ResourceTestCase
 from django.contrib.auth.models import User
 from ticketz_backend_app.models import *
+from ticketz_backend_app.tasks import close_deals
 
 #===============================================================================
 # end imports
@@ -301,6 +302,15 @@ class ApiTest(ResourceTestCase):
         self.assertHttpAccepted(resp)
         deal = Deal.objects.get(id=1)
         self.assertEqual(deal.status, 0)
+        
+    def test_close_deals(self):
+        '''
+        will test that the close deals works good
+        '''
+        close_deals()
+        self.assertEqual(Deal.objects.get(id=1).status, 3)
+        
+    
         
         
         
