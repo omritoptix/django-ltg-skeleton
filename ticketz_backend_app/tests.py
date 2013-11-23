@@ -120,7 +120,8 @@ class ApiTest(ResourceTestCase):
         resp = self.api_client.post(uri='/api/v1/deal/?username=ywarezk&api_key=12345678', format='json', 
                                     data={
                                             "original_price": 100, 
-                                            "valid_from": "2013-11-13T02:00:00Z", 
+                                            "valid_from": "2013-11-23T20:00:00Z", 
+                                            "valid_to": "2013-11-23T21:00:00Z", 
                                             "description": "new beer promotion in a software company? kind of makes you wonder what the hell are they doing there", 
                                             "title": "1+1 beers", 
                                             "discounted_price": 50, 
