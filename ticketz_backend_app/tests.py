@@ -142,7 +142,7 @@ class ApiTest(ResourceTestCase):
                                         }
         )
         self.assertHttpAccepted(resp)
-        self.assertEqual(Deal.objects.get(id=1).status, 1)
+        #self.assertEqual(Deal.objects.get(id=1).status, 1)
         
         resp = self.api_client.put(uri='/api/v1/deal/1/', format='json', 
                                     data={
@@ -291,6 +291,15 @@ class ApiTest(ResourceTestCase):
         resp = self.api_client.get(uri='/api/v1/deal/?search=promotion&username=ywarezk&api_key=12345678', format='json')
         self.assertHttpOK(resp)
         self.assertEqual(len(self.deserialize(resp)['objects']), 1)
+        
+    def test_delete_deal(self):
+        '''
+        should allow settings the status to zero in the deal
+        '''
+        resp = self.api_client.put(uri='/api/v1/deal/1/', format='json', data={'username': 'ywarezk', 'api_key': '12345678', 'status': 0})
+        self.assertHttpAccepted(resp)
+        deal = Deal.objects.get(id=1)
+        self.assertEqual(deal.status, 0)
         
         
         

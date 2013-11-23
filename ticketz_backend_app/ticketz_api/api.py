@@ -298,7 +298,9 @@ class DealResource(NerdeezResource):
         ordering = ['valid_to']
         
     def hydrate(self, bundle):
-        bundle.data['status'] = 1
+        status = bundle.data.get('status', 1)
+        if status > 1:
+            bundle.data['status'] = 1
         bundle.data['business'] = API_URL + 'business/' + str(bundle.request.user.profile.business.id) + '/'
         return super(DealResource, self).hydrate(bundle)
                      
