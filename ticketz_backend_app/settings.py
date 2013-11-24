@@ -278,6 +278,6 @@ CELERY_ROUTES = {#"tasks.videoprocessing.prepareVideo": {"queue": "videoprocessi
                  #"tasks.GetLeastLoadedServer": {"queue": "polling"},
                  #"tasks.UpdateWowza": {"queue": "polling"}
                  }
-CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+# CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 import djcelery
 djcelery.setup_loader()
