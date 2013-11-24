@@ -21,11 +21,12 @@ import datetime
 # end imports 
 ####################
 
-@periodic_task(run_every=timedelta(seconds=60), name='tasks.close_deals')
+@periodic_task(run_every=timedelta(minutes=1), name='tasks.close_deals')
 def close_deals():
     '''
     will run every minute and close all the expired deals
     '''
+    print 'running celery - close_deals'
     Deal.objects.filter(valid_to__lte=datetime.datetime.now()).update(status=3)
     
     
