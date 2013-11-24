@@ -24,9 +24,9 @@ from celery import Celery
 # end imports 
 ####################
 
-REDIS_URL = environ.get('REDISTOGO_URL', 'redis://localhost')
+# REDIS_URL = environ.get('REDISTOGO_URL', 'redis://localhost')
 
-celery = Celery('ticketz_backend_app.tasks', broker=REDIS_URL)
+# celery = Celery('ticketz_backend_app.tasks', broker=REDIS_URL)
 
 
 @periodic_task(run_every=timedelta(minutes=1), name='tasks.close_deals')
