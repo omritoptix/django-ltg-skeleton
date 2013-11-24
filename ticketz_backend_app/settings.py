@@ -281,3 +281,5 @@ CELERY_ROUTES = {#"tasks.videoprocessing.prepareVideo": {"queue": "videoprocessi
 # CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 import djcelery
 djcelery.setup_loader()
+
+REDIS_URL = os.environ.get('REDISTOGO_URL', 'redis://localhost:6379/0')

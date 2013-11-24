@@ -16,10 +16,18 @@ from ticketz_backend_app.models import *
 from datetime import timedelta
 from celery.decorators import periodic_task
 import datetime
+from os import environ
+from celery import Celery
+
 
 ####################
 # end imports 
 ####################
+
+REDIS_URL = environ.get('REDISTOGO_URL', 'redis://localhost')
+
+celery = Celery('tasks', broker=REDIS_URL)
+
 
 @periodic_task(run_every=timedelta(minutes=1), name='tasks.close_deals')
 def close_deals():
