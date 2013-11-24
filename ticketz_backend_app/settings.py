@@ -267,19 +267,19 @@ TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN', '')
 TWILIO_PHONE = os.environ.get('TWILIO_PHONE', '')
 
 #celery
-INSTALLED_APPS += ("kombu.transport.django", )
-INSTALLED_APPS += ("djcelery", )
-# django-celery
-BROKER_URL = os.environ.get("CLOUDAMQP_URL","amqp://guest:guest@localhost:5672/")
-BROKER_BACKEND = 'django'
-CELERY_IMPORTS = ("ticketz_backend_app.tasks", )
-CELERY_ROUTES = {#"tasks.videoprocessing.prepareVideo": {"queue": "videoprocessing"}
-                 "tasks.async_tasks": {"queue": "asynctasks"},
-                 # "tasks.CountViews": {},
-                 #"tasks.GetLeastLoadedServer": {"queue": "polling"},
-                 #"tasks.UpdateWowza": {"queue": "polling"}
-                 }
-# CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
-import djcelery
-djcelery.setup_loader()
+# INSTALLED_APPS += ("kombu.transport.django", )
+# INSTALLED_APPS += ("djcelery", )
+# # django-celery
+# BROKER_URL = os.environ.get("CLOUDAMQP_URL","amqp://guest:guest@localhost:5672/")
+# BROKER_BACKEND = 'django'
+# CELERY_IMPORTS = ("ticketz_backend_app.tasks", )
+# CELERY_ROUTES = {#"tasks.videoprocessing.prepareVideo": {"queue": "videoprocessing"}
+#                  "tasks.async_tasks": {"queue": "asynctasks"},
+#                  # "tasks.CountViews": {},
+#                  #"tasks.GetLeastLoadedServer": {"queue": "polling"},
+#                  #"tasks.UpdateWowza": {"queue": "polling"}
+#                  }
+# # CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+# import djcelery
+# djcelery.setup_loader()
 
