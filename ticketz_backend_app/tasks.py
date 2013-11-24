@@ -29,12 +29,13 @@ from celery import Celery
 # celery = Celery('ticketz_backend_app.tasks', broker=REDIS_URL)
 
 
-@periodic_task(run_every=timedelta(minutes=1), name='tasks.close_deals')
-def close_deals():
+@periodic_task(run_every=timedelta(minutes=1), name='tasks.async_tasks')
+def async_tasks():
     '''
-    will run every minute and close all the expired deals
+    all the application async process will be run here
     '''
-    print 'running celery - close_deals'
+    
+    # update deals that valid to has passed to be closed
     Deal.objects.filter(valid_to__lte=datetime.datetime.now()).update(status=3)
     
     

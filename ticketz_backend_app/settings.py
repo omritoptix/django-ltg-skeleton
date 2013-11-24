@@ -273,7 +273,7 @@ INSTALLED_APPS += ("djcelery", )
 BROKER_BACKEND = 'django'
 CELERY_IMPORTS = ("ticketz_backend_app.tasks", )
 CELERY_ROUTES = {#"tasks.videoprocessing.prepareVideo": {"queue": "videoprocessing"}
-                 "tasks.close_deals": {"queue": "closedeals"},
+                 "tasks.async_tasks": {"queue": "asynctasks"},
                  # "tasks.CountViews": {},
                  #"tasks.GetLeastLoadedServer": {"queue": "polling"},
                  #"tasks.UpdateWowza": {"queue": "polling"}
@@ -282,4 +282,3 @@ CELERY_ROUTES = {#"tasks.videoprocessing.prepareVideo": {"queue": "videoprocessi
 import djcelery
 djcelery.setup_loader()
 
-REDIS_URL = os.environ.get('REDISTOGO_URL', 'redis://localhost:6379/0')
