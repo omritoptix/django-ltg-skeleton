@@ -30,8 +30,9 @@ from djorm_pgfulltext.fields import VectorField
 DEAL_STATUS = (
     (0, 'Inactive'),
     (1, 'Pending'),
-    (2,  'Active'),
+    (2,  'Approved'),
     (3,  'Close'),
+    (4,  'Active'),
 )
 
 TRANSACTION_STATUS = (

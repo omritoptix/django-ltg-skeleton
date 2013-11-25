@@ -15,6 +15,15 @@ def close_deals():
     print 'Closing deals that passed the valid_to'
     Deal.objects.filter(valid_to__lte=datetime.datetime.now()).update(status=3)
     
+@sched.interval_schedule(minutes=1)
+def active_deals():
+    '''
+    deal that passed the valid from should be Active
+    '''
+    
+    print 'Change to active deals that passed the valid_from'
+    Deal.objects.filter(valid_from__lte=datetime.datetime.now(), valid_to__gt=datetime.datetime.now()).update(status=4)
+    
 @sched.interval_schedule(minutes=5)
 def activate_pending_deals():
     '''
