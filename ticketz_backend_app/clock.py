@@ -7,7 +7,6 @@ from tastypie.models import ApiKey
 from tastypie.api import Api
 from rq import Queue
 from worker import conn
-from utils import count_words_at_url
 
 ################################
 # begin asyn methods
