@@ -193,5 +193,19 @@
             "modified_data": "2013-11-20T13:37:28.127Z", 
             "creation_date": "2013-11-20T13:36:21Z"
         }
+    },
+    {
+        "pk": 1, 
+        "model": "ticketz_backend_app.transaction", 
+        "fields": {
+            "status": 2, 
+            "hash": "12345", 
+            "modified_data": "2013-11-25T18:24:16.393", 
+            "deal": 1, 
+            "user_profile": 1, 
+            "creation_date": "2013-11-25T18:24:11", 
+            "amount": 1, 
+            "paymill_transaction_id": "tran_d123ad1ab812ba753e38c5a01dd6"
+        }
     }
 ]

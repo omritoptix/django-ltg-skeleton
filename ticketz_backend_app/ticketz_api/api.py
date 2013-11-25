@@ -330,7 +330,7 @@ class TransactionResource(NerdeezResource):
         queryset = Transaction.objects.all()
         authentication = NerdeezApiKeyAuthentication()
         authorization = NerdeezOnlyOwnerCanReadAuthorization()
-        allowed_methods = ['get', 'post']
+        allowed_methods = ['get', 'post', 'delete']
         read_only_fields = ['paymill_transaction_id']
         
     def hydrate(self, bundle):
@@ -467,6 +467,38 @@ class TransactionResource(NerdeezResource):
             
         return super(TransactionResource, self).obj_create(bundle, **kwargs)
     
+class RefundResource(NerdeezResource):
+    '''
+    the api to refund a customer
+    '''
+    transaction = fields.ToOneField(TransactionResource, 'transaction', null=False, full=True)
+    
+    class Meta(NerdeezResource.Meta):
+        queryset = Refund.objects.all()
+        authentication = NerdeezApiKeyAuthentication()
+        authorization = NerdeezOnlyOwnerCanReadAuthorization()
+        allowed_methods = ['get', 'post']
+        
+    def obj_create(self, bundle, **kwargs):
+        '''
+        will create a refund for a user and will return the money through paymill api
+        '''
+        
+        #get the transaction object and the total paid
+        transaction_id = NerdeezResource.get_pk_from_uri(bundle.data['transaction'])
+        transaction = Transaction.objects.get(id=transaction_id)
+        total_refund = transaction.amount * 100 * int(transaction.deal.discounted_price)
+        
+        #submit a refund to paymill
+        private_key = settings.PAYMILL_PRIVATE_KEY
+        p = pymill.Pymill(private_key)
+        refund = p.refund(transaction.paymill_transaction_id, int(total_refund), bundle.data.get('description', ''))
+        bundle.data['paymill_refund_id'] = refund.id
+        
+        return super(RefundResource, self).obj_create(bundle, **kwargs)
+        
+                
+        
 
 class UnpaidTransactionResource(NerdeezResource):
     user_profile = fields.ToOneField(UserProfileResource, 'user_profile', null=True, full=False)

@@ -65,6 +65,9 @@ class TransactionAdmin(admin.ModelAdmin):
 
 class UnpaidTransactionAdmin(admin.ModelAdmin):
     pass
+
+class RefundAdmin(admin.ModelAdmin):
+    pass
     
 
 
@@ -87,6 +90,7 @@ admin.site.register(Deal, DealAdmin)
 admin.site.register(Logger, LoggerAdmin)
 admin.site.register(Transaction, TransactionAdmin)
 admin.site.register(UnpaidTransaction, UnpaidTransactionAdmin)
+admin.site.register(Refund, RefundAdmin)
 
 #===============================================================================
 # end admin site registration

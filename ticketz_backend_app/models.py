@@ -214,6 +214,24 @@ class Transaction(NerdeezModel):
     def owner(self):
         return self.deal.business.user_profile.all()[0].user.username
     
+    def __unicode__(self):
+        return 'Transaction for user: %s with phone: %s' % (self.user_profile.user.email, self.user_profile.phone)
+    
+class Refund(NerdeezModel):
+    '''
+    the table for refunds for customers
+    '''
+    transaction = models.ForeignKey(Transaction, blank=False, null=False)
+    description = models.CharField(max_length=1000, blank=True, null=True, default=None)
+    paymill_refund_id = models.CharField(max_length=100, blank=True, null=True, default=None)
+    
+    def owner(self):
+        return self.transaction.deal.business.user_profile.all()[0].user.username
+    
+    def __unicode__(self):
+        return 'Refund for user: %s' % (self.transaction.deal.business.user_profile.all()[0].user.email)
+    
+    
 class UnpaidTransaction(NerdeezModel):
     '''
     a transaction that is not paid
