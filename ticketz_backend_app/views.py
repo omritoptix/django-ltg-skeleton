@@ -24,6 +24,11 @@ from django.utils.html import strip_tags
 from smtplib import SMTPSenderRefused
 from tastypie.models import ApiKey
 import random
+from tastypie.authentication import ApiKeyAuthentication
+from datetime import date
+import pdfcrowd
+from ticketz_backend_app.models import *
+from django.http import HttpResponse
  
 
 #===============================================================================
@@ -82,6 +87,59 @@ def activate_business(request, id):
             pass
     
     return render_to_response('confirm_activate_business.html', {}, context_instance=RequestContext(request))
+
+def report(request):
+    '''
+    download user profile pdf
+    @param id: the id of the profile being asked 
+    '''
+    
+    #check if the user is authorized to view this pdf
+    auth = ApiKeyAuthentication()
+    auth.is_authenticated(request)
+    user = request.user
+    user_profile = user.get_profile()
+    business = user_profile.business
+    
+    try:
+        
+        # create an API client instance
+        client = pdfcrowd.Client(settings.PDFCROWD_USERNAME, settings.PDFCROWD_APIKEY)
+        
+        t = get_template('report_footer.html')
+        html = t.render(Context({})).encode('utf-8')
+        client.setDefaultTextEncoding('utf-8')
+        client.setFooterHtml(html)
+        client.setHorizontalMargin("0.0in")
+
+        #date
+        today = date.today()
+        pdf_date = today.strftime("%d/%m/%y")
+        
+        #the deals
+        deals = Deal.objects.all()
+        
+        # convert a web page and store the generated PDF to a variable
+        t = get_template('report.html')
+        html = t.render(Context(
+                                {
+                                 'date': pdf_date, 
+                                 'deals': deals, 
+                                 })).encode('utf-8')
+        pdf = client.convertHtml(html)
+
+        # set HTTP response headers
+        response = HttpResponse(mimetype="application/pdf")
+        response["Cache-Control"] = "no-cache"
+        response["Accept-Ranges"] = "none"
+        #response["Content-Disposition"] = "attachment; filename=google_com.pdf"
+
+        # send the generated PDF
+        response.write(pdf)
+    except pdfcrowd.Error, why:
+        response = HttpResponse(mimetype="text/plain")
+        response.write(why)
+    return response
 
 
 #===============================================================================

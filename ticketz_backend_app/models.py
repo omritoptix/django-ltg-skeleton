@@ -143,7 +143,7 @@ class Category(NerdeezModel):
     those images has to be loaded in the splash screen
     '''
     title = models.CharField(max_length=100, blank=False, null=False, unique=True)
-    image = models.ImageField(upload_to='img/category', default=None, blank=True, null=True)
+    image = models.ImageField(upload_to='img/category', default=None, blank=True, null=True, max_length=1000)
     
 class Business(NerdeezModel):
     '''
@@ -205,7 +205,7 @@ class Transaction(NerdeezModel):
     will hold the table for a transaction
     '''
     user_profile = models.ForeignKey(UserProfile, blank=False, null=False)
-    deal = models.ForeignKey(Deal, blank=False, null=False)
+    deal = models.ForeignKey(Deal, blank=False, null=False, related_name='transactions')
     status = models.PositiveSmallIntegerField(choices=TRANSACTION_STATUS, default=0)
     amount = models.PositiveIntegerField(default=1)
     hash = models.CharField(max_length=20, default=None, blank=True, null=True)

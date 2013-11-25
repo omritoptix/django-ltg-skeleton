@@ -55,9 +55,11 @@ urlpatterns = patterns('',
     #grappelli
     (r'^grappelli/', include('grappelli.urls')),
     
-    
+    #views activated from admin
     (r'^confirm-business/(\d+)', ticketz_backend_app.views.confirm_activate_business),
     (r'^activate-business/(\d+)', ticketz_backend_app.views.activate_business),
     
+    #create the pdf
+    ('^report/', ticketz_backend_app.views.report),
     
 )
