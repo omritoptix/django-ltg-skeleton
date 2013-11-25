@@ -626,8 +626,8 @@ class UtilitiesResource(NerdeezResource):
         auth.login(request, user)
         
         #successfull login delete all the old api key of the user and create a new one
-        api_keys = ApiKey.objects.filter(user=user)
-        api_keys.delete()
+        #api_keys = ApiKey.objects.filter(user=user)
+        #api_keys.delete()
         api_key, created = ApiKey.objects.get_or_create(user=user)
         api_key.save()
 
