@@ -96,7 +96,10 @@ def report(request):
     
     #check if the user is authorized to view this pdf
     auth = ApiKeyAuthentication()
-    auth.is_authenticated(request)
+    if auth.is_authenticated(request) != True:
+        response = HttpResponse(mimetype="text/plain")
+        response.write('Unautorized')
+        return response
     user = request.user
     user_profile = user.get_profile()
     business = user_profile.business
@@ -117,7 +120,7 @@ def report(request):
         pdf_date = today.strftime("%d/%m/%y")
         
         #the deals
-        deals = Deal.objects.all()
+        deals = Deal.objects.filter(business=business)
         
         # convert a web page and store the generated PDF to a variable
         t = get_template('report.html')

@@ -304,15 +304,15 @@ class ApiTest(ResourceTestCase):
         deal = Deal.objects.get(id=1)
         self.assertEqual(deal.status, 0)
         
-    def test_refund(self):
-        '''
-        will check the the api for the refund is working
-        '''
-        #test refund is working
-        resp = self.api_client.post(uri='/api/v1/refund/?username=ywarezk&api_key=12345678', format='json', data={'transaction': '/api/v1/transaction/1/', 'description': 'Trying to work my way on a refund'})
-        self.assertHttpCreated(resp)
-        self.assertEqual(Refund.objects.all().count(), 1)
-        self.assertNotEqual(Refund.objects.all()[0].paymill_refund_id, None)
+#     def test_refund(self):
+#         '''
+#         will check the the api for the refund is working
+#         '''
+#         #test refund is working
+#         resp = self.api_client.post(uri='/api/v1/refund/?username=ywarezk&api_key=12345678', format='json', data={'transaction': '/api/v1/transaction/1/', 'description': 'Trying to work my way on a refund'})
+#         self.assertHttpCreated(resp)
+#         self.assertEqual(Refund.objects.all().count(), 1)
+#         self.assertNotEqual(Refund.objects.all()[0].paymill_refund_id, None)
         
         
         
