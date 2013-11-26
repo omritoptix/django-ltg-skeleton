@@ -269,3 +269,19 @@ TWILIO_PHONE = os.environ.get('TWILIO_PHONE', '')
 #for pdfcrowd
 PDFCROWD_USERNAME = os.environ.get('PDFCROWD_USERNAME', '')
 PDFCROWD_APIKEY = os.environ.get('PDFCROWD_APIKEY', '')
+
+#for celery
+INSTALLED_APPS = INSTALLED_APPS + ('kombu.transport.django',)
+INSTALLED_APPS = INSTALLED_APPS + ('djcelery',)
+BROKER_BACKEND = 'django'
+CELERY_IMPORTS = ("ticketz_backend_app.tasks", )
+CELERY_ROUTES = {
+                     "tasks.close_deals": {"queue": "ticketz"},
+                     "tasks.active_deals": {"queue": "ticketz"},
+                     "tasks.activate_pending_deals": {"queue": "ticketz"},
+                     "tasks.delete_old_api_keys": {"queue": "ticketz"},
+                 }
+
+import djcelery
+djcelery.setup_loader()
+

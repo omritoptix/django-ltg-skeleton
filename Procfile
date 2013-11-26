@@ -1,3 +1,3 @@
 web: python manage.py run_gunicorn -b "0.0.0.0:$PORT"
-clock: python ticketz_backend_app/clock.py
-worker: python ticketz_backend_app/worker.py
+celerydpolling: python manage.py celeryd -B --loglevel=INFO -E
+celerydprocessing: python manage.py celeryd --loglevel=INFO -Q ticketz -E
