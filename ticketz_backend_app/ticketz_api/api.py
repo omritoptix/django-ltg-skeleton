@@ -953,6 +953,8 @@ class UtilitiesResource(NerdeezResource):
                     }, HttpNotFound)
             
         #paid transaction
+        
+        
         try:
             transaction = Transaction.objects.get(user_profile=customer, hash=hash)
             transaction.status = 3
@@ -984,11 +986,13 @@ class UtilitiesResource(NerdeezResource):
             
         #success
         transaction.save()
+        ur = DealResource()
+        ur_bundle = ur.build_bundle(obj=transaction.deal, request=request)
         return self.create_response(request, {
                     'success': True,
                     'message': "Found a paid transaction",
                     'is_unpaid': is_unpaid,
-                    'deal': transaction.deal
+                    'deal': ur_bundle
                     })
             
         
