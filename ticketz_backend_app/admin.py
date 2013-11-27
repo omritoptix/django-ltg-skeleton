@@ -50,10 +50,14 @@ class BusinessAdmin(admin.ModelAdmin):
     search_fields = ['user_profile__user__email','title', 'business_id']
     list_filter = ('modified_data','creation_date')
     def get_email(self, business):
-        try:
-            return business.user_profile.all()[0].user.email
-        except: 
-            return '' 
+        return ''
+#         try:
+#             return business.user_profile.all()[0].user.email
+#         except: 
+#             return ''
+
+
+ 
     def send_activation(self, business):
         '''
         will redirect to a business approval page
