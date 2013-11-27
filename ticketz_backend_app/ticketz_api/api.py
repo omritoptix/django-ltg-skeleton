@@ -41,6 +41,8 @@ import pymill
 from twilio.rest import TwilioRestClient
 from django.core.urlresolvers import resolve, get_script_prefix
 from django.db.models import Q
+from tastypie import http
+from tastypie.exceptions import ImmediateHttpResponse
 
 
 #===============================================================================
@@ -320,6 +322,12 @@ class DealResource(NerdeezResource):
             return self.Meta.object_class.search(request.GET.get('search'))
         else:
             return super(DealResource, self).get_object_list(request)
+        
+    def obj_create(self, bundle, **kwargs):
+        #if the user is not a business than he is unauth to post
+        if bundle.request.user.get_profile().business == None:
+            raise ImmediateHttpResponse(response=http.HttpUnauthorized())
+        return super(DealResource, self).obj_create(bundle, **kwargs)
     
     
 class TransactionResource(NerdeezResource):
@@ -341,6 +349,7 @@ class TransactionResource(NerdeezResource):
     def obj_create(self, bundle, **kwargs):
         
         #get params
+        print '1'
         email = bundle.data.get('email', '')
         token = bundle.data.get('token','')
         first_name = bundle.data.get('first_name', '')
@@ -349,6 +358,7 @@ class TransactionResource(NerdeezResource):
         amount = int(bundle.data.get('amount', 0))
         
         #get the user profile
+        print '2'
         user = bundle.request.user
         user_profile = user.get_profile()
             
@@ -363,6 +373,7 @@ class TransactionResource(NerdeezResource):
             user_profile.phone = phone
             user_profile.save()
         user.save()
+        print '3'
             
         #create a paymill instance
         private_key = settings.PAYMILL_PRIVATE_KEY

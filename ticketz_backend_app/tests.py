@@ -187,12 +187,32 @@ class ApiTest(ResourceTestCase):
         self.assertHttpAccepted(resp)
         
     def test_register_and_deals(self):
+        '''
+        test the registration through the smartphone
+        also test the registerd user can't add a deal
+        '''
         resp = self.api_client.post(uri='/api/v1/utilities/register-user/', format='json', data={'uuid': 'helloworld'})
         self.assertHttpCreated(resp)
         username = self.deserialize(resp)['username']
         api_key = self.deserialize(resp)['api_key']
         resp = self.api_client.get(uri='/api/v1/deal/', format='json', data={'username': username, 'api_key': api_key})
         self.assertHttpOK(resp)
+        resp = self.api_client.post(uri='/api/v1/deal/', format='json', 
+                                    data={
+                                            "original_price": 100, 
+                                            "valid_from": "2013-11-23T20:00:00Z", 
+                                            "valid_to": "2013-11-23T21:00:00Z", 
+                                            "description": "new beer promotion in a software company? kind of makes you wonder what the hell are they doing there", 
+                                            "title": "1+1 beers", 
+                                            "discounted_price": 50, 
+                                            "num_total_places": 10, 
+                                            'username': username,
+                                            'api_key': api_key
+                                        }
+        )
+        self.assertHttpUnauthorized(resp)
+        
+        
         
     def test_category_in_deal(self):
         resp = self.api_client.get(uri='/api/v1/deal/', format='json', data={'username': 'ywarezk', 'api_key': '12345678'})
@@ -324,6 +344,8 @@ class ApiTest(ResourceTestCase):
         resp = self.api_client.post(uri='/api/v1/utilities/confirm-transaction/', format='json', data={'username': 'ywarezk', 'api_key': '12345678', 'phone': '+972522441431', 'hash': '12344'})
         self.assertHttpOK(resp)
         self.assertEqual(UnpaidTransaction.objects.get(id=1).status, 2)
+        
+        
         
         
     
