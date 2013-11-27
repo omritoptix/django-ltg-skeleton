@@ -304,6 +304,30 @@ class ApiTest(ResourceTestCase):
         deal = Deal.objects.get(id=1)
         self.assertEqual(deal.status, 0)
         
+    def test_confirm_deals(self):
+        '''
+        test the confirm deals api
+        - first test will try to activate a transaction from a cradentials of another business
+        - second test will try to successfully change
+        '''
+        resp = self.api_client.post(uri='/api/v1/utilities/confirm-transaction/', format='json', data={'username': 'yariv', 'api_key': '12345678', 'phone': '+972522441431', 'hash': '12345'})
+        self.assertHttpUnauthorized(resp)
+        
+        resp = self.api_client.post(uri='/api/v1/utilities/confirm-transaction/', format='json', data={'username': 'ywarezk', 'api_key': '12345678', 'phone': '+972522441431', 'hash': '12345'})
+        print resp.content
+        self.assertHttpOK(resp)
+        self.assertEqual(Transaction.objects.get(id=1).status, 3)
+        
+        resp = self.api_client.post(uri='/api/v1/utilities/confirm-transaction/', format='json', data={'username': 'yariv', 'api_key': '12345678', 'phone': '+972522441431', 'hash': '12344'})
+        self.assertHttpUnauthorized(resp)
+        
+        resp = self.api_client.post(uri='/api/v1/utilities/confirm-transaction/', format='json', data={'username': 'ywarezk', 'api_key': '12345678', 'phone': '+972522441431', 'hash': '12344'})
+        self.assertHttpOK(resp)
+        self.assertEqual(UnpaidTransaction.objects.get(id=1).status, 2)
+        
+        
+    
+        
 #     def test_refund(self):
 #         '''
 #         will check the the api for the refund is working

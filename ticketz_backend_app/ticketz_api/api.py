@@ -583,6 +583,9 @@ class UtilitiesResource(NerdeezResource):
             url(r"^(?P<resource_name>%s)/payment%s$" %
                 (self._meta.resource_name, trailing_slash()),
                 self.wrap_view('payment'), name="api_payment"),
+            url(r"^(?P<resource_name>%s)/confirm-transaction%s$" %
+                (self._meta.resource_name, trailing_slash()),
+                self.wrap_view('confirm_transaction'), name="api_confirm_transaction"),
         ]
         
     def contact(self, request=None, **kwargs):
@@ -901,6 +904,94 @@ class UtilitiesResource(NerdeezResource):
                     'username': user.username
                     }, HttpAccepted)
             
+    def confirm_transaction(self, request=None, **kwargs):
+        '''
+        gets a phone number and a date and check if there is a transaction for those cradentials
+        @param string phone: phone number of the user
+        @param string hash: the transaction code
+        @return: on error - 401 unauth, 404 - transaction not founr
+                 on success {
+                     success: true
+                     is_unpaid: true/false
+                     message: <descriptive message>
+                     deal: {<deal object>}
+                 }  
+        '''
+        
+        #get the params
+        post = simplejson.loads(request.body)
+        phone = post.get('phone')
+        hash = post.get('hash')
+        
+        #check auth
+        apikey_auth = NerdeezApiKeyAuthentication()
+        if apikey_auth.is_authenticated(request) != True:
+            return self.create_response(request, {
+                    'success': False,
+                    'message': 'You are not authorized for this action'
+                    }, HttpUnauthorized)
+            
+        #get the user profile
+        user = request.user
+        user_profile = user.get_profile()
+        
+        #get the business check if this is a legit business
+        business = user_profile.business
+        if business == None:
+            return self.create_response(request, {
+                    'success': False,
+                    'message': 'You are not authorized for this action'
+                    }, HttpUnauthorized)
+            
+        #find a userprofile with this phone
+        try:
+            customer = UserProfile.objects.get(phone=phone)
+        except:
+            return self.create_response(request, {
+                    'success': False,
+                    'message': "I didn't find this user"
+                    }, HttpNotFound)
+            
+        #paid transaction
+        try:
+            transaction = Transaction.objects.get(user_profile=customer, hash=hash)
+            transaction.status = 3
+            is_unpaid = False
+        except:
+            pass
+        
+        #unpaid transaction
+        try:
+            transaction = UnpaidTransaction.objects.get(user_profile=customer, hash=hash)
+            transaction.status = 2
+            is_unpaid = True
+        except:
+            pass
+        
+        #did i find a transaction
+        if transaction == None:
+            return self.create_response(request, {
+                    'success': False,
+                    'message': "I didn't find this transaction"
+                    }, HttpNotFound)
+            
+        #is the transaction belong to the business?
+        if transaction.deal.business.id != business.id:
+            return self.create_response(request, {
+                    'success': False,
+                    'message': "You are not authorized for confirm this deal"
+                    }, HttpUnauthorized)
+            
+        #success
+        transaction.save()
+        return self.create_response(request, {
+                    'success': True,
+                    'message': "Found a paid transaction",
+                    'is_unpaid': is_unpaid,
+                    'deal': transaction.deal
+                    })
+            
+        
             
         
 #===============================================================================

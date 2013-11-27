@@ -88,7 +88,7 @@ class UserProfile(NerdeezModel):
     note that email, first_name. last_name are contained in the user object
     '''
     user = models.ForeignKey(User, unique=True)
-    phone = models.CharField(max_length=20, default=None, blank=True, null=True)
+    phone = models.CharField(max_length=20, default=None, blank=True, null=True, unique=True)
     uuid = models.CharField(max_length=50, default=None, blank=True, null=True, unique=True)
     business = models.ForeignKey('Business', related_name='user_profile', default=None, blank=True, null=True)
     paymill_client_id = models.CharField(max_length=50, default=None, blank=True, null=True)
@@ -214,6 +214,9 @@ class Transaction(NerdeezModel):
     def owner(self):
         return self.deal.business.user_profile.all()[0].user.username
     
+    class Meta(NerdeezModel.Meta):
+        unique_together = (("user_profile", "hash"),)
+    
     def __unicode__(self):
         return 'Transaction for user: %s with phone: %s' % (self.user_profile.user.email, self.user_profile.phone)
     
@@ -242,7 +245,7 @@ class UnpaidTransaction(NerdeezModel):
     hash = models.CharField(max_length=20, default=None, blank=True, null=True)
     
     class Meta(NerdeezModel.Meta):
-        unique_together = (("user_profile", "deal"),)
+        unique_together = (("user_profile", "deal"),("user_profile", "hash"),)
         
     def __unicode__(self):
         return "User: %s Purchased deal: %d" % (self.user_profile.user.username, self.deal.id)

@@ -60,7 +60,7 @@
             "uuid": null, 
             "business": 1, 
             "creation_date": "2013-11-10T10:56:38Z", 
-            "phone": "", 
+            "phone": "+972522441431", 
             "user": 1, 
             "modified_data": "2013-11-10T10:56:38.407Z",
             "paymill_client_id": "client_17f5a09043e0e60497c6",
@@ -206,6 +206,18 @@
             "creation_date": "2013-11-25T18:24:11", 
             "amount": 1, 
             "paymill_transaction_id": "tran_d123ad1ab812ba753e38c5a01dd6"
+        }
+    },
+    {
+        "pk": 1, 
+        "model": "ticketz_backend_app.unpaidtransaction", 
+        "fields": {
+            "status": 1, 
+            "hash": "12344", 
+            "modified_data": "2013-11-27T14:59:48.564", 
+            "deal": 1, 
+            "user_profile": 1, 
+            "creation_date": "2013-11-27T14:59:25"
         }
     }
 ]
