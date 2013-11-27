@@ -992,7 +992,7 @@ class UtilitiesResource(NerdeezResource):
                     'success': True,
                     'message': "Found a paid transaction",
                     'is_unpaid': is_unpaid,
-                    'deal': ur_bundle
+                    'deal': json.loads(ur.serialize(None, ur.full_dehydrate(ur_bundle), 'application/json')),
                     })
             
         
