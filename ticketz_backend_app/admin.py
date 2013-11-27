@@ -25,7 +25,10 @@ class FlatPageAdmin(admin.ModelAdmin):
     pass
 
 class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ('id', 'phone', 'uuid')
+    list_display = ('id', 'phone', 'uuid', 'get_email')
+    
+    def get_email(self, user_profile):
+        return user_profile.user.email
 
 class RegionAdmin(admin.ModelAdmin):
     pass
@@ -47,7 +50,7 @@ class BusinessAdmin(admin.ModelAdmin):
     search_fields = ['user_profile__user__email','title', 'business_id']
     list_filter = ('modified_data','creation_date')
     def get_email(self, business):
-        return business.user_profile.user.email
+        return business.user_profile.all()[0].user.email
     def send_activation(self, business):
         '''
         will redirect to a business approval page

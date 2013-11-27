@@ -36,6 +36,24 @@
         }
     },
     {
+        "pk": 3, 
+        "model": "auth.user", 
+        "fields": {
+            "username": "yariv1", 
+            "first_name": "", 
+            "last_name": "", 
+            "is_active": true, 
+            "is_superuser": false, 
+            "is_staff": false, 
+            "last_login": "2013-11-10T13:35:09.901Z", 
+            "groups": [], 
+            "user_permissions": [], 
+            "password": "pbkdf2_sha256$10000$2bpfy5rvLM23$DPr4aQ5QAQzA5am3thP2fkx/XuhXLfREQg8TpM5paio=", 
+            "email": "yariv1@nerdeez.com", 
+            "date_joined": "2013-11-10T13:35:09.434Z"
+        }
+    },
+    {
         "pk": 1, 
         "model": "tastypie.apikey", 
         "fields": {
@@ -49,6 +67,15 @@
         "model": "tastypie.apikey", 
         "fields": {
             "user": 2, 
+            "key": "12345678", 
+            "created": "2013-11-11T16:32:56.779Z"
+        }
+    },
+    {
+        "pk": 3, 
+        "model": "tastypie.apikey", 
+        "fields": {
+            "user": 3, 
             "key": "12345678", 
             "created": "2013-11-11T16:32:56.779Z"
         }
@@ -76,6 +103,18 @@
             "creation_date": "2013-11-10T13:35:09Z", 
             "phone": null, 
             "user": 2, 
+            "modified_data": "2013-11-10T13:35:10.062Z"
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "ticketz_backend_app.userprofile", 
+        "fields": {
+            "uuid": null, 
+            "business": null, 
+            "creation_date": "2013-11-10T13:35:09Z", 
+            "phone": null, 
+            "user": 3, 
             "modified_data": "2013-11-10T13:35:10.062Z"
         }
     }, 

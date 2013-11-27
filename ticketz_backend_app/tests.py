@@ -62,7 +62,7 @@ class ApiTest(ResourceTestCase):
         #test success registration
         num_users = User.objects.count()
         num_business = Business.objects.count()
-        resp = self.api_client.post(uri='/api/v1/utilities/register/', format='json', data={'email': 'yariv1@nerdeez.com', 'business_id': '12345', 'phone': '12345', 'address': 'sdf', 'title': 'asdf'})
+        resp = self.api_client.post(uri='/api/v1/utilities/register/', format='json', data={'email': 'yariv2@nerdeez.com', 'business_id': '12345', 'phone': '12345', 'address': 'sdf', 'title': 'asdf'})
         self.assertEqual(User.objects.count(), num_users + 1)
         self.assertEqual(Business.objects.count(), num_business + 1)
         
@@ -257,7 +257,7 @@ class ApiTest(ResourceTestCase):
         for this test i put a user profile with a client id and payment id
         we need to pass deal and amount
         '''
-        resp = self.api_client.post(uri='/api/v1/transaction/?username=ywarezk&api_key=12345678', format='json', data={'deal': '/api/v1/deal/1/', 'amount': 3, 'phone': '+972522441431'})
+        resp = self.api_client.post(uri='/api/v1/transaction/?username=ywarezk&api_key=12345678', format='json', data={'deal': '/api/v1/deal/1/', 'amount': 3})
         print resp.content
         self.assertHttpCreated(resp)
         self.assertEquals(UserProfile.objects.get(id=1).phone, '+972522441431')
@@ -267,9 +267,9 @@ class ApiTest(ResourceTestCase):
         '''
         will check the api for the unpaid transaction
         '''
-        resp = self.api_client.post(uri='/api/v1/unpaidtransaction/?username=ywarezk&api_key=12345678', format='json', data={'deal': '/api/v1/deal/1/','phone': '+972522441431'})
+        resp = self.api_client.post(uri='/api/v1/unpaidtransaction/?username=yariv1&api_key=12345678', format='json', data={'deal': '/api/v1/deal/1/','phone': '+972522441432'})
         self.assertHttpCreated(resp)
-        self.assertEquals(UserProfile.objects.get(id=1).phone, '+972522441431')
+        self.assertEquals(UserProfile.objects.get(id=3).phone, '+972522441432')
         
     def test_logger_api(self):
         '''
