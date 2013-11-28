@@ -62,14 +62,14 @@ class ApiTest(ResourceTestCase):
         #test success registration
         num_users = User.objects.count()
         num_business = Business.objects.count()
-        resp = self.api_client.post(uri='/api/v1/utilities/register/', format='json', data={'email': 'yariv2@nerdeez.com', 'business_id': '12345', 'phone': '12345', 'address': 'sdf', 'title': 'asdf'})
+        resp = self.api_client.post(uri='/api/v1/utilities/register/', format='json', data={'email': 'yariv2@nerdeez.com', 'business_number': '12345', 'phone': '12345', 'address': 'sdf', 'title': 'asdf'})
         self.assertEqual(User.objects.count(), num_users + 1)
         self.assertEqual(Business.objects.count(), num_business + 1)
         
         #test duplicate
         num_users = User.objects.count()
         num_business = Business.objects.count()
-        resp = self.api_client.post(uri='/api/v1/utilities/register/', format='json', data={'email': 'yariv1@nerdeez.com', 'business_id': '12345', 'phone': '12345', 'address': 'sdf', 'title': 'asdf'})
+        resp = self.api_client.post(uri='/api/v1/utilities/register/', format='json', data={'email': 'yariv1@nerdeez.com', 'business_number': '12345', 'phone': '12345', 'address': 'sdf', 'title': 'asdf'})
         self.assertHttpConflict(resp)
         self.assertEqual(User.objects.count(), num_users)
         self.assertEqual(Business.objects.count(), num_business)
@@ -344,6 +344,17 @@ class ApiTest(ResourceTestCase):
         resp = self.api_client.post(uri='/api/v1/utilities/confirm-transaction/', format='json', data={'username': 'ywarezk', 'api_key': '12345678', 'phone': '+972522441431', 'hash': '12344'})
         self.assertHttpOK(resp)
         self.assertEqual(UnpaidTransaction.objects.get(id=1).status, 2)
+        
+#     def test_new_business_cant_modify_deals(self):
+#         '''
+#         test that a new registered business cant modify old deals
+#         reported auth bug
+#         '''
+#         
+#         #register a new business
+#         resp = self.api_client.post(uri='/api/v1/utilities/', format, data, authentication)
+        
+        
         
         
         

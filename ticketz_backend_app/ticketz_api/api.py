@@ -699,7 +699,7 @@ class UtilitiesResource(NerdeezResource):
         #get params
         post = simplejson.loads(request.body)
         email = post.get('email')
-        business_id = post.get('business_id')
+        business_number = post.get('business_number')
         phone = post.get('phone')
         address = post.get('address')
         city = post.get('city')
@@ -744,7 +744,7 @@ class UtilitiesResource(NerdeezResource):
             #create the business 
             business = Business()
             business.title = title
-            business.business_id = business_id
+            business.business_number = business_number
             business.phone = phone
             if city != None:
                 business.city = City.objects.get(id=city)

@@ -47,7 +47,7 @@ class DealAdmin(admin.ModelAdmin):
 
 class BusinessAdmin(admin.ModelAdmin):
     list_display = ('title', 'business_number', 'get_email', 'phone', 'send_activation')
-    search_fields = ['user_profile__user__email','title', 'business_id']
+    search_fields = ['user_profile__user__email','title', 'business_number']
     list_filter = ('modified_data','creation_date')
     def get_email(self, business):
         try:
