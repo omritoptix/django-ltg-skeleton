@@ -14,6 +14,7 @@ Created on November 7, 2013
 from tastypie.test import ResourceTestCase
 from django.contrib.auth.models import User
 from ticketz_backend_app.models import *
+from tastypie.models import ApiKey
 # from ticketz_backend_app.clock import close_deals
 
 #===============================================================================
@@ -345,14 +346,49 @@ class ApiTest(ResourceTestCase):
         self.assertHttpOK(resp)
         self.assertEqual(UnpaidTransaction.objects.get(id=1).status, 2)
         
-#     def test_new_business_cant_modify_deals(self):
-#         '''
-#         test that a new registered business cant modify old deals
-#         reported auth bug
-#         '''
-#         
-#         #register a new business
-#         resp = self.api_client.post(uri='/api/v1/utilities/', format, data, authentication)
+    def test_new_business_cant_modify_deals(self):
+        '''
+        test that a new registered business cant modify old deals
+        reported auth bug
+        '''
+         
+        #register a new business and set it as active
+        old_num_users = User.objects.all().count()
+        resp = self.api_client.post(uri='/api/v1/utilities/register/', format='json', data={'email': 'yariv2@nerdeez.com', 'business_number': '12345', 'phone': '12345', 'address': 'sdf', 'title': 'asdf'})
+        self.assertHttpCreated(resp)
+        self.assertEqual(User.objects.all().count(), old_num_users + 1)
+        users = User.objects.all()
+        user = users[users.count() - 1]
+        user.is_active = True
+        user.save()
+        
+        #find the api key of the user
+        api_key = ApiKey()
+        api_key.user = user
+        api_key.save()
+        
+        #modify deal number one which doesnt belong to this business
+        resp = self.api_client.put(uri='/api/v1/deal/1/', format='json', 
+                                    data={
+                                            "original_price": 80,
+                                            'username': user.username,
+                                            'api_key': api_key.key  
+                                        }
+        )
+        self.assertHttpUnauthorized(resp)
+        self.assertNotEquals(Deal.objects.get(id=1).original_price, 80)
+        
+    def test_user_profile_only_owner_can_read(self):
+        '''
+        test that a user profile cant read other user profiles
+        '''
+        resp = self.api_client.get(uri='/api/v1/userprofile/3/?username=ywaerzk&api_key=12345678', format='json')
+        self.assertHttpUnauthorized(resp)
+        resp = self.api_client.put(uri='/api/v1/userprofile/3/?username=ywaerzk&api_key=12345678', format='json', data={'phone': '12345678'})
+        self.assertHttpUnauthorized(resp)
+        self.assertNotEqual(UserProfile.objects.get(id=3).phone, '12345678')
+        
+        
         
         
         

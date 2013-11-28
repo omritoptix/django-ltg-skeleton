@@ -168,10 +168,19 @@ class NerdeezReadForFreeAuthorization( DjangoAuthorization ):
     it will allow post to everyone
     and put/delete if there is owner only he can do it.
     '''
-
-    def read_list(self, object_list, bundle):
-        return object_list
     
+    def owner_auth(self, bundle):
+        '''
+        gets a bundle and return true if the current user is the owner
+        @param Object bundle: tastypie bundle object
+        @return: true if owner raise Unauthorized if not
+        '''
+        obj = bundle.obj
+        if hasattr(obj, 'owner') and (obj.owner() == bundle.request.user.username):
+            return True
+        else:
+            raise Unauthorized('you are not auth to modify this record');
+        
     def read_detail(self, object_list, bundle):
         return True
     
@@ -180,28 +189,12 @@ class NerdeezReadForFreeAuthorization( DjangoAuthorization ):
     
     def create_list(self, object_list, bundle):
         return object_list
-        
-        
+    
     def update_detail(self, object_list, bundle):
-        return len(object_list) > 0
-    
-    def update_list(self, object_list, bundle):
-        if bundle.request == None:
-            raise Unauthorized("You are not allowed to access that resource.")
-        
-        objects = []
-        for obj in object_list:
-            if hasattr(obj, 'owner') and (obj.owner() == bundle.request.user.username):
-                objects.append(obj)
-            if not hasattr(obj, 'owner'):
-                objects.append(obj)
-        return objects
-    
-    def delete_list(self, object_list, bundle):
-        return self.update_list(object_list, bundle)
+        return self.owner_auth(bundle)
     
     def delete_detail(self, object_list, bundle):
-        return self.delete_detail(object_list, bundle)
+        return self.owner_auth(bundle)
     
 class NerdeezOnlyOwnerCanReadAuthorization( NerdeezReadForFreeAuthorization ):
     '''
@@ -209,18 +202,8 @@ class NerdeezOnlyOwnerCanReadAuthorization( NerdeezReadForFreeAuthorization ):
     performs NerdeezReadForFreeAuthorization.
     '''
     
-    def read_list(self, object_list, bundle):
-        list = []
-        for obj in object_list:
-            if not hasattr(obj, 'owner'):
-                list.append(obj)
-            if hasattr(obj, 'owner') and obj.owner() == bundle.request.user.username:
-                list.append(obj)
-                
-        return list
-    
     def read_detail(self, object_list, bundle):
-        return len(self.read_list(object_list, bundle)) > 0
+        return self.owner_auth(bundle)
 
         
 

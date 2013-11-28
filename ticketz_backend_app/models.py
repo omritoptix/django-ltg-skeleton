@@ -162,6 +162,9 @@ class Business(NerdeezModel):
     adapter_class = models.CharField(max_length=50, blank=True, null=True, default=None)
     adapter_object = PickledObjectField()
     
+    def owner(self):
+        return self.user_profile.all()[0].user.username
+    
 class Deal(NerdeezModel):
     '''
     will hold the table for the deals a business is making
