@@ -257,6 +257,9 @@ class UserPrefrenceResource(NerdeezResource):
 class CategoryResource(NerdeezResource):
     class Meta(NerdeezResource.Meta):
         queryset = Category.objects.all()
+        filtering = {
+                     'id': ALL_WITH_RELATIONS
+                     }
         
 class BusinessResource(NerdeezResource):
     city = fields.ToOneField(CityResource, 'city', null=True, full=True)
@@ -278,7 +281,8 @@ class DealResource(NerdeezResource):
         allowed_methods = ['get', 'put', 'post']
         filtering = {
                      'status': ALL_WITH_RELATIONS,
-                     'business': ALL_WITH_RELATIONS
+                     'business': ALL_WITH_RELATIONS,
+                     'category': ALL_WITH_RELATIONS
                      }
         ordering = ['valid_to']
         
