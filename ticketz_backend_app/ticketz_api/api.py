@@ -272,7 +272,7 @@ class BusinessResource(NerdeezResource):
                      }
         
 class DealResource(NerdeezResource):
-    business = fields.ToOneField(BusinessResource, 'business', null=True, full=False)
+    business = fields.ToOneField(BusinessResource, 'business', null=True, full=True)
     category = fields.ToOneField(CategoryResource, 'category', null=True, full=True)
     class Meta(NerdeezResource.Meta):
         queryset = Deal.objects.all()

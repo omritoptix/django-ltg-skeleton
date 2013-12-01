@@ -366,7 +366,9 @@ class ApiTest(ResourceTestCase):
         self.assertHttpCreated(resp)
         self.assertEqual(User.objects.all().count(), old_num_users + 1)
         users = User.objects.all()
-        user = users[users.count() - 1]
+        for single_user in users:
+            if single_user.id == 4:
+                user = single_user
         user.is_active = True
         user.save()
         
@@ -395,6 +397,14 @@ class ApiTest(ResourceTestCase):
         resp = self.api_client.put(uri='/api/v1/userprofile/3/?username=ywaerzk&api_key=12345678', format='json', data={'phone': '12345678'})
         self.assertHttpUnauthorized(resp)
         self.assertNotEqual(UserProfile.objects.get(id=3).phone, '12345678')
+        
+    def test_deal_contain_business(self):
+        '''
+        test that the deal api returns a business object
+        '''
+        resp = self.api_client.get(uri='/api/v1/deal/', format='json', data={'username': 'ywarezk', 'api_key': '12345678'})
+        business = self.deserialize(resp)['objects'][0]['business']
+        self.assertTrue('id' in business)
         
         
         
