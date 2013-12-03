@@ -749,7 +749,7 @@ class UtilitiesResource(NerdeezResource):
         return self.create_response(request, {
                     'success': True,
                     'message': 'Successfully logged in',
-                    "user_profile": json.loads(ur.serialize(None, ur.full_dehydrate(ur_bundle), 'application/json')),
+                    "business_profile": json.loads(ur.serialize(None, ur.full_dehydrate(ur_bundle), 'application/json')),
                     'api_key': api_key.key,
                     'username': user.username
                     }, HttpAccepted )
