@@ -55,7 +55,7 @@ def confirm_activate_business(request, id):
     '''
     if we want to activate a business with an id
     '''
-    business = Business.objects.get(id=id)
+    business = BusinessProfile.objects.get(id=id)
     return render_to_response('activate_business.html', {'business': business}, context_instance=RequestContext(request))
 
 @user_passes_test(lambda u: u.is_superuser, login_url='/admin/')
@@ -64,8 +64,8 @@ def activate_business(request, id):
     if we want to activate a business with an id
     '''
     #activate the business
-    business = Business.objects.get(id=id)
-    user = business.user_profile.all()[0].user
+    business = BusinessProfile.objects.get(id=id)
+    user = business.user_profile.user
     user.is_active = True
     api_key = ApiKey()
     pass_length = random.randint(8, 15)
