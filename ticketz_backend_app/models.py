@@ -89,16 +89,43 @@ class UserProfile(NerdeezModel):
     '''
     user = models.ForeignKey(User, unique=True)
     phone = models.CharField(max_length=20, default=None, blank=True, null=True, unique=True)
-    uuid = models.CharField(max_length=50, default=None, blank=True, null=True, unique=True)
-    business = models.ForeignKey('Business', related_name='user_profile', default=None, blank=True, null=True)
-    paymill_client_id = models.CharField(max_length=50, default=None, blank=True, null=True)
-    paymill_payment_id = models.CharField(max_length=50, default=None, blank=True, null=True)
     
     def __unicode__(self):
         return self.user.email
     
     def owner(self):
         return self.user.username
+    
+class BaseProfile(NerdeezModel):
+    
+    class Meta(NerdeezModel.Meta):
+        abstract = True
+    
+    def __unicode__(self):
+        return self.user_profile.user.email
+    
+    def owner(self):
+        return self.user_profile.user.username
+    
+    
+class PhoneProfile(BaseProfile):
+    user_profile = models.ForeignKey(UserProfile, related_name='phone_profile')
+    uuid = models.CharField(max_length=50, default=None, blank=True, null=True, unique=True)
+    paymill_client_id = models.CharField(max_length=50, default=None, blank=True, null=True)
+    paymill_payment_id = models.CharField(max_length=50, default=None, blank=True, null=True)
+    
+class BusinessProfile(NerdeezModel):
+    user_profile = models.ForeignKey(UserProfile, related_name='business_profile')
+    title = models.CharField(max_length=100, blank=False, null=False)
+    business_number = models.CharField(max_length=20, blank=True, null=True, unique=True, default=None)
+    city = models.ForeignKey('City', blank=True, null=True, default=None)
+    address = models.CharField(max_length=200, blank=True, null=True, default=None)
+    web_service_url = models.CharField(max_length=300, blank=True, null=True, default=None)
+    adapter_class = models.CharField(max_length=50, blank=True, null=True, default=None)
+    adapter_object = PickledObjectField()
+    
+    def __unicode__(self):
+        return 'Business: %s mail: %s' % (self.title, self.user_profile.user.email)
     
         
 class FlatPage(NerdeezModel):
@@ -126,15 +153,15 @@ class UserPrefrence(NerdeezModel):
     '''
     will hold user specific configurations
     '''
-    user_profile = models.ForeignKey(UserProfile, related_name='prefrences', blank=False, null=False, unique=True)
+    phone_profile = models.ForeignKey(PhoneProfile, related_name='prefrences', blank=False, null=False, unique=True)
     city = models.ForeignKey(City, blank=True, null=True, default=None)
     region = models.ForeignKey(Region, blank=True, null=True, default=None)
     
     def __unicode__(self):
-        return self.user_profile.user.email
+        return self.phone_profile.user_profile.user.email
     
     def owner(self):
-        return self.user_profile.user.username
+        return self.phone_profile.user_profile.user.username
     
 class Category(NerdeezModel):
     '''
@@ -145,36 +172,18 @@ class Category(NerdeezModel):
     title = models.CharField(max_length=100, blank=False, null=False, unique=True)
     image = models.ImageField(upload_to='img/category', default=None, blank=True, null=True, max_length=1000)
     
-class Business(NerdeezModel):
-    '''
-    will hold the data for each business that is working with us.
-    I didnt want to include fields that are specific for toptix needs cause we might want in the 
-    future to work with other API's, so to make stuff as generic as I could I created a dictionary
-    field that will hold specific api data that toptix or titan or other service requires.
-    Question: Should that data be encrypted?
-    '''
-    title = models.CharField(max_length=100, blank=False, null=False)
-    business_number = models.CharField(max_length=20, blank=True, null=True, unique=True, default=None)
-    phone = models.CharField(max_length=20, blank=False, null=False)
-    city = models.ForeignKey(City, blank=True, null=True, default=None)
-    address = models.CharField(max_length=200, blank=True, null=True, default=None)
-    web_service_url = models.CharField(max_length=300, blank=True, null=True, default=None)
-    adapter_class = models.CharField(max_length=50, blank=True, null=True, default=None)
-    adapter_object = PickledObjectField()
-    
-    def owner(self):
-        return self.user_profile.all()[0].user.username
     
 class Deal(NerdeezModel):
     '''
     will hold the table for the deals a business is making
     '''
-    business = models.ForeignKey(Business)
+    business_profile = models.ForeignKey(BusinessProfile)
     title = models.CharField(max_length=150, blank=False, null=False)
     description = models.CharField(max_length=300, blank=True, null=True)
     valid_from = models.DateTimeField(default=lambda: datetime.datetime.now().replace(microsecond=0))
     valid_to = models.DateTimeField(default=lambda: datetime.datetime.now().replace(microsecond=0))
     num_total_places = models.PositiveIntegerField(default=0)
+    num_places_left = models.PositiveIntegerField(default=0)
     image = models.ImageField(upload_to='img/deal', default=None, blank=True, null=True, max_length=1000)
     original_price = models.DecimalField(max_digits = 6, decimal_places = 3)
     discounted_price = models.DecimalField(max_digits = 6, decimal_places = 3)
@@ -191,7 +200,7 @@ class Deal(NerdeezModel):
     )
     
     def owner(self):
-        return self.business.user_profile.all()[0].user.username
+        return self.business_profile.user_profile.user.username
     
     @classmethod
     def search(cls, query):
@@ -207,7 +216,7 @@ class Transaction(NerdeezModel):
     '''
     will hold the table for a transaction
     '''
-    user_profile = models.ForeignKey(UserProfile, blank=False, null=False)
+    phone_profile = models.ForeignKey(PhoneProfile, blank=False, null=False)
     deal = models.ForeignKey(Deal, blank=False, null=False, related_name='transactions')
     status = models.PositiveSmallIntegerField(choices=TRANSACTION_STATUS, default=0)
     amount = models.PositiveIntegerField(default=1)
@@ -215,13 +224,13 @@ class Transaction(NerdeezModel):
     paymill_transaction_id = models.CharField(max_length=50, default=None, blank=True, null=True)
     
     def owner(self):
-        return self.deal.business.user_profile.all()[0].user.username
+        return [self.deal.business_profile.user_profile.user.username, self.phone_profile.user_profile.user.username]
     
     class Meta(NerdeezModel.Meta):
-        unique_together = (("user_profile", "hash"),)
+        unique_together = (("phone_profile", "hash"),)
     
     def __unicode__(self):
-        return 'Transaction for user: %s with phone: %s' % (self.user_profile.user.email, self.user_profile.phone)
+        return 'Transaction for user: %s with phone: %s' % (self.phone_profile.user_profile.user.email, self.phone_profile.user_profile.phone)
     
 class Refund(NerdeezModel):
     '''
@@ -232,29 +241,29 @@ class Refund(NerdeezModel):
     paymill_refund_id = models.CharField(max_length=100, blank=True, null=True, default=None)
     
     def owner(self):
-        return self.transaction.deal.business.user_profile.all()[0].user.username
+        return self.transaction.deal.business_profile.user_profile.user.username
     
     def __unicode__(self):
-        return 'Refund for user: %s' % (self.transaction.deal.business.user_profile.all()[0].user.email)
+        return 'Refund for user: %s' % (self.transaction.deal.business_profile.user_profile.user.email)
     
     
 class UnpaidTransaction(NerdeezModel):
     '''
     a transaction that is not paid
     '''
-    user_profile = models.ForeignKey(UserProfile, blank=False, null=False)
+    phone_profile = models.ForeignKey(PhoneProfile, blank=False, null=False)
     deal = models.ForeignKey(Deal, blank=False, null=False)
     status = models.PositiveSmallIntegerField(choices=UNPAID_TRANSACTION_STATUS, default=0)
     hash = models.CharField(max_length=20, default=None, blank=True, null=True)
     
     class Meta(NerdeezModel.Meta):
-        unique_together = (("user_profile", "deal"),("user_profile", "hash"),)
+        unique_together = (("phone_profile", "deal"),("phone_profile", "hash"),)
         
     def __unicode__(self):
-        return "User: %s Purchased deal: %d" % (self.user_profile.user.username, self.deal.id)
+        return "User: %s Purchased deal: %d" % (self.phone_profile.user_profile.user.username, self.deal.id)
     
     def owner(self):
-        return self.deal.business.user_profile.all()[0].user.username
+        return self.deal.business_profile.user_profile.user.username
     
     
 class Logger(NerdeezModel):

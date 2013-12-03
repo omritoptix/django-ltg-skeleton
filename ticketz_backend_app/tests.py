@@ -62,18 +62,18 @@ class ApiTest(ResourceTestCase):
         '''
         #test success registration
         num_users = User.objects.count()
-        num_business = Business.objects.count()
+        num_business = BusinessProfile.objects.count()
         resp = self.api_client.post(uri='/api/v1/utilities/register/', format='json', data={'email': 'yariv2@nerdeez.com', 'business_number': '12345', 'phone': '12345', 'address': 'sdf', 'title': 'asdf'})
         self.assertEqual(User.objects.count(), num_users + 1)
-        self.assertEqual(Business.objects.count(), num_business + 1)
+        self.assertEqual(BusinessProfile.objects.count(), num_business + 1)
         
         #test duplicate
         num_users = User.objects.count()
-        num_business = Business.objects.count()
+        num_business = BusinessProfile.objects.count()
         resp = self.api_client.post(uri='/api/v1/utilities/register/', format='json', data={'email': 'yariv1@nerdeez.com', 'business_number': '12345', 'phone': '12345', 'address': 'sdf', 'title': 'asdf'})
         self.assertHttpConflict(resp)
         self.assertEqual(User.objects.count(), num_users)
-        self.assertEqual(Business.objects.count(), num_business)
+        self.assertEqual(BusinessProfile.objects.count(), num_business)
         
     def test_forgot_password(self):
         '''
@@ -213,10 +213,9 @@ class ApiTest(ResourceTestCase):
         )
         self.assertHttpUnauthorized(resp)
         
-        
-        
     def test_category_in_deal(self):
         resp = self.api_client.get(uri='/api/v1/deal/', format='json', data={'username': 'ywarezk', 'api_key': '12345678'})
+        print resp.content
         self.assertTrue('category' in self.deserialize(resp)['objects'][0])
         
     def test_order_validto(self):
@@ -229,10 +228,6 @@ class ApiTest(ResourceTestCase):
         self.assertEqual(objects[0]['id'], 2)
         self.assertEqual(objects[1]['id'], 3)
         self.assertEqual(objects[2]['id'], 1)
-        
-    def test_num_available_places(self):
-        resp = self.api_client.get(uri='/api/v1/deal/', format='json', data={'username': 'ywarezk', 'api_key': '12345678', 'order': '-valid_to'})
-        self.assertTrue('num_available_places' in self.deserialize(resp)['objects'][0])
         
     def test_deal_category(self):
         '''
@@ -278,11 +273,10 @@ class ApiTest(ResourceTestCase):
         for this test i put a user profile with a client id and payment id
         we need to pass deal and amount
         '''
-        resp = self.api_client.post(uri='/api/v1/transaction/?username=ywarezk&api_key=12345678', format='json', data={'deal': '/api/v1/deal/1/', 'amount': 3})
+        resp = self.api_client.post(uri='/api/v1/transaction/?username=yariv1&api_key=12345678', format='json', data={'deal': '/api/v1/deal/1/', 'amount': 3})
         print resp.content
         self.assertHttpCreated(resp)
-        self.assertEquals(UserProfile.objects.get(id=1).phone, '+972522441431')
-        
+        self.assertEquals(UserProfile.objects.get(id=3).phone, '+972522441431')
         
     def test_unpaid_transaction(self):
         '''
@@ -303,7 +297,7 @@ class ApiTest(ResourceTestCase):
         '''
         test the filter deal by business
         '''
-        resp = self.api_client.get(uri='/api/v1/deal/?business__id=2&username=ywarezk&api_key=12345678', format='json', data={})
+        resp = self.api_client.get(uri='/api/v1/deal/?business_profile__id=2&username=ywarezk&api_key=12345678', format='json', data={})
         print resp.content
         self.assertHttpOK(resp)
         self.assertEqual(len(self.deserialize(resp)['objects']), 0)
@@ -339,7 +333,7 @@ class ApiTest(ResourceTestCase):
         - first test will try to activate a transaction from a cradentials of another business
         - second test will try to successfully change
         '''
-        resp = self.api_client.post(uri='/api/v1/utilities/confirm-transaction/', format='json', data={'username': 'yariv', 'api_key': '12345678', 'phone': '+972522441431', 'hash': '12345'})
+        resp = self.api_client.post(uri='/api/v1/utilities/confirm-transaction/', format='json', data={'username': 'yariv2', 'api_key': '12345678', 'phone': '+972522441431', 'hash': '12345'})
         self.assertHttpUnauthorized(resp)
         
         resp = self.api_client.post(uri='/api/v1/utilities/confirm-transaction/', format='json', data={'username': 'ywarezk', 'api_key': '12345678', 'phone': '+972522441431', 'hash': '12345'})
@@ -347,7 +341,7 @@ class ApiTest(ResourceTestCase):
         self.assertHttpOK(resp)
         self.assertEqual(Transaction.objects.get(id=1).status, 3)
         
-        resp = self.api_client.post(uri='/api/v1/utilities/confirm-transaction/', format='json', data={'username': 'yariv', 'api_key': '12345678', 'phone': '+972522441431', 'hash': '12344'})
+        resp = self.api_client.post(uri='/api/v1/utilities/confirm-transaction/', format='json', data={'username': 'yariv2', 'api_key': '12345678', 'phone': '+972522441431', 'hash': '12344'})
         self.assertHttpUnauthorized(resp)
         
         resp = self.api_client.post(uri='/api/v1/utilities/confirm-transaction/', format='json', data={'username': 'ywarezk', 'api_key': '12345678', 'phone': '+972522441431', 'hash': '12344'})
@@ -362,12 +356,12 @@ class ApiTest(ResourceTestCase):
          
         #register a new business and set it as active
         old_num_users = User.objects.all().count()
-        resp = self.api_client.post(uri='/api/v1/utilities/register/', format='json', data={'email': 'yariv2@nerdeez.com', 'business_number': '12345', 'phone': '12345', 'address': 'sdf', 'title': 'asdf'})
+        resp = self.api_client.post(uri='/api/v1/utilities/register/', format='json', data={'email': 'yariv3@nerdeez.com', 'business_number': '12345', 'phone': '12345', 'address': 'sdf', 'title': 'asdf'})
         self.assertHttpCreated(resp)
         self.assertEqual(User.objects.all().count(), old_num_users + 1)
         users = User.objects.all()
         for single_user in users:
-            if single_user.id == 4:
+            if single_user.id == 5:
                 user = single_user
         user.is_active = True
         user.save()
@@ -392,18 +386,18 @@ class ApiTest(ResourceTestCase):
         '''
         test that a user profile cant read other user profiles
         '''
-        resp = self.api_client.get(uri='/api/v1/userprofile/3/?username=ywaerzk&api_key=12345678', format='json')
+        resp = self.api_client.get(uri='/api/v1/phoneprofile/1/?username=yariv1&api_key=12345678', format='json')
         self.assertHttpUnauthorized(resp)
-        resp = self.api_client.put(uri='/api/v1/userprofile/3/?username=ywaerzk&api_key=12345678', format='json', data={'phone': '12345678'})
+        resp = self.api_client.put(uri='/api/v1/phoneprofile/1/?username=yariv1&api_key=12345678', format='json', data={'uuid': '12345678'})
         self.assertHttpUnauthorized(resp)
-        self.assertNotEqual(UserProfile.objects.get(id=3).phone, '12345678')
+        self.assertNotEqual(PhoneProfile.objects.get(id=1).uuid, '12345678')
         
     def test_deal_contain_business(self):
         '''
         test that the deal api returns a business object
         '''
         resp = self.api_client.get(uri='/api/v1/deal/', format='json', data={'username': 'ywarezk', 'api_key': '12345678'})
-        business = self.deserialize(resp)['objects'][0]['business']
+        business = self.deserialize(resp)['objects'][0]['business_profile']
         self.assertTrue('id' in business)
         
         
@@ -426,7 +420,23 @@ class ApiTest(ResourceTestCase):
 #         self.assertNotEqual(Refund.objects.all()[0].paymill_refund_id, None)
         
         
-        
+# 
+# {
+#         "pk": 2, 
+#         "model": "ticketz_backend_app.business", 
+#         "fields": {
+#             "city": null, 
+#             "web_service_url": "", 
+#             "modified_data": "2013-11-12T17:04:34.478Z", 
+#             "title": "Nerdeez", 
+#             "adapter_object": "gAJVAC4=", 
+#             "business_number": "0368565401", 
+#             "creation_date": "2013-11-10T13:35:09Z", 
+#             "phone": "0522441431", 
+#             "address": "52 no life lane", 
+#             "adapter_class": ""
+#         }
+#     },   
         
     
 #===============================================================================

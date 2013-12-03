@@ -45,13 +45,13 @@ class CategoryAdmin(admin.ModelAdmin):
 class DealAdmin(admin.ModelAdmin):
     list_display = ('id', 'business', 'title', 'description', 'valid_from', 'valid_to', 'num_total_places', 'original_price', 'discounted_price', 'status', 'category')
 
-class BusinessAdmin(admin.ModelAdmin):
+class BusinessProfileAdmin(admin.ModelAdmin):
     list_display = ('title', 'business_number', 'get_email', 'phone', 'send_activation')
     search_fields = ['user_profile__user__email','title', 'business_number']
     list_filter = ('modified_data','creation_date')
     def get_email(self, business):
         try:
-            return business.user_profile.all()[0].user.email
+            return business.user_profile.user.email
         except: 
             return '' 
     def send_activation(self, business):
@@ -61,6 +61,9 @@ class BusinessAdmin(admin.ModelAdmin):
         '''
         return "<a href='/confirm-business/%s'>Activate</a>" % (business.id)
     send_activation.allow_tags = True
+    
+class PhoneProfileAdmin(admin.ModelAdmin):
+    pass
     
 class LoggerAdmin(admin.ModelAdmin):
     list_display = ('path', 'post', 'get', 'content')
@@ -87,11 +90,12 @@ class RefundAdmin(admin.ModelAdmin):
 
 admin.site.register(FlatPage, FlatPageAdmin)
 admin.site.register(UserProfile, UserProfileAdmin)
+admin.site.register(PhoneProfile, PhoneProfileAdmin)
+admin.site.register(BusinessProfile, BusinessProfileAdmin)
 admin.site.register(Region, RegionAdmin)
 admin.site.register(City, CityAdmin)
 admin.site.register(UserPrefrence, UserPrefrenceAdmin)
 admin.site.register(Category, CategoryAdmin)
-admin.site.register(Business, BusinessAdmin)
 admin.site.register(Deal, DealAdmin)
 admin.site.register(Logger, LoggerAdmin)
 admin.site.register(Transaction, TransactionAdmin)

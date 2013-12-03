@@ -54,6 +54,24 @@
         }
     },
     {
+        "pk": 4, 
+        "model": "auth.user", 
+        "fields": {
+            "username": "yariv2", 
+            "first_name": "", 
+            "last_name": "", 
+            "is_active": true, 
+            "is_superuser": false, 
+            "is_staff": false, 
+            "last_login": "2013-11-10T13:35:09.901Z", 
+            "groups": [], 
+            "user_permissions": [], 
+            "password": "pbkdf2_sha256$10000$2bpfy5rvLM23$DPr4aQ5QAQzA5am3thP2fkx/XuhXLfREQg8TpM5paio=", 
+            "email": "yariv2@nerdeez.com", 
+            "date_joined": "2013-11-10T13:35:09.434Z"
+        }
+    },
+    {
         "pk": 1, 
         "model": "tastypie.apikey", 
         "fields": {
@@ -81,25 +99,28 @@
         }
     },
     {
+        "pk": 4, 
+        "model": "tastypie.apikey", 
+        "fields": {
+            "user": 4, 
+            "key": "12345678", 
+            "created": "2013-11-11T16:32:56.779Z"
+        }
+    },
+    {
         "pk": 1, 
         "model": "ticketz_backend_app.userprofile", 
         "fields": {
-            "uuid": null, 
-            "business": 1, 
             "creation_date": "2013-11-10T10:56:38Z", 
             "phone": "+972522441431", 
             "user": 1, 
-            "modified_data": "2013-11-10T10:56:38.407Z",
-            "paymill_client_id": "client_17f5a09043e0e60497c6",
-            "paymill_payment_id": "pay_d11e842b123d3d16970249eb"
+            "modified_data": "2013-11-10T10:56:38.407Z"
         }
     }, 
     {
         "pk": 2, 
         "model": "ticketz_backend_app.userprofile", 
         "fields": {
-            "uuid": null, 
-            "business": null, 
             "creation_date": "2013-11-10T13:35:09Z", 
             "phone": null, 
             "user": 2, 
@@ -110,12 +131,74 @@
         "pk": 3, 
         "model": "ticketz_backend_app.userprofile", 
         "fields": {
-            "uuid": null, 
-            "business": null, 
             "creation_date": "2013-11-10T13:35:09Z", 
             "phone": null, 
             "user": 3, 
             "modified_data": "2013-11-10T13:35:10.062Z"
+        }
+    }, 
+    {
+        "pk": 4, 
+        "model": "ticketz_backend_app.userprofile", 
+        "fields": {
+            "creation_date": "2013-11-10T13:35:09Z", 
+            "phone": null, 
+            "user": 4, 
+            "modified_data": "2013-11-10T13:35:10.062Z"
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "ticketz_backend_app.businessprofile", 
+        "fields": {
+            "user_profile": 1, 
+            "creation_date": "2013-11-10T10:56:38Z", 
+            "modified_data": "2013-11-10T10:56:38.407Z",
+            "city": null, 
+            "web_service_url": "",
+            "title": "Nerdeez", 
+            "adapter_object": "gAJVAC4=", 
+            "business_number": "036856540", 
+            "address": "52 no life lane", 
+            "adapter_class": ""
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "ticketz_backend_app.businessprofile", 
+        "fields": {
+            "user_profile": 4, 
+            "creation_date": "2013-11-10T10:56:38Z", 
+            "modified_data": "2013-11-10T10:56:38.407Z",
+            "city": null, 
+            "web_service_url": "",
+            "title": "Nerdeez", 
+            "adapter_object": "gAJVAC4=", 
+            "business_number": "036856541", 
+            "address": "52 no life lane", 
+            "adapter_class": ""
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "ticketz_backend_app.phoneprofile", 
+        "fields": {
+            "uuid": null, 
+            "creation_date": "2013-11-10T13:35:09Z", 
+            "user_profile": 2, 
+            "modified_data": "2013-11-10T13:35:10.062Z"
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "ticketz_backend_app.phoneprofile", 
+        "fields": {
+            "uuid": null, 
+            "creation_date": "2013-11-10T13:35:09Z", 
+            "user_profile": 3, 
+            "modified_data": "2013-11-10T13:35:10.062Z",
+            "paymill_client_id": "client_17f5a09043e0e60497c6",
+            "paymill_payment_id": "pay_d11e842b123d3d16970249eb"
         }
     }, 
     {
@@ -137,38 +220,7 @@
             "creation_date": "2013-11-12T15:39:18Z"
         }
     }, 
-    {
-        "pk": 1, 
-        "model": "ticketz_backend_app.business", 
-        "fields": {
-            "city": null, 
-            "web_service_url": "", 
-            "modified_data": "2013-11-12T17:04:34.478Z", 
-            "title": "Nerdeez", 
-            "adapter_object": "gAJVAC4=", 
-            "business_number": "036856540", 
-            "creation_date": "2013-11-10T13:35:09Z", 
-            "phone": "0522441431", 
-            "address": "52 no life lane", 
-            "adapter_class": ""
-        }
-    },
-    {
-        "pk": 2, 
-        "model": "ticketz_backend_app.business", 
-        "fields": {
-            "city": null, 
-            "web_service_url": "", 
-            "modified_data": "2013-11-12T17:04:34.478Z", 
-            "title": "Nerdeez", 
-            "adapter_object": "gAJVAC4=", 
-            "business_number": "0368565401", 
-            "creation_date": "2013-11-10T13:35:09Z", 
-            "phone": "0522441431", 
-            "address": "52 no life lane", 
-            "adapter_class": ""
-        }
-    },
+    
     {
         "pk": 1, 
         "model": "ticketz_backend_app.deal", 
@@ -177,7 +229,7 @@
             "original_price": "100.000", 
             "valid_from": "2013-11-12T17:56:14Z", 
             "description": "new beer promotion in a software company? kind of makes you wonder what the hell are they doing there", 
-            "business": 1, 
+            "business_profile": 1, 
             "title": "1+1 beers", 
             "discounted_price": "50.000", 
             "image": "", 
@@ -192,7 +244,7 @@
             "title": "a", 
             "num_total_places": 5, 
             "valid_from": "2013-11-19T08:48:00Z", 
-            "business": 1, 
+            "business_profile": 1, 
             "image": "img/deal/BBB.png", 
             "discounted_price": "10.000", 
             "valid_to": "2013-11-27T11:47:00Z", 
@@ -210,7 +262,7 @@
             "title": "asd 020202", 
             "num_total_places": 5, 
             "valid_from": "2013-11-19T08:27:00Z", 
-            "business": 1, 
+            "business_profile": 1, 
             "image": "img/deal/SoZKXQ5vTtGvzWLL1qwC_filepickerAPIKEY.png", 
             "discounted_price": "10.000", 
             "valid_to": "2013-11-19T09:29:00Z", 
@@ -241,7 +293,7 @@
             "hash": "12345", 
             "modified_data": "2013-11-25T18:24:16.393", 
             "deal": 1, 
-            "user_profile": 1, 
+            "phone_profile": 2, 
             "creation_date": "2013-11-25T18:24:11", 
             "amount": 1, 
             "paymill_transaction_id": "tran_d123ad1ab812ba753e38c5a01dd6"
@@ -255,7 +307,7 @@
             "hash": "12344", 
             "modified_data": "2013-11-27T14:59:48.564", 
             "deal": 1, 
-            "user_profile": 1, 
+            "phone_profile": 1, 
             "creation_date": "2013-11-27T14:59:25"
         }
     }

@@ -43,6 +43,8 @@ from django.core.urlresolvers import resolve, get_script_prefix
 from django.db.models import Q
 from tastypie import http
 from tastypie.exceptions import ImmediateHttpResponse
+from kombu.transport.django.managers import select_for_update
+from django.db import transaction
 
 
 #===============================================================================
@@ -176,7 +178,7 @@ class NerdeezReadForFreeAuthorization( DjangoAuthorization ):
         @return: true if owner raise Unauthorized if not
         '''
         obj = bundle.obj
-        if hasattr(obj, 'owner') and (obj.owner() == bundle.request.user.username):
+        if hasattr(obj, 'owner') and (obj.owner() == bundle.request.user.username or bundle.request.user.username in obj.owner()):
             return True
         else:
             raise Unauthorized('you are not auth to modify this record');
@@ -226,13 +228,37 @@ class FlatpageResource(NerdeezResource):
                      }
      
 class UserProfileResource(NerdeezResource):
-    business = fields.ToOneField('ticketz_backend_app.ticketz_api.api.BusinessResource', 'business', full=True, null=True)
     class Meta(NerdeezResource.Meta):
         queryset = UserProfile.objects.all()
         authentication = NerdeezApiKeyAuthentication()
         authorization = NerdeezOnlyOwnerCanReadAuthorization()
+        read_only_fields = ['user', 'phone']
+        
+class PhoneProfileResource(NerdeezResource):
+    '''
+    api for the phone users
+    '''
+    user_profile = fields.ToOneField('ticketz_backend_app.ticketz_api.api.UserProfileResource', 'user_profile', full=True, null=True)
+    class Meta(NerdeezResource.Meta):
+        queryset = PhoneProfile.objects.all()
+        authentication = NerdeezApiKeyAuthentication()
+        authorization = NerdeezOnlyOwnerCanReadAuthorization()
         allowed_methods = ['get', 'put']
-        read_only_fields = ['paymill_client_id', 'paymill_client_id', 'user', 'phone', 'uuid', 'business']
+        read_only_fields = ['paymill_client_id', 'paymill_client_id', 'user_profile', 'uuid']
+        
+class BusinessProfileResource(NerdeezResource):
+    '''
+    api for the business profile
+    '''
+    user_profile = fields.ToOneField('ticketz_backend_app.ticketz_api.api.UserProfileResource', 'user_profile', full=True, null=True)
+    class Meta(NerdeezResource.Meta):
+        queryset = BusinessProfile.objects.all()
+        authentication = NerdeezApiKeyAuthentication()
+        authorization = NerdeezOnlyOwnerCanReadAuthorization()
+        allowed_methods = ['get', 'put']
+        read_only_fields = ['web_service_url', 'adapter_class', 'adapter_object']
+        
+
         
 class RegionResource(NerdeezResource):
     class Meta(NerdeezResource.Meta):
@@ -244,7 +270,7 @@ class CityResource(NerdeezResource):
         queryset = City.objects.all()
         
 class UserPrefrenceResource(NerdeezResource):
-    user_profile = fields.ToOneField(UserProfileResource, 'user_profile', null=True, full=True)
+    phone_profile = fields.ToOneField(PhoneProfileResource, 'phone_profile', null=True, full=True)
     city = fields.ToOneField(CityResource, 'city', null=True, full=True)
     region = fields.ToOneField(RegionResource, 'region', null=True, full=True)
     class Meta(NerdeezResource.Meta):
@@ -252,7 +278,7 @@ class UserPrefrenceResource(NerdeezResource):
         authentication = NerdeezApiKeyAuthentication()
         authorization = NerdeezOnlyOwnerCanReadAuthorization()
         allowed_methods = ['get', 'put']
-        read_only_fields = ['user_profile']
+        read_only_fields = ['phone_profile']
         
 class CategoryResource(NerdeezResource):
     class Meta(NerdeezResource.Meta):
@@ -261,18 +287,21 @@ class CategoryResource(NerdeezResource):
                      'id': ALL_WITH_RELATIONS
                      }
         
-class BusinessResource(NerdeezResource):
-    city = fields.ToOneField(CityResource, 'city', null=True, full=True)
-    class Meta(NerdeezResource.Meta):
-        queryset = Business.objects.all()
-        authentication = NerdeezApiKeyAuthentication()
-        authorization = NerdeezOnlyOwnerCanReadAuthorization()
-        filtering = {
-                     'id': ALL_WITH_RELATIONS
-                     }
+# class BusinessResource(NerdeezResource):
+#     '''
+#     @deprecated: use BusinessProfileResource
+#     '''
+#     city = fields.ToOneField(CityResource, 'city', null=True, full=True)
+#     class Meta(NerdeezResource.Meta):
+#         queryset = Business.objects.all()
+#         authentication = NerdeezApiKeyAuthentication()
+#         authorization = NerdeezOnlyOwnerCanReadAuthorization()
+#         filtering = {
+#                      'id': ALL_WITH_RELATIONS
+#                      }
         
 class DealResource(NerdeezResource):
-    business = fields.ToOneField(BusinessResource, 'business', null=True, full=True)
+    business_profile = fields.ToOneField(BusinessProfileResource, 'business_profile', null=True, full=True)
     category = fields.ToOneField(CategoryResource, 'category', null=True, full=True)
     class Meta(NerdeezResource.Meta):
         queryset = Deal.objects.all()
@@ -281,7 +310,7 @@ class DealResource(NerdeezResource):
         allowed_methods = ['get', 'put', 'post']
         filtering = {
                      'status': ALL_WITH_RELATIONS,
-                     'business': ALL_WITH_RELATIONS,
+                     'business_profile': ALL_WITH_RELATIONS,
                      'category': ALL_WITH_RELATIONS
                      }
         ordering = ['valid_to']
@@ -290,17 +319,9 @@ class DealResource(NerdeezResource):
         status = bundle.data.get('status', 1)
         if status > 1:
             bundle.data['status'] = 1
-        bundle.data['business'] = API_URL + 'business/' + str(bundle.request.user.profile.business.id) + '/'
+        bundle.data['business_profile'] = API_URL + 'businessprofile/' + str(bundle.request.user.profile.business_profile.all()[0].id) + '/'
         return super(DealResource, self).hydrate(bundle)
                      
-    def dehydrate(self, bundle):
-        
-        #calculate the number of purchases
-        transactions = Transaction.objects.filter(deal=bundle.obj, status__gte=2)
-        total_baught = sum([transaction.amount for transaction in transactions])
-        bundle.data['num_available_places'] = bundle.obj.num_total_places - total_baught          
-        return super(DealResource, self).dehydrate(bundle)
-    
     def get_object_list(self, request):
         '''
         search group logic
@@ -312,42 +333,83 @@ class DealResource(NerdeezResource):
         
     def obj_create(self, bundle, **kwargs):
         #if the user is not a business than he is unauth to post
-        if bundle.request.user.get_profile().business == None:
+        try:
+            if bundle.request.user.get_profile().business_profile.all()[0] == None:
+                raise ImmediateHttpResponse(response=http.HttpUnauthorized())
+        except:
             raise ImmediateHttpResponse(response=http.HttpUnauthorized())
+        if 'num_total_places' in bundle.data:
+            bundle.data['num_places_left'] = bundle.data['num_total_places']
         return super(DealResource, self).obj_create(bundle, **kwargs)
     
     
 class TransactionResource(NerdeezResource):
-    user_profile = fields.ToOneField(UserProfileResource, 'user_profile', null=True, full=False)
+    phone_profile = fields.ToOneField(PhoneProfileResource, 'phone_profile', null=True, full=False)
     deal = fields.ToOneField(DealResource, 'deal', null=True, full=False)
     
     class Meta(NerdeezResource.Meta):
         queryset = Transaction.objects.all()
         authentication = NerdeezApiKeyAuthentication()
         authorization = NerdeezOnlyOwnerCanReadAuthorization()
-        allowed_methods = ['get', 'post', 'delete']
+        allowed_methods = ['get', 'post', 'put']
         read_only_fields = ['paymill_transaction_id']
         
     def hydrate(self, bundle):
-        bundle.data['status'] = 2
-        bundle.data['user_profile'] = API_URL + 'userprofile/' + str(bundle.request.user.profile.id) + '/'
+        try:
+            bundle.data['phone_profile'] = API_URL + 'phoneprofile/' + str(bundle.request.user.profile.phone_profile.all()[0].id) + '/'
+        except:
+            if 'phone_profile' in bundle.data:
+                del bundle.data['phone_profile']
+            
         return super(TransactionResource, self).hydrate(bundle)
     
     def obj_create(self, bundle, **kwargs):
+        '''
+        will create a transaction object and by doing so will reserve the seats
+        @param string deal: will get a deal resource uri
+        @return on success a 201 response with the object
+        on error will return a 
+        '''
+        
+        bundle.data['status'] = 1
+        amount = int(bundle.data.get('amount', 0))
+        
+        #check amount is legal
+        if not amount > 0:
+            raise ImmediateHttpResponse(response=http.HttpBadRequest())
+        
+        #get the deal and lower the seats while maintaining cuncurancy
+        deal_id = NerdeezResource.get_pk_from_uri(bundle.data['deal'])
+        deal = Deal.objects.select_for_update().get(id=int(deal_id))
+        seats_left = deal.num_places_left
+        new_seats_left = seats_left - amount
+        if new_seats_left < 0:
+            transaction.commit()
+            raise ImmediateHttpResponse(response=http.HttpConflict())
+        deal.num_places_left = new_seats_left
+        deal.save()
+        transaction.commit()
+        
+        return super(TransactionResource, self).obj_create(bundle, **kwargs)
+    
+    def obj_update(self, bundle, skip_errors=False, **kwargs):
         
         #get params
-        print '1'
         email = bundle.data.get('email', '')
         token = bundle.data.get('token','')
         first_name = bundle.data.get('first_name', '')
         last_name = bundle.data.get('last_name', '')
         phone = bundle.data.get('phone', '')
-        amount = int(bundle.data.get('amount', 0))
+        bundle.data['status'] = 2
+        if 'amount' in bundle.data:
+            del bundle.data['amount']
+        if 'deal' in bundle.data:
+            del bundle.data['deal']
         
         #get the user profile
-        print '2'
         user = bundle.request.user
         user_profile = user.get_profile()
+        phone_profile = user_profile.phone_profile.all()[0]
             
         #update the user object with the data entered
         if first_name != '':
@@ -360,14 +422,13 @@ class TransactionResource(NerdeezResource):
             user_profile.phone = phone
             user_profile.save()
         user.save()
-        print '3'
             
         #create a paymill instance
         private_key = settings.PAYMILL_PRIVATE_KEY
         p = pymill.Pymill(private_key)
             
         #get or create the client
-        client_id = user_profile.paymill_client_id
+        client_id = phone_profile.paymill_client_id
         if client_id == None:
             if user.email != None:
                 return self.create_response(bundle.request, {
@@ -377,7 +438,7 @@ class TransactionResource(NerdeezResource):
             try:
                 client = p.new_client(
                       email=user.email,
-                      description='{id: %d, Name: "%s %s", Email: "%s", Phone: "%s"}' % (user_profile.id, user.first_name, user.last_name, user.email, user_profile.phone)
+                      description='{id: %d, Name: "%s %s", Email: "%s", Phone: "%s"}' % (phone_profile.id, user.first_name, user.last_name, user.email, user_profile.phone)
                 )
             except Exception,e:
                 return self.create_response(bundle.request, {
@@ -386,11 +447,11 @@ class TransactionResource(NerdeezResource):
                     }, HttpApplicationError )
                 
             client_id = client.id
-            user_profile.paymill_client_id = client_id
-            user_profile.save()
+            phone_profile.paymill_client_id = client_id
+            phone_profile.save()
             
         #get or create the payment
-        payment_id = user_profile.paymill_payment_id
+        payment_id = phone_profile.paymill_payment_id
         if payment_id == None:
             if token == '':
                 return self.create_response(bundle.request, {
@@ -408,12 +469,12 @@ class TransactionResource(NerdeezResource):
                     'message': e.message,
                     }, HttpApplicationError )
             payment_id = payment.id
-            user_profile.paymill_payment_id = payment_id
-            user_profile.save()
+            phone_profile.paymill_payment_id = payment_id
+            phone_profile.save()
             
         #get the deal
-        deal_id = NerdeezResource.get_pk_from_uri(bundle.data['deal'])
-        deal = Deal.objects.get(id=deal_id)
+        #deal_id = NerdeezResource.get_pk_from_uri(bundle.data['deal'])
+        deal = bundle.obj.deal
             
         #do the payment
         total_price = deal.discounted_price * bundle.data['amount']
@@ -421,7 +482,7 @@ class TransactionResource(NerdeezResource):
             transaction = p.transact(
                         amount=int(total_price) * 100,
                         currency='ILS',
-                        description='{user_profile_id: %d, amount_purchased: %d, deal_id: %d, first_name: "%s", last_name: "%s", email: "%s", phone: "%s"}' % (user_profile.id, amount, deal.id, user.first_name, user.last_name, user.email, user_profile.phone),
+                        description='{user_phone_id: %d, amount_purchased: %d, deal_id: %d, first_name: "%s", last_name: "%s", email: "%s", phone: "%s"}' % (phone_profile.id, bundle.obj.amount, deal.id, user.first_name, user.last_name, user.email, user_profile.phone),
                         payment=payment_id
                     )
             transaction_id = transaction.id
@@ -436,7 +497,7 @@ class TransactionResource(NerdeezResource):
         #send the user a cnfirmation email
         if is_send_grid():
             t = get_template('emails/confirm_purchase.html')
-            html = t.render(Context({'admin_mail': settings.ADMIN_MAIL, 'admin_phone': settings.ADMIN_PHONE, 'deal': deal, 'amount': amount}))
+            html = t.render(Context({'admin_mail': settings.ADMIN_MAIL, 'admin_phone': settings.ADMIN_PHONE, 'deal': deal, 'amount': bundle.obj.amount}))
             text_content = strip_tags(html)
             msg = EmailMultiAlternatives('2Nite Confirm Purchase', text_content, settings.FROM_EMAIL_ADDRESS, [user.email])
             msg.attach_alternative(html, "text/html")
@@ -463,7 +524,7 @@ class TransactionResource(NerdeezResource):
                     'exception': e.message
                     }, HttpApplicationError)
             
-        return super(TransactionResource, self).obj_create(bundle, **kwargs)
+        return super(TransactionResource, self).obj_update(bundle, skip_errors=skip_errors, **kwargs)
     
 class RefundResource(NerdeezResource):
     '''
@@ -499,7 +560,7 @@ class RefundResource(NerdeezResource):
         
 
 class UnpaidTransactionResource(NerdeezResource):
-    user_profile = fields.ToOneField(UserProfileResource, 'user_profile', null=True, full=False)
+    phone_profile = fields.ToOneField(PhoneProfileResource, 'phone_profile', null=True, full=False)
     deal = fields.ToOneField(DealResource, 'deal', null=True, full=False)
     
     class Meta(NerdeezResource.Meta):
@@ -510,7 +571,11 @@ class UnpaidTransactionResource(NerdeezResource):
         
     def hydrate(self, bundle):
         bundle.data['status'] = 1
-        bundle.data['user_profile'] = API_URL + 'userprofile/' + str(bundle.request.user.profile.id) + '/'
+        try:
+            bundle.data['phone_profile'] = API_URL + 'phoneprofile/' + str(bundle.request.user.profile.phone_profile.all()[0].id) + '/'
+        except:
+            if 'phone_profile' in bundle.data:
+                del bundle.data['phone_profile']
         return super(UnpaidTransactionResource, self).hydrate(bundle)
     
     def obj_create(self, bundle, **kwargs):
@@ -664,8 +729,8 @@ class UtilitiesResource(NerdeezResource):
         api_key, created = ApiKey.objects.get_or_create(user=user)
         api_key.save()
 
-        ur = UserProfileResource()
-        ur_bundle = ur.build_bundle(obj=user.profile, request=request)
+        ur = BusinessProfileResource()
+        ur_bundle = ur.build_bundle(obj=user.profile.business_profile.all()[0], request=request)
         return self.create_response(request, {
                     'success': True,
                     'message': 'Successfully logged in',
@@ -728,18 +793,18 @@ class UtilitiesResource(NerdeezResource):
             user.is_active = False
             user.save()
             
-            #create the business 
-            business = Business()
+            #create the business
+            user_profile = user.profile
+            user_profile.phone = phone
+            user_profile.save() 
+            business = BusinessProfile()
             business.title = title
             business.business_number = business_number
-            business.phone = phone
             if city != None:
                 business.city = City.objects.get(id=city)
+            business.user_profile = user_profile
             business.address = address
             business.save()
-            user_profile = user.profile
-            user_profile.business = business
-            user_profile.save()
             
             #send the verification mail
             if is_send_grid():
@@ -862,8 +927,8 @@ class UtilitiesResource(NerdeezResource):
         
         #find a user profile with this uuid if none exist than create one
         try:
-            user_profile = UserProfile.objects.get(uuid=uuid)
-            user = user_profile.user
+            phone_profile = PhoneProfile.objects.get(uuid=uuid)
+            user = phone_profile.user_profile.user
             is_created = False
         except:
             #create the username
@@ -876,9 +941,10 @@ class UtilitiesResource(NerdeezResource):
             user.is_active = True
             user.save()
             user_profile = UserProfile()
-            user_profile.uuid = uuid
             user_profile.user = user
             user_profile.save()
+            phone_profile = PhoneProfile()
+            phone_profile.uuid = uuid
             is_created = True
             
         #create a new api key for the user
@@ -934,7 +1000,7 @@ class UtilitiesResource(NerdeezResource):
         user_profile = user.get_profile()
         
         #get the business check if this is a legit business
-        business = user_profile.business
+        business = user_profile.business_profile.all()[0]
         if business == None:
             return self.create_response(request, {
                     'success': False,
@@ -943,7 +1009,7 @@ class UtilitiesResource(NerdeezResource):
             
         #find a userprofile with this phone
         try:
-            customer = UserProfile.objects.get(phone=phone)
+            customer = UserProfile.objects.get(phone=phone).phone_profile.all()[0]
         except:
             return self.create_response(request, {
                     'success': False,
@@ -951,10 +1017,8 @@ class UtilitiesResource(NerdeezResource):
                     }, HttpNotFound)
             
         #paid transaction
-        
-        
         try:
-            transaction = Transaction.objects.get(user_profile=customer, hash=hash)
+            transaction = Transaction.objects.get(phone_profile=customer, hash=hash)
             transaction.status = 3
             is_unpaid = False
         except:
@@ -962,7 +1026,7 @@ class UtilitiesResource(NerdeezResource):
         
         #unpaid transaction
         try:
-            transaction = UnpaidTransaction.objects.get(user_profile=customer, hash=hash)
+            transaction = UnpaidTransaction.objects.get(phone_profile=customer, hash=hash)
             transaction.status = 2
             is_unpaid = True
         except:
@@ -976,7 +1040,7 @@ class UtilitiesResource(NerdeezResource):
                     }, HttpNotFound)
             
         #is the transaction belong to the business?
-        if transaction.deal.business.id != business.id:
+        if transaction.deal.business_profile.id != business.id:
             return self.create_response(request, {
                     'success': False,
                     'message': "You are not authorized for confirm this deal"

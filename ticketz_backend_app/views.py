@@ -14,7 +14,7 @@ Created on Jun 20, 2013
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.contrib.auth.decorators import user_passes_test
-from ticketz_backend_app.models import Business
+from ticketz_backend_app.models import *
 from ticketz_backend_app.ticketz_api.api import is_send_grid
 from ticketz_backend_app import settings
 from django.core.mail import EmailMultiAlternatives
@@ -27,7 +27,6 @@ import random
 from tastypie.authentication import ApiKeyAuthentication
 from datetime import date
 import pdfcrowd
-from ticketz_backend_app.models import *
 from django.http import HttpResponse
  
 
