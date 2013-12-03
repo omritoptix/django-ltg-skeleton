@@ -112,7 +112,7 @@
         "model": "ticketz_backend_app.userprofile", 
         "fields": {
             "creation_date": "2013-11-10T10:56:38Z", 
-            "phone": null, 
+            "phone": "+972522441434", 
             "user": 1, 
             "modified_data": "2013-11-10T10:56:38.407Z"
         }
@@ -122,7 +122,7 @@
         "model": "ticketz_backend_app.userprofile", 
         "fields": {
             "creation_date": "2013-11-10T13:35:09Z", 
-            "phone": null, 
+            "phone": "+972522441433", 
             "user": 2, 
             "modified_data": "2013-11-10T13:35:10.062Z"
         }
@@ -142,7 +142,7 @@
         "model": "ticketz_backend_app.userprofile", 
         "fields": {
             "creation_date": "2013-11-10T13:35:09Z", 
-            "phone": null, 
+            "phone": "+972522441432", 
             "user": 4, 
             "modified_data": "2013-11-10T13:35:10.062Z"
         }

@@ -45,7 +45,7 @@ def active_deals():
     '''
     
     print 'Change to active deals that passed the valid_from'
-    Deal.objects.filter(valid_from__lte=datetime.datetime.now(), valid_to__gt=datetime.datetime.now()).update(status=4)
+    Deal.objects.filter(valid_from__lte=datetime.datetime.now(), valid_to__gt=datetime.datetime.now(), status=2).update(status=4)
 
 @periodic_task(run_every=timedelta(minutes=5), name='tasks.activate_pending_deals')
 def activate_pending_deals():

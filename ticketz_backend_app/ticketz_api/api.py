@@ -419,6 +419,7 @@ class TransactionResource(NerdeezResource):
             del bundle.data['deal']
         
         #get the user profile
+        
         user = bundle.request.user
         user_profile = user.get_profile()
         phone_profile = user_profile.phone_profile.all()[0]
@@ -486,10 +487,12 @@ class TransactionResource(NerdeezResource):
             
         #get the deal
         #deal_id = NerdeezResource.get_pk_from_uri(bundle.data['deal'])
-        deal = bundle.obj.deal
+        deal = Deal.objects.get(id=kwargs['pk'])
+        print bundle.obj.amount
+        
             
         #do the payment
-        total_price = deal.discounted_price * bundle.data['amount']
+        total_price = deal.discounted_price * bundle.obj.amount
         try:
             transaction = p.transact(
                         amount=int(total_price) * 100,
@@ -1031,6 +1034,7 @@ class UtilitiesResource(NerdeezResource):
                     }, HttpNotFound)
             
         #paid transaction
+        transaction = None
         try:
             transaction = Transaction.objects.get(phone_profile=customer, hash=hash)
             transaction.status = 3

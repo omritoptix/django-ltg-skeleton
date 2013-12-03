@@ -273,8 +273,11 @@ class ApiTest(ResourceTestCase):
         for this test i put a user profile with a client id and payment id
         we need to pass deal and amount
         '''
-        resp = self.api_client.post(uri='/api/v1/transaction/?username=yariv4&api_key=12345678', format='json', data={'deal': '/api/v1/deal/1/', 'amount': 3})
+        resp = self.api_client.post(uri='/api/v1/transaction/?username=yariv3&api_key=12345678', format='json', data={'deal': '/api/v1/deal/1/', 'amount': 3})
         self.assertHttpCreated(resp)
+        transaction_id = self.deserialize(resp)['id']
+        resp = self.api_client.put(uri='/api/v1/transaction/%d/?username=yariv3&api_key=12345678' % transaction_id, format='json', data={})
+        self.assertHttpAccepted(resp)
         self.assertEquals(UserProfile.objects.get(id=3).phone, '+972522441431')
         
     def test_unpaid_transaction(self):
