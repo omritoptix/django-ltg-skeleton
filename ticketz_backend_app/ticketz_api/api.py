@@ -328,13 +328,10 @@ class DealResource(NerdeezResource):
         ordering = ['valid_to']
         
     def hydrate(self, bundle):
-        print '1'
         status = bundle.data.get('status', 1)
         if status > 1:
             bundle.data['status'] = 1
-        print '2'
         bundle.data['business_profile'] = API_URL + 'businessprofile/' + str(bundle.request.user.profile.business_profile.all()[0].id) + '/'
-        print '3'
         return super(DealResource, self).hydrate(bundle)
                      
     def get_object_list(self, request):
@@ -348,7 +345,6 @@ class DealResource(NerdeezResource):
         
     def obj_create(self, bundle, **kwargs):
         #if the user is not a business than he is unauth to post
-        print '44444'
         try:
             if bundle.request.user.get_profile().business_profile.all()[0] == None:
                 raise ImmediateHttpResponse(response=http.HttpUnauthorized("Couldn't find the business profile"))
@@ -356,7 +352,6 @@ class DealResource(NerdeezResource):
             raise ImmediateHttpResponse(response=http.HttpUnauthorized("Couldn't find the business profile"))
         if 'num_total_places' in bundle.data:
             bundle.data['num_places_left'] = bundle.data['num_total_places']
-        print '55555'
         return super(DealResource, self).obj_create(bundle, **kwargs)
     
     
@@ -962,6 +957,8 @@ class UtilitiesResource(NerdeezResource):
             user_profile.save()
             phone_profile = PhoneProfile()
             phone_profile.uuid = uuid
+            phone_profile.user_profile = user_profile
+            phone_profile.save()
             is_created = True
             
         #create a new api key for the user

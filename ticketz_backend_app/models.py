@@ -114,7 +114,7 @@ class PhoneProfile(BaseProfile):
     paymill_client_id = models.CharField(max_length=50, default=None, blank=True, null=True)
     paymill_payment_id = models.CharField(max_length=50, default=None, blank=True, null=True)
     
-class BusinessProfile(NerdeezModel):
+class BusinessProfile(BaseProfile):
     user_profile = models.ForeignKey(UserProfile, related_name='business_profile')
     title = models.CharField(max_length=100, blank=False, null=False)
     business_number = models.CharField(max_length=20, blank=True, null=True, unique=True, default=None)
