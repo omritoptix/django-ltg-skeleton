@@ -25,7 +25,7 @@ class FlatPageAdmin(admin.ModelAdmin):
     pass
 
 class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ('id', 'phone', 'uuid', 'get_email')
+    list_display = ('id', 'phone', 'get_email')
     
     def get_email(self, user_profile):
         return user_profile.user.email
@@ -43,10 +43,10 @@ class CategoryAdmin(admin.ModelAdmin):
     pass
 
 class DealAdmin(admin.ModelAdmin):
-    list_display = ('id', 'business', 'title', 'description', 'valid_from', 'valid_to', 'num_total_places', 'original_price', 'discounted_price', 'status', 'category')
+    list_display = ('id', 'business_profile', 'title', 'description', 'valid_from', 'valid_to', 'num_total_places', 'original_price', 'discounted_price', 'status', 'category')
 
 class BusinessProfileAdmin(admin.ModelAdmin):
-    list_display = ('title', 'business_number', 'get_email', 'phone', 'send_activation')
+    list_display = ('title', 'business_number', 'get_email', 'send_activation')
     search_fields = ['user_profile__user__email','title', 'business_number']
     list_filter = ('modified_data','creation_date')
     def get_email(self, business):

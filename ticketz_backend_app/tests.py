@@ -119,7 +119,7 @@ class ApiTest(ResourceTestCase):
                                         }
         )
         self.assertHttpUnauthorized(resp)
-        resp = self.api_client.post(uri='/api/v1/deal/?username=ywarezk&api_key=12345678', format='json', 
+        resp = self.api_client.post(uri='/api/v1/deal/?username=yariv1&api_key=12345678', format='json', 
                                     data={
                                             "original_price": 100, 
                                             "valid_from": "2013-11-23T20:00:00Z", 
@@ -139,7 +139,7 @@ class ApiTest(ResourceTestCase):
                                         }
         )
         self.assertHttpUnauthorized(resp)
-        resp = self.api_client.put(uri='/api/v1/deal/1/?username=ywarezk&api_key=12345678', format='json', 
+        resp = self.api_client.put(uri='/api/v1/deal/1/?username=yariv1&api_key=12345678', format='json', 
                                     data={
                                             "original_price": 80, 
                                         }
@@ -162,7 +162,7 @@ class ApiTest(ResourceTestCase):
                                             "num_available_places":5,
                                             "creation_date":"Tue, 19 Nov 2013 08:48:15 GMT",
                                             "business":"/api/v1/business/3/",
-                                            "username":"ywarezk",
+                                            "username":"yariv1",
                                             "api_key":"12345678"
                                         }
         )
@@ -173,7 +173,7 @@ class ApiTest(ResourceTestCase):
         '''
         test that the filtering works
         '''
-        resp = self.api_client.get(uri='/api/v1/deal/', format='json', data={'status': 1, 'username': 'ywarezk', 'api_key': '12345678'})
+        resp = self.api_client.get(uri='/api/v1/deal/', format='json', data={'status': 1, 'username': 'yariv1', 'api_key': '12345678'})
         self.assertHttpOK(resp)
         self.assertEqual(len(self.deserialize(resp)['objects']), 2)
         
@@ -214,7 +214,7 @@ class ApiTest(ResourceTestCase):
         self.assertHttpUnauthorized(resp)
         
     def test_category_in_deal(self):
-        resp = self.api_client.get(uri='/api/v1/deal/', format='json', data={'username': 'ywarezk', 'api_key': '12345678'})
+        resp = self.api_client.get(uri='/api/v1/deal/', format='json', data={'username': 'yariv1', 'api_key': '12345678'})
         print resp.content
         self.assertTrue('category' in self.deserialize(resp)['objects'][0])
         
@@ -222,7 +222,7 @@ class ApiTest(ResourceTestCase):
         '''
         test the order by -valid_to
         '''
-        resp = self.api_client.get(uri='/api/v1/deal/', format='json', data={'username': 'ywarezk', 'api_key': '12345678', 'order_by': '-valid_to'})
+        resp = self.api_client.get(uri='/api/v1/deal/', format='json', data={'username': 'yariv1', 'api_key': '12345678', 'order_by': '-valid_to'})
         objects = self.deserialize(resp)['objects']
         self.assertEqual(len(objects), 3)
         self.assertEqual(objects[0]['id'], 2)
@@ -234,7 +234,7 @@ class ApiTest(ResourceTestCase):
         reported bug: saving the category in deal creation is not saved
         '''
         resp = self.api_client.post(uri='/api/v1/deal/', format='json', data={
-                                                                              'username': 'ywarezk', 
+                                                                              'username': 'yariv1', 
                                                                               'api_key': '12345678', 
                                                                               "title":"aaa",
                                                                               "description":"a",
@@ -247,8 +247,9 @@ class ApiTest(ResourceTestCase):
                                                                               "status":0,
                                                                               "num_available_places":5,
                                                                               "creation_date":None,
-                                                                              "business":"/api/v1/business/1/",
+                                                                              "business_profile":"/api/v1/businessprofile/1/",
                                                                               "category":"/api/v1/category/1/"})
+        print resp.content
         self.assertHttpCreated(resp)
         num_deals = Deal.objects.all().count()
         deals = Deal.objects.all()
@@ -297,7 +298,7 @@ class ApiTest(ResourceTestCase):
         '''
         test the filter deal by business
         '''
-        resp = self.api_client.get(uri='/api/v1/deal/?business_profile__id=2&username=ywarezk&api_key=12345678', format='json', data={})
+        resp = self.api_client.get(uri='/api/v1/deal/?business_profile__id=2&username=yariv1&api_key=12345678', format='json', data={})
         print resp.content
         self.assertHttpOK(resp)
         self.assertEqual(len(self.deserialize(resp)['objects']), 0)
@@ -306,7 +307,7 @@ class ApiTest(ResourceTestCase):
         '''
         test the filter deal by business
         '''
-        resp = self.api_client.get(uri='/api/v1/deal/?category__id=1&username=ywarezk&api_key=12345678', format='json', data={})
+        resp = self.api_client.get(uri='/api/v1/deal/?category__id=1&username=yariv1&api_key=12345678', format='json', data={})
         print resp.content
         self.assertHttpOK(resp)
         
@@ -314,7 +315,7 @@ class ApiTest(ResourceTestCase):
         '''
         test the api for the search deals
         '''
-        resp = self.api_client.get(uri='/api/v1/deal/?search=promotion&username=ywarezk&api_key=12345678', format='json')
+        resp = self.api_client.get(uri='/api/v1/deal/?search=promotion&username=yariv1&api_key=12345678', format='json')
         self.assertHttpOK(resp)
         self.assertEqual(len(self.deserialize(resp)['objects']), 1)
         
@@ -322,7 +323,7 @@ class ApiTest(ResourceTestCase):
         '''
         should allow settings the status to zero in the deal
         '''
-        resp = self.api_client.put(uri='/api/v1/deal/1/', format='json', data={'username': 'ywarezk', 'api_key': '12345678', 'status': 0})
+        resp = self.api_client.put(uri='/api/v1/deal/1/', format='json', data={'username': 'yariv1', 'api_key': '12345678', 'status': 0})
         self.assertHttpAccepted(resp)
         deal = Deal.objects.get(id=1)
         self.assertEqual(deal.status, 0)
@@ -336,7 +337,7 @@ class ApiTest(ResourceTestCase):
         resp = self.api_client.post(uri='/api/v1/utilities/confirm-transaction/', format='json', data={'username': 'yariv2', 'api_key': '12345678', 'phone': '+972522441431', 'hash': '12345'})
         self.assertHttpUnauthorized(resp)
         
-        resp = self.api_client.post(uri='/api/v1/utilities/confirm-transaction/', format='json', data={'username': 'ywarezk', 'api_key': '12345678', 'phone': '+972522441431', 'hash': '12345'})
+        resp = self.api_client.post(uri='/api/v1/utilities/confirm-transaction/', format='json', data={'username': 'yariv1', 'api_key': '12345678', 'phone': '+972522441431', 'hash': '12345'})
         print resp.content
         self.assertHttpOK(resp)
         self.assertEqual(Transaction.objects.get(id=1).status, 3)
@@ -344,7 +345,7 @@ class ApiTest(ResourceTestCase):
         resp = self.api_client.post(uri='/api/v1/utilities/confirm-transaction/', format='json', data={'username': 'yariv2', 'api_key': '12345678', 'phone': '+972522441431', 'hash': '12344'})
         self.assertHttpUnauthorized(resp)
         
-        resp = self.api_client.post(uri='/api/v1/utilities/confirm-transaction/', format='json', data={'username': 'ywarezk', 'api_key': '12345678', 'phone': '+972522441431', 'hash': '12344'})
+        resp = self.api_client.post(uri='/api/v1/utilities/confirm-transaction/', format='json', data={'username': 'yariv1', 'api_key': '12345678', 'phone': '+972522441431', 'hash': '12344'})
         self.assertHttpOK(resp)
         self.assertEqual(UnpaidTransaction.objects.get(id=1).status, 2)
         
@@ -396,7 +397,7 @@ class ApiTest(ResourceTestCase):
         '''
         test that the deal api returns a business object
         '''
-        resp = self.api_client.get(uri='/api/v1/deal/', format='json', data={'username': 'ywarezk', 'api_key': '12345678'})
+        resp = self.api_client.get(uri='/api/v1/deal/', format='json', data={'username': 'yariv1', 'api_key': '12345678'})
         business = self.deserialize(resp)['objects'][0]['business_profile']
         self.assertTrue('id' in business)
         
@@ -414,7 +415,7 @@ class ApiTest(ResourceTestCase):
 #         will check the the api for the refund is working
 #         '''
 #         #test refund is working
-#         resp = self.api_client.post(uri='/api/v1/refund/?username=ywarezk&api_key=12345678', format='json', data={'transaction': '/api/v1/transaction/1/', 'description': 'Trying to work my way on a refund'})
+#         resp = self.api_client.post(uri='/api/v1/refund/?username=yariv1&api_key=12345678', format='json', data={'transaction': '/api/v1/transaction/1/', 'description': 'Trying to work my way on a refund'})
 #         self.assertHttpCreated(resp)
 #         self.assertEqual(Refund.objects.all().count(), 1)
 #         self.assertNotEqual(Refund.objects.all()[0].paymill_refund_id, None)

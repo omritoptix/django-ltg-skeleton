@@ -77,6 +77,7 @@ class NerdeezResource(ModelResource):
         always_return_data = True
         ordering = ['title']
         read_only_fields = ['creation_date', 'modified_data']
+        invisible_fields = []
         
     @staticmethod
     def send_sms(to, body):
@@ -115,6 +116,13 @@ class NerdeezResource(ModelResource):
     def hydrate(self, bundle):
         read_only_fields = self.Meta.read_only_fields
         for field in read_only_fields:
+            if field in bundle.data:
+                del bundle.data[field]
+        return super(NerdeezResource, self).hydrate(bundle)
+    
+    def dehydrate(self, bundle):
+        invisible_fields = self.Meta.invisible_fields
+        for field in invisible_fields:
             if field in bundle.data:
                 del bundle.data[field]
         return super(NerdeezResource, self).hydrate(bundle)
@@ -257,6 +265,10 @@ class BusinessProfileResource(NerdeezResource):
         authorization = NerdeezOnlyOwnerCanReadAuthorization()
         allowed_methods = ['get', 'put']
         read_only_fields = ['web_service_url', 'adapter_class', 'adapter_object']
+        invisible_fields = ['web_service_url', 'adapter_class', 'adapter_object']
+        filtering = {
+                     'id': ALL_WITH_RELATIONS
+                     }
         
 
         
@@ -316,10 +328,13 @@ class DealResource(NerdeezResource):
         ordering = ['valid_to']
         
     def hydrate(self, bundle):
+        print '1'
         status = bundle.data.get('status', 1)
         if status > 1:
             bundle.data['status'] = 1
+        print '2'
         bundle.data['business_profile'] = API_URL + 'businessprofile/' + str(bundle.request.user.profile.business_profile.all()[0].id) + '/'
+        print '3'
         return super(DealResource, self).hydrate(bundle)
                      
     def get_object_list(self, request):
@@ -333,13 +348,15 @@ class DealResource(NerdeezResource):
         
     def obj_create(self, bundle, **kwargs):
         #if the user is not a business than he is unauth to post
+        print '44444'
         try:
             if bundle.request.user.get_profile().business_profile.all()[0] == None:
-                raise ImmediateHttpResponse(response=http.HttpUnauthorized())
+                raise ImmediateHttpResponse(response=http.HttpUnauthorized("Couldn't find the business profile"))
         except:
-            raise ImmediateHttpResponse(response=http.HttpUnauthorized())
+            raise ImmediateHttpResponse(response=http.HttpUnauthorized("Couldn't find the business profile"))
         if 'num_total_places' in bundle.data:
             bundle.data['num_places_left'] = bundle.data['num_total_places']
+        print '55555'
         return super(DealResource, self).obj_create(bundle, **kwargs)
     
     

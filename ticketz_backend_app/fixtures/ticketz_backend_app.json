@@ -3,7 +3,7 @@
         "pk": 1, 
         "model": "auth.user", 
         "fields": {
-            "username": "ywarezk", 
+            "username": "yariv1", 
             "first_name": "", 
             "last_name": "", 
             "is_active": true, 
@@ -21,7 +21,7 @@
         "pk": 2, 
         "model": "auth.user", 
         "fields": {
-            "username": "yariv", 
+            "username": "yariv2", 
             "first_name": "", 
             "last_name": "", 
             "is_active": false, 
@@ -39,7 +39,7 @@
         "pk": 3, 
         "model": "auth.user", 
         "fields": {
-            "username": "yariv1", 
+            "username": "yariv3", 
             "first_name": "", 
             "last_name": "", 
             "is_active": true, 
@@ -57,7 +57,7 @@
         "pk": 4, 
         "model": "auth.user", 
         "fields": {
-            "username": "yariv2", 
+            "username": "yariv4", 
             "first_name": "", 
             "last_name": "", 
             "is_active": true, 
@@ -112,7 +112,7 @@
         "model": "ticketz_backend_app.userprofile", 
         "fields": {
             "creation_date": "2013-11-10T10:56:38Z", 
-            "phone": "+972522441431", 
+            "phone": null, 
             "user": 1, 
             "modified_data": "2013-11-10T10:56:38.407Z"
         }
@@ -132,7 +132,7 @@
         "model": "ticketz_backend_app.userprofile", 
         "fields": {
             "creation_date": "2013-11-10T13:35:09Z", 
-            "phone": null, 
+            "phone": "+972522441431", 
             "user": 3, 
             "modified_data": "2013-11-10T13:35:10.062Z"
         }
@@ -167,7 +167,7 @@
         "pk": 2, 
         "model": "ticketz_backend_app.businessprofile", 
         "fields": {
-            "user_profile": 4, 
+            "user_profile": 2, 
             "creation_date": "2013-11-10T10:56:38Z", 
             "modified_data": "2013-11-10T10:56:38.407Z",
             "city": null, 
@@ -185,8 +185,10 @@
         "fields": {
             "uuid": null, 
             "creation_date": "2013-11-10T13:35:09Z", 
-            "user_profile": 2, 
-            "modified_data": "2013-11-10T13:35:10.062Z"
+            "user_profile": 3, 
+            "modified_data": "2013-11-10T13:35:10.062Z",
+            "paymill_client_id": "client_17f5a09043e0e60497c6",
+            "paymill_payment_id": "pay_d11e842b123d3d16970249eb"
         }
     }, 
     {
@@ -195,10 +197,8 @@
         "fields": {
             "uuid": null, 
             "creation_date": "2013-11-10T13:35:09Z", 
-            "user_profile": 3, 
-            "modified_data": "2013-11-10T13:35:10.062Z",
-            "paymill_client_id": "client_17f5a09043e0e60497c6",
-            "paymill_payment_id": "pay_d11e842b123d3d16970249eb"
+            "user_profile": 4, 
+            "modified_data": "2013-11-10T13:35:10.062Z"
         }
     }, 
     {
@@ -293,7 +293,7 @@
             "hash": "12345", 
             "modified_data": "2013-11-25T18:24:16.393", 
             "deal": 1, 
-            "phone_profile": 2, 
+            "phone_profile": 1, 
             "creation_date": "2013-11-25T18:24:11", 
             "amount": 1, 
             "paymill_transaction_id": "tran_d123ad1ab812ba753e38c5a01dd6"
