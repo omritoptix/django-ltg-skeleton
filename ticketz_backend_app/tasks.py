@@ -16,7 +16,8 @@ from datetime import timedelta
 from ticketz_backend_app.models import *
 from celery.decorators import periodic_task
 from dateutil.relativedelta import relativedelta
-from tastypie.models import ApiKey 
+from tastypie.models import ApiKey
+from django.db import transaction 
 
 
 ###############################
@@ -69,17 +70,31 @@ def delete_old_api_keys():
     day_before = now + relativedelta(hours=-24)
     ApiKey.objects.filter(created__lt=day_before).delete()
     
-@periodic_task(run_every=timedelta(minutes=1), name='tasks.close_unactive_reservation')
-def close_unactive_reservation():
-    '''
-    transaction with reserved status should be closed after 10 minutes
-    '''
-    
-    print 'Closing reserved transactions'
-    now = datetime.datetime.now()
-    ten_before = now + relativedelta(minutes=-10)
-    Transaction.objects.filter(status=1, creation_date__lte=ten_before).update(status=0)
-    
+# @periodic_task(run_every=timedelta(minutes=1), name='tasks.close_unactive_reservation')
+# def close_unactive_reservation():
+#     '''
+#     transaction with reserved status should be closed after 10 minutes
+#     '''
+#     
+#     print 'Closing reserved transactions'
+#     
+#     #find the transactions that needs to be closed
+#     now = datetime.datetime.now()
+#     ten_before = now + relativedelta(minutes=-10)
+#     transactions = Transaction.objects.filter(status=1, creation_date__lte=ten_before)
+#     transactions = transactions.update(status=0)
+#     print transactions
+#     
+#     #for each transaction increment the seat number
+#     for current_transaction in transactions:
+#         deal = Deal.objects.select_for_update().get(id=current_transaction.deal.id)    
+#         seats_left = deal.num_places_left
+#         new_seats_left = seats_left + current_transaction.amount
+#         deal.num_places_left = new_seats_left
+#         print new_seats_left
+#         deal.save()
+#         transaction.commit()
+#     
 
     
 
