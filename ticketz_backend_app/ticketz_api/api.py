@@ -368,6 +368,7 @@ class TransactionResource(NerdeezResource):
         filtering = {
                      'deal': ALL_WITH_RELATIONS,
                      'status': ALL_WITH_RELATIONS,
+                     'creation_date': ALL_WITH_RELATIONS,
                      }
         ordering = ['creation_date']
         

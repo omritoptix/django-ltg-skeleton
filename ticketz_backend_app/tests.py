@@ -404,8 +404,15 @@ class ApiTest(ResourceTestCase):
         self.assertHttpOK(resp)
         resp = self.api_client.get(uri='/api/v1/transaction/?status=1&username=yariv1&api_key=12345678', format='json', data={})
         self.assertHttpOK(resp)
+        resp = self.api_client.get(uri='/api/v1/transaction/?creation_date__gte=1988-12-4T00:00:00&username=yariv1&api_key=12345678', format='json', data={})
+        self.assertHttpOK(resp)
         resp = self.api_client.get(uri='/api/v1/transaction/?order_by=creation_date&username=yariv1&api_key=12345678', format='json', data={})
         self.assertHttpOK(resp)
+        
+#     def test_user_details_in_phoneprofile(self):
+#         '''
+#         test that the user profile
+#         '''
         
         
         
