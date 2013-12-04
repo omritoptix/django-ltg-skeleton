@@ -560,7 +560,6 @@ class RefundResource(NerdeezResource):
     the api to refund a customer
     '''
     transaction = fields.ToOneField(TransactionResource, 'transaction', null=False, full=True)
-    
     class Meta(NerdeezResource.Meta):
         queryset = Refund.objects.all()
         authentication = NerdeezApiKeyAuthentication()
