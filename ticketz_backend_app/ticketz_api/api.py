@@ -365,6 +365,9 @@ class TransactionResource(NerdeezResource):
         authorization = NerdeezOnlyOwnerCanReadAuthorization()
         allowed_methods = ['get', 'post', 'put']
         read_only_fields = ['paymill_transaction_id']
+        filtering = {
+                     'deal': ALL_WITH_RELATIONS
+                     }
         
     def hydrate(self, bundle):
         try:
