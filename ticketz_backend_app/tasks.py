@@ -69,6 +69,19 @@ def delete_old_api_keys():
     day_before = now + relativedelta(hours=-24)
     ApiKey.objects.filter(created__lt=day_before).delete()
     
+@periodic_task(run_every=timedelta(minutes=1), name='tasks.close_unactive_reservation')
+def close_unactive_reservation():
+    '''
+    transaction with reserved status should be closed after 10 minutes
+    '''
+    
+    print 'Closing reserved transactions'
+    now = datetime.datetime.now()
+    ten_before = now + relativedelta(minutes=-10)
+    Transaction.objects.filter(status=1, creation_date__lte=ten_before).update(status=0)
+    
+
+    
 
 ##############################
 # end async tasks

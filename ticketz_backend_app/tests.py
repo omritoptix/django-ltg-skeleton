@@ -15,6 +15,9 @@ from tastypie.test import ResourceTestCase
 from django.contrib.auth.models import User
 from ticketz_backend_app.models import *
 from tastypie.models import ApiKey
+from dateutil import relativedelta
+import datetime
+from ticketz_backend_app.tasks import close_unactive_reservation
 # from ticketz_backend_app.clock import close_deals
 
 #===============================================================================
@@ -424,6 +427,32 @@ class ApiTest(ResourceTestCase):
         self.assertTrue('last_name' in business_profile['user_profile'])
         self.assertTrue('email' in phone_profile['user_profile'])
         self.assertTrue('email' in business_profile['user_profile'])
+        
+    def test_seat_reservation(self):
+        '''
+        test that if 10 minutes passed after reservation our async process will delete that transaction
+        '''
+        #create a transaction
+        resp = self.api_client.post(uri='/api/v1/transaction/?username=yariv3&password=12345678', format='json', data={'deal': '/api/v1/deal/1/', 'amount': 3})
+        self.assertHttpCreated(resp)
+        transaction_id = self.deserialize(resp)['id']
+        
+        #make sure that deal1 availabel seats are lowered
+        resp = self.api_client.get(uri='/api/v1/deal/1/?username=yariv4&api_key=12345678', format='json')
+        self.assertEqual(self.deserialize(resp)['num_places_left'], 6)
+        
+        #modify the creation date to be 10 minutes before
+        now = datetime.datetime.now()
+        ten_before = now + relativedelta(minutes=-11)
+        transaction = Transaction.objects.get(id=transaction_id)
+        transaction.creation_date = ten_before
+        transaction.save()
+        
+        #make sure the async process closes the transaction
+        close_unactive_reservation()
+        resp = self.api_client.get(uri='/api/v1/deal/1/?username=yariv4&api_key=12345678', format='json')
+        self.assertEqual(self.deserialize(resp)['num_places_left'], 9)
+        self.assertEqual(Transaction.objects.get(id=transaction_id).status, 0)
         
         
         
