@@ -409,10 +409,21 @@ class ApiTest(ResourceTestCase):
         resp = self.api_client.get(uri='/api/v1/transaction/?order_by=creation_date&username=yariv1&api_key=12345678', format='json', data={})
         self.assertHttpOK(resp)
         
-#     def test_user_details_in_phoneprofile(self):
-#         '''
-#         test that the user profile
-#         '''
+    def test_user_details_in_phoneprofile(self):
+        '''
+        test that the phone profile and business profile returns the first name last name and email
+        '''
+        
+        resp = self.api_client.get(uri='/api/v1/phoneprofile/1/?username=yariv3&api_key=12345678', format='json')
+        phone_profile = self.deserialize(resp)
+        resp = self.api_client.get(uri='/api/v1/businessprofile/1/?username=yariv1&api_key=12345678', format='json')
+        business_profile = self.deserialize(resp)
+        self.assertTrue('first_name' in phone_profile['user_profile'])
+        self.assertTrue('first_name' in business_profile['user_profile'])
+        self.assertTrue('last_name' in phone_profile['user_profile'])
+        self.assertTrue('last_name' in business_profile['user_profile'])
+        self.assertTrue('email' in phone_profile['user_profile'])
+        self.assertTrue('email' in business_profile['user_profile'])
         
         
         
