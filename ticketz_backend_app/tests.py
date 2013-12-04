@@ -399,9 +399,14 @@ class ApiTest(ResourceTestCase):
         business = self.deserialize(resp)['objects'][0]['business_profile']
         self.assertTrue('id' in business)
         
-    def test_transaction_business_filtering(self):
+    def test_transaction_filtering(self):
         resp = self.api_client.get(uri='/api/v1/transaction/?deal__business_profile__id=1&username=yariv1&api_key=12345678', format='json', data={})
         self.assertHttpOK(resp)
+        resp = self.api_client.get(uri='/api/v1/transaction/?status=1&username=yariv1&api_key=12345678', format='json', data={})
+        self.assertHttpOK(resp)
+        resp = self.api_client.get(uri='/api/v1/transaction/?order_by=creation_date&username=yariv1&api_key=12345678', format='json', data={})
+        self.assertHttpOK(resp)
+        
         
         
         

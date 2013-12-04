@@ -366,8 +366,10 @@ class TransactionResource(NerdeezResource):
         allowed_methods = ['get', 'post', 'put']
         read_only_fields = ['paymill_transaction_id']
         filtering = {
-                     'deal': ALL_WITH_RELATIONS
+                     'deal': ALL_WITH_RELATIONS,
+                     'status': ALL_WITH_RELATIONS,
                      }
+        ordering = ['creation_date']
         
     def hydrate(self, bundle):
         try:
