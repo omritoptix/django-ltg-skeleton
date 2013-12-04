@@ -357,7 +357,7 @@ class DealResource(NerdeezResource):
     
 class TransactionResource(NerdeezResource):
     phone_profile = fields.ToOneField(PhoneProfileResource, 'phone_profile', null=True, full=False)
-    deal = fields.ToOneField(DealResource, 'deal', null=True, full=False)
+    deal = fields.ToOneField(DealResource, 'deal', null=True, full=True)
     
     class Meta(NerdeezResource.Meta):
         queryset = Transaction.objects.all()
