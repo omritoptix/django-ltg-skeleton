@@ -280,6 +280,7 @@ CELERY_ROUTES = {
                      "tasks.active_deals": {"queue": "ticketz"},
                      "tasks.activate_pending_deals": {"queue": "ticketz"},
                      "tasks.delete_old_api_keys": {"queue": "ticketz"},
+                     "tasks.close_unactive_reservation": {"queue": "ticketz"},
                  }
 
 import djcelery
