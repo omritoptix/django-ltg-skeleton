@@ -270,11 +270,11 @@ class Logger(NerdeezModel):
     '''
     will load failed transaction
     '''
-    path = models.CharField(max_length=100, blank=True, null=True, default=None)
-    post = models.CharField(max_length=1000, blank=True, null=True, default=None)
-    get = models.CharField(max_length=1000, blank=True, null=True, default=None)
-    content = models.CharField(max_length=1000, blank=True, null=True, default=None)
-    free_text = models.CharField(max_length=1000, blank=True, null=True, default=None)
+    path = models.CharField(max_length=1000, blank=True, null=True, default=None)
+    post = models.TextField(blank=True, null=True, default=None)
+    get = models.TextField(blank=True, null=True, default=None)
+    content = models.TextField(blank=True, null=True, default=None)
+    free_text = models.TextField(blank=True, null=True, default=None)
     
     def __unicode__(self):
         return self.path

@@ -28,6 +28,7 @@ from tastypie.authentication import ApiKeyAuthentication
 from datetime import date
 import pdfcrowd
 from django.http import HttpResponse
+from ticketz_backend_app.ticketz_api.api import DealResource
  
 
 #===============================================================================
@@ -101,7 +102,7 @@ def report(request):
         return response
     user = request.user
     user_profile = user.get_profile()
-    business = user_profile.business
+    business = user_profile.business_profile.all()[0]
     
     try:
         
@@ -118,8 +119,10 @@ def report(request):
         today = date.today()
         pdf_date = today.strftime("%d/%m/%y")
         
-        #the deals
-        deals = Deal.objects.filter(business=business)
+        #get the deals from the rest server
+        ur = DealResource()
+        ur_bundle = ur.build_bundle(obj=Deal.objects.filter(business_profile=business), request=request)
+        deals = ur.serialize(None, ur.full_dehydrate(ur_bundle))
         
         # convert a web page and store the generated PDF to a variable
         t = get_template('report.html')
