@@ -4,8 +4,8 @@
         "model": "auth.user", 
         "fields": {
             "username": "yariv1", 
-            "first_name": "", 
-            "last_name": "", 
+            "first_name": "yariv", 
+            "last_name": "katz", 
             "is_active": true, 
             "is_superuser": true, 
             "is_staff": true, 
@@ -22,8 +22,8 @@
         "model": "auth.user", 
         "fields": {
             "username": "yariv2", 
-            "first_name": "", 
-            "last_name": "", 
+            "first_name": "omri", 
+            "last_name": "dagan", 
             "is_active": false, 
             "is_superuser": false, 
             "is_staff": false, 
@@ -40,8 +40,8 @@
         "model": "auth.user", 
         "fields": {
             "username": "yariv3", 
-            "first_name": "", 
-            "last_name": "", 
+            "first_name": "assaf", 
+            "last_name": "menachem", 
             "is_active": true, 
             "is_superuser": false, 
             "is_staff": false, 
@@ -58,8 +58,8 @@
         "model": "auth.user", 
         "fields": {
             "username": "yariv4", 
-            "first_name": "", 
-            "last_name": "", 
+            "first_name": "tzachi", 
+            "last_name": "bimba", 
             "is_active": true, 
             "is_superuser": false, 
             "is_staff": false, 
@@ -201,6 +201,26 @@
             "modified_data": "2013-11-10T13:35:10.062Z"
         }
     }, 
+        {
+        "pk": 3, 
+        "model": "ticketz_backend_app.phoneprofile", 
+        "fields": {
+            "uuid": null, 
+            "creation_date": "2014-11-10T13:35:09Z", 
+            "user_profile": 1, 
+            "modified_data": "2014-11-10T13:35:10.062Z"
+        }
+    }, 
+        {
+        "pk": 4, 
+        "model": "ticketz_backend_app.phoneprofile", 
+        "fields": {
+            "uuid": null, 
+            "creation_date": "2013-11-17T13:35:09Z", 
+            "user_profile": 2, 
+            "modified_data": "2013-11-17T13:35:10.062Z"
+        }
+    }, 
     {
         "pk": 1, 
         "model": "ticketz_backend_app.region", 
@@ -279,6 +299,63 @@
         "pk": 3
     },
     {
+        "fields": {
+            "title": "movie 1+1", 
+            "num_total_places": 10, 
+            "valid_from": "2013-11-19T08:27:00Z", 
+            "business_profile": 1, 
+            "image": "img/deal/SoZKXQ5vTtGvzWLL1qwC_filepickerAPIKEY.png", 
+            "discounted_price": "10.000", 
+            "valid_to": "2013-11-08T09:29:00Z", 
+            "description": "captain phillips on the house!", 
+            "original_price": "20.000", 
+            "creation_date": "2013-11-19T08:27:28Z", 
+            "modified_data": "2013-11-21T13:10:43.489Z", 
+            "status": 2,
+            "num_places_left": 5
+        }, 
+        "model": "ticketz_backend_app.deal", 
+        "pk": 4
+    },
+    {
+        "fields": {
+            "title": "Beer 1+1", 
+            "num_total_places": 20, 
+            "valid_from": "2013-11-19T08:27:00Z", 
+            "business_profile": 1, 
+            "image": "img/deal/SoZKXQ5vTtGvzWLL1qwC_filepickerAPIKEY.png", 
+            "discounted_price": "12.500", 
+            "valid_to": "2013-11-08T09:29:00Z", 
+            "description": "a great deal of 1+1 on all beers", 
+            "original_price": "25.000", 
+            "creation_date": "2013-11-18T08:27:28Z", 
+            "modified_data": "2013-11-21T13:10:43.489Z", 
+            "status": 2,
+            "num_places_left": 14
+        }, 
+        "model": "ticketz_backend_app.deal", 
+        "pk": 5
+    },
+    {
+        "fields": {
+            "title": "fries 1+1", 
+            "num_total_places": 15, 
+            "valid_from": "2013-11-19T08:27:00Z", 
+            "business_profile": 1, 
+            "image": "img/deal/SoZKXQ5vTtGvzWLL1qwC_filepickerAPIKEY.png", 
+            "discounted_price": "17.800", 
+            "valid_to": "2013-11-08T09:29:00Z", 
+            "description": "to all of you fat people!", 
+            "original_price": "21.000", 
+            "creation_date": "2013-11-18T08:27:28Z", 
+            "modified_data": "2013-11-21T13:10:43.489Z", 
+            "status": 2,
+            "num_places_left": 15
+        }, 
+        "model": "ticketz_backend_app.deal", 
+        "pk": 6
+    },
+    {
         "pk": 1, 
         "model": "ticketz_backend_app.category", 
         "fields": {
@@ -302,6 +379,62 @@
             "paymill_transaction_id": "tran_d123ad1ab812ba753e38c5a01dd6"
         }
     },
+    {
+        "pk": 2, 
+        "model": "ticketz_backend_app.transaction", 
+        "fields": {
+            "status": 3, 
+            "hash": "1fghg2345", 
+            "modified_data": "2013-11-25T18:24:16.393", 
+            "deal": 4, 
+            "phone_profile": 2, 
+            "creation_date": "2013-11-25T18:24:11", 
+            "amount": 2, 
+            "paymill_transaction_id": "tran_d123ad1ab812ba753e38c5a01dd6"
+        }
+    },
+    {
+        "pk": 3, 
+        "model": "ticketz_backend_app.transaction", 
+        "fields": {
+            "status": 3, 
+            "hash": "12fgh345", 
+            "modified_data": "2013-11-25T18:24:16.393", 
+            "deal": 4, 
+            "phone_profile": 3, 
+            "creation_date": "2013-11-25T18:24:11", 
+            "amount": 3, 
+            "paymill_transaction_id": "tran_d123ad1ab812ba753e38c5a01dd6"
+        }
+    },
+    {
+        "pk": 4, 
+        "model": "ticketz_backend_app.transaction", 
+        "fields": {
+            "status": 2, 
+            "hash": "123gg5", 
+            "modified_data": "2013-11-25T18:24:16.393", 
+            "deal": 5, 
+            "phone_profile": 3, 
+            "creation_date": "2013-10-25T18:24:11", 
+            "amount": 3, 
+            "paymill_transaction_id": "tran_d123ad1ab812ba753e38c5a01dd6"
+        }
+    },
+    {
+        "pk": 5, 
+        "model": "ticketz_backend_app.transaction", 
+        "fields": {
+            "status": 3, 
+            "hash": "12345", 
+            "modified_data": "2013-11-25T18:24:16.393", 
+            "deal": 5, 
+            "phone_profile": 2, 
+            "creation_date": "2012-11-25T18:24:11", 
+            "amount": 3, 
+            "paymill_transaction_id": "tran_d123ad1ab812ba753e38c5a01dd6"
+        }
+    },  
     {
         "pk": 1, 
         "model": "ticketz_backend_app.unpaidtransaction", 

@@ -225,7 +225,7 @@ class ApiTest(ResourceTestCase):
         '''
         resp = self.api_client.get(uri='/api/v1/deal/', format='json', data={'username': 'yariv1', 'api_key': '12345678', 'order_by': '-valid_to'})
         objects = self.deserialize(resp)['objects']
-        self.assertEqual(len(objects), 3)
+        self.assertEqual(len(objects), 6)
         self.assertEqual(objects[0]['id'], 2)
         self.assertEqual(objects[1]['id'], 3)
         self.assertEqual(objects[2]['id'], 1)
@@ -253,9 +253,11 @@ class ApiTest(ResourceTestCase):
                                                                               "category":"/api/v1/category/1/"
         })
         self.assertHttpCreated(resp)
-        num_deals = Deal.objects.all().count()
-        deals = Deal.objects.all()
-        new_deal = deals[num_deals - 1]
+#         num_deals = Deal.objects.all().count()
+#         deals = Deal.objects.all()
+#         new_deal = deals[num_deals - 1]
+        deal_id = self.deserialize(resp)['id']
+        new_deal = Deal.objects.get(id=deal_id)
         self.assertEqual(new_deal.category.id, 1)
         
     def test_logger(self):

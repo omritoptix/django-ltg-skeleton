@@ -1,9 +1,11 @@
+{% load ticketz_backend_extras %}
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	</head>
 	<body>
 		<div style="width: 90%;margin: 0 auto;">
+			
 			
 			<!-- begin header -->
 			<table style="width: 100%; height: 45px;">
@@ -56,18 +58,24 @@
 						<div>
 							<table>
 								<tr>
-									<th>User Email</th>
-									<th>User Phone</th>
-									<th>Purchase Status</th>
-									<th>Amount Purchased</th>
-									<th>Amount Purchased</th>
+									<th>#</th>
+									<th>Last Name</th>
+									<th>First Name</th>
+									<th>Phone</th>
+									<th>Email</th>
+									<th>Amount</th>
 									<th>Total Paid</th>
 								</tr>
-								{% for transaction in transactions %}
+								{% for transaction in deal.transaction %}
 								<tr>
-									<td>{{transaction.user_profile.user.email}}</td>
-									<td>{{transaction.user_profile.phone}}</td>
-									<td>
+									<td>{{transaction.id}}</td>
+									<td>{{transaction.phone_profile.user_profile.last_name}}</td>
+									<td>{{transaction.phone_profile.user_profile.first_name}}</td>
+									<td>{{transaction.phone_profile.user_profile.phone}}</td>
+									<td>{{transaction.phone_profile.user_profile.email}}</td>
+									<td>{% multiply transaction.amount deal.discounted_price %}</td>
+									<td></td>									
+									<!-- <td>
 										{% if transaction.status == 2 %}
 											Confirmed
 										{% else %}
@@ -75,8 +83,7 @@
 												Claimed
 											{% endif %}
 										{% endif %}
-									</td>
-									<td>{{transaction.amount}}</td>
+									</td> -->
 									<td></td>
 								</tr>
 								{% endfor %}

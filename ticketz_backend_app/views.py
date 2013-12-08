@@ -125,7 +125,12 @@ def report(request):
         api_client = TestApiClient()
         resp = api_client.get(uri='/api/v1/deal/', format='json', data=request.GET)
         deals = simplejson.loads(resp.content)['objects']
+         
+        #get transactions for each deal
+        for deal in deals:
+            deal['transaction'] = Transaction.objects.filter(deal__id=deal['id'])
         
+                
         # convert a web page and store the generated PDF to a variable
         t = get_template('report.html')
         html = t.render(Context(
