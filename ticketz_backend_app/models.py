@@ -223,6 +223,15 @@ class Transaction(NerdeezModel):
     hash = models.CharField(max_length=20, default=None, blank=True, null=True)
     paymill_transaction_id = models.CharField(max_length=50, default=None, blank=True, null=True)
     
+    search_index = VectorField()
+
+    objects = SearchManager(
+        fields = None,
+        config = 'pg_catalog.english', # this is default
+        search_field = 'search_index', # this is default
+        auto_update_search_field = False
+    )
+    
     def owner(self):
         return [self.deal.business_profile.user_profile.user.username, self.phone_profile.user_profile.user.username]
     
