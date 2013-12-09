@@ -113,6 +113,8 @@ class PhoneProfile(BaseProfile):
     uuid = models.CharField(max_length=50, default=None, blank=True, null=True, unique=True)
     paymill_client_id = models.CharField(max_length=50, default=None, blank=True, null=True)
     paymill_payment_id = models.CharField(max_length=50, default=None, blank=True, null=True)
+    apn_token = models.CharField(max_length=100, default=None, blank=True, null=True)
+    gcm_token = models.CharField(max_length=100, default=None, blank=True, null=True)
     
 class BusinessProfile(BaseProfile):
     user_profile = models.ForeignKey(UserProfile, related_name='business_profile')
