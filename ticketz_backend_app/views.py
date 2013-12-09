@@ -133,8 +133,7 @@ def report(request):
         deals = simplejson.loads(resp.content)['objects']
          
         #get transactions for each deal
-        for deal in deals:
-            
+        for deal in deals:          
             #filter only deals with status 3 - claimed
             transactionForCurrDeal = Transaction.objects.filter(deal__id=deal['id'],status=3)
             deal['transaction'] = transactionForCurrDeal
