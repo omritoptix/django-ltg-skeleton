@@ -121,6 +121,12 @@ def report(request):
         today = date.today()
         pdf_date = today.strftime("%d/%m/%y")
         
+        #will hold the sum of amount paid for transactions
+        sumOfAmountPaidTransactions = 0
+        
+        #will hold number of total transactions
+        sumOfTransactions = 0
+        
         #get the deals from the rest server
         api_client = TestApiClient()
         resp = api_client.get(uri='/api/v1/deal/', format='json', data=request.GET)
@@ -128,7 +134,22 @@ def report(request):
          
         #get transactions for each deal
         for deal in deals:
-            deal['transaction'] = Transaction.objects.filter(deal__id=deal['id'])
+            
+            #filter only deals with status 3 - claimed
+            transactionForCurrDeal = Transaction.objects.filter(deal__id=deal['id'],status=3)
+            deal['transaction'] = transactionForCurrDeal
+            deal['valid_to'] = datetime.datetime.strptime(deal['valid_to'].encode(),"%Y-%m-%dT%H:%M:%S")
+            deal['valid_from'] = datetime.datetime.strptime(deal['valid_from'].encode(),"%Y-%m-%dT%H:%M:%S")
+            
+            #loop over the relevant transaction to sum to total amount paid
+            for transaction in transactionForCurrDeal:
+                sumOfTransactions+=1
+                try:
+                    sumOfAmountPaidTransactions += (transaction.amount * float(deal['discounted_price'].encode()))
+                except ValueError:
+                    print "Could not calculate sumOfTransactions"
+                    #TODO - log the error
+                
         
                 
         # convert a web page and store the generated PDF to a variable
@@ -136,7 +157,9 @@ def report(request):
         html = t.render(Context(
                                 {
                                  'date': pdf_date, 
-                                 'deals': deals, 
+                                 'deals': deals,
+                                 'sumOfAmountPaidTransactions' : sumOfAmountPaidTransactions,
+                                 'sumOfTransactions' : sumOfTransactions 
                                  })).encode('utf-8')
         pdf = client.convertHtml(html)
 
