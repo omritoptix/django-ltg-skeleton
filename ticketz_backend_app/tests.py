@@ -279,7 +279,8 @@ class ApiTest(ResourceTestCase):
         resp = self.api_client.post(uri='/api/v1/transaction/?username=yariv3&api_key=12345678', format='json', data={'deal': '/api/v1/deal/1/', 'amount': 3})
         self.assertHttpCreated(resp)
         transaction_id = self.deserialize(resp)['id']
-        resp = self.api_client.put(uri='/api/v1/transaction/%d/?username=yariv3&api_key=12345678' % transaction_id, format='json', data={})
+        resp = self.api_client.put(uri='/api/v1/transaction/%d/?username=yariv3&api_key=12345678' % transaction_id, format='json', data={'email': 'aaa@vvv.ccc', 'first_name': 'aaa', 'last_name': 'ccc', 'phone': '+972522441431'})
+        print resp.status_code
         self.assertHttpAccepted(resp)
         self.assertEquals(UserProfile.objects.get(id=3).phone, '+972522441431')
         
@@ -454,6 +455,20 @@ class ApiTest(ResourceTestCase):
         resp = self.api_client.get(uri='/api/v1/deal/1/?username=yariv4&api_key=12345678', format='json')
         self.assertEqual(self.deserialize(resp)['num_places_left'], 9)
         self.assertEqual(Transaction.objects.get(id=transaction_id).status, 0)
+        
+    def test_update_push_tokens(self):
+        '''
+        - test that we can put the user token
+        - test that we cant change others token 
+        '''
+        
+        resp = self.api_client.put(uri='/api/v1/phoneprofile/1/', format='json', data={'username': 'yariv3', 'api_key': '12345678', 'apn_token': 'yariv'})
+        self.assertHttpAccepted(resp)
+        self.assertEqual(PhoneProfile.objects.get(id=1).apn_token, 'yariv')
+        resp = self.api_client.put(uri='/api/v1/phoneprofile/2/', format='json', data={'username': 'yariv3', 'api_key': '12345678', 'apn_token': 'yariv'})
+        self.assertHttpUnauthorized(resp)
+        self.assertNotEquals(PhoneProfile.objects.get(id=2).apn_token, 'yariv')
+        
         
         
         

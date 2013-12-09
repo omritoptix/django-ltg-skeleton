@@ -422,6 +422,7 @@ class TransactionResource(NerdeezResource):
     def obj_update(self, bundle, skip_errors=False, **kwargs):
         
         #get params
+        print '1'
         email = bundle.data.get('email', '')
         token = bundle.data.get('token','')
         first_name = bundle.data.get('first_name', '')
@@ -434,12 +435,13 @@ class TransactionResource(NerdeezResource):
             del bundle.data['deal']
         
         #get the user profile
-        
+        print '2'
         user = bundle.request.user
         user_profile = user.get_profile()
         phone_profile = user_profile.phone_profile.all()[0]
             
         #update the user object with the data entered
+        print '3'
         if first_name != '':
             user.first_name = first_name
         if last_name != '':
@@ -452,61 +454,55 @@ class TransactionResource(NerdeezResource):
         user.save()
             
         #create a paymill instance
+        print '4'
         private_key = settings.PAYMILL_PRIVATE_KEY
         p = pymill.Pymill(private_key)
             
         #get or create the client
+        print phone_profile.paymill_client_id
         client_id = phone_profile.paymill_client_id
         if client_id == None:
-            if user.email != None:
-                return self.create_response(bundle.request, {
-                    'success': False,
-                    'message': "user doesn't have a client defined - you must pass an email",
-                    }, HttpBadRequest )
+            if user.email == None:
+                raise ImmediateHttpResponse(response=http.HttpBadRequest("user doesn't have a client defined - you must pass an email"))
             try:
                 client = p.new_client(
                       email=user.email,
                       description='{id: %d, Name: "%s %s", Email: "%s", Phone: "%s"}' % (phone_profile.id, user.first_name, user.last_name, user.email, user_profile.phone)
                 )
             except Exception,e:
-                return self.create_response(bundle.request, {
-                    'success': False,
-                    'message': e.message,
-                    }, HttpApplicationError )
+                raise ImmediateHttpResponse(response=http.HttpBadRequest(e.message))
                 
             client_id = client.id
             phone_profile.paymill_client_id = client_id
             phone_profile.save()
             
         #get or create the payment
+        print '5'
         payment_id = phone_profile.paymill_payment_id
         if payment_id == None:
             if token == '':
-                return self.create_response(bundle.request, {
-                    'success': False,
-                    'message': "user doesn't have a payment defined - you must pass a token",
-                    }, HttpBadRequest )
+                raise ImmediateHttpResponse(response=http.HttpBadRequest("user doesn't have a payment defined - you must pass a token"))
             try:
                 payment = p.new_card(
                     token=token,
                     client=client_id
                 )
             except Exception,e:
-                return self.create_response(bundle.request, {
-                    'success': False,
-                    'message': e.message,
-                    }, HttpApplicationError )
+                raise ImmediateHttpResponse(response=http.HttpBadRequest(e.message))
             payment_id = payment.id
             phone_profile.paymill_payment_id = payment_id
             phone_profile.save()
             
         #get the deal
         #deal_id = NerdeezResource.get_pk_from_uri(bundle.data['deal'])
-        deal = Deal.objects.get(id=kwargs['pk'])
+        print '6'
+        transaction = Transaction.objects.get(id=kwargs['pk'])
+        deal = transaction.deal
         print bundle.obj.amount
         
             
         #do the payment
+        print '7'
         total_price = deal.discounted_price * bundle.obj.amount
         try:
             transaction = p.transact(
@@ -517,14 +513,12 @@ class TransactionResource(NerdeezResource):
                     )
             transaction_id = transaction.id
         except Exception,e:
-                return self.create_response(bundle.request, {
-                    'success': False,
-                    'message': e.message,
-                    }, HttpApplicationError )
+            raise ImmediateHttpResponse(response=http.HttpBadRequest(e.message))
                 
         bundle.data['paymill_transaction_id'] = transaction_id
         
         #send the user a cnfirmation email
+        print '8'
         if is_send_grid():
             t = get_template('emails/confirm_purchase.html')
             html = t.render(Context({'admin_mail': settings.ADMIN_MAIL, 'admin_phone': settings.ADMIN_PHONE, 'deal': deal, 'amount': bundle.obj.amount}))
@@ -534,12 +528,10 @@ class TransactionResource(NerdeezResource):
             try:
                 msg.send()
             except SMTPSenderRefused, e:
-                return self.create_response(bundle.request, {
-                    'success': False,
-                    'message': "Failed to send the mail",
-                    }, HttpApplicationError)
+                raise ImmediateHttpResponse(response=http.HttpBadRequest("Failed to send the mail"))
                 
         #sms the hash
+        print '9'
         hash = ''
         for i in range(0,5):
             hash = hash + str(random.randrange(start=0, stop=10))
@@ -548,12 +540,8 @@ class TransactionResource(NerdeezResource):
             message = 'Your order confirmation code is: %s' % (bundle.data['hash'])
             NerdeezResource.send_sms(user_profile.phone, message)
         except Exception,e:
-            return self.create_response(bundle.request, {
-                    'success': False,
-                    'message': "Failed to send the sms",
-                    'exception': e.message
-                    }, HttpApplicationError)
-            
+            raise ImmediateHttpResponse(response=http.HttpBadRequest(e.message))
+        
         return super(TransactionResource, self).obj_update(bundle, skip_errors=skip_errors, **kwargs)
     
 class RefundResource(NerdeezResource):
