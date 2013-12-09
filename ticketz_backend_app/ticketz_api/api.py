@@ -927,14 +927,16 @@ class UtilitiesResource(NerdeezResource):
                      success: true
                      message: 'registered a new device'
                      api_key: 'api key for the user'
-                     username: 'username of the user'    
+                     username: 'username of the user',
+                     'id': '<id of user>'  
                  }
                  success - 202 if user exists containing the following details
                  {
                      success: true
                      message: 'user is already registered'
                      api_key: 'api key for the user'
-                     username: 'username of the user'    
+                     username: 'username of the user'
+                     'id': '<id of user>'    
                  }
                   
         '''
@@ -977,14 +979,16 @@ class UtilitiesResource(NerdeezResource):
                     'success': True,
                     'message': "registered a new device",
                     'api_key': api_key.key,
-                    'username': user.username
+                    'username': user.username,
+                    'id': phone_profile.id
                     }, HttpCreated)
         else:
             return self.create_response(request, {
                     'success': True,
                     'message': "user is already registered",
                     'api_key': api_key.key,
-                    'username': user.username
+                    'username': user.username,
+                    'id': phone_profile.id
                     }, HttpAccepted)
             
     def confirm_transaction(self, request=None, **kwargs):
