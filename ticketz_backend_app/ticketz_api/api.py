@@ -480,6 +480,7 @@ class TransactionResource(NerdeezResource):
         print '5'
         payment_id = phone_profile.paymill_payment_id
         if payment_id == None:
+            print token
             if token == '':
                 raise ImmediateHttpResponse(response=http.HttpBadRequest("user doesn't have a payment defined - you must pass a token"))
             try:
