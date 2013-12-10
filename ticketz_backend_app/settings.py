@@ -151,6 +151,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'grappelli',
     'django.contrib.admin',
+    "push_notifications",
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
