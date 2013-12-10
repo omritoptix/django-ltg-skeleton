@@ -470,7 +470,7 @@ class TransactionResource(NerdeezResource):
                       description='{id: %d, Name: "%s %s", Email: "%s", Phone: "%s"}' % (phone_profile.id, user.first_name, user.last_name, user.email, user_profile.phone)
                 )
             except Exception,e:
-                raise ImmediateHttpResponse(response=http.HttpBadRequest(e.message))
+                raise ImmediateHttpResponse(response=http.HttpBadRequest(e.message['error']))
                 
             client_id = client.id
             phone_profile.paymill_client_id = client_id
@@ -490,8 +490,7 @@ class TransactionResource(NerdeezResource):
                     client=p.get_client(client_id)
                 )
             except Exception,e:
-                print 'Payment Failed!!!'
-                raise ImmediateHttpResponse(response=http.HttpBadRequest(e.message))
+                raise ImmediateHttpResponse(response=http.HttpBadRequest(e.message['error']))
             payment_id = payment.id
             phone_profile.paymill_payment_id = payment_id
             phone_profile.save()
@@ -516,7 +515,7 @@ class TransactionResource(NerdeezResource):
                     )
             transaction_id = transaction.id
         except Exception,e:
-            raise ImmediateHttpResponse(response=http.HttpBadRequest(e.message))
+            raise ImmediateHttpResponse(response=http.HttpBadRequest(e.message['error']))
                 
         bundle.data['paymill_transaction_id'] = transaction_id
         
