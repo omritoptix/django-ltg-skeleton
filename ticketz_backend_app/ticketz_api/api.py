@@ -489,6 +489,7 @@ class TransactionResource(NerdeezResource):
                     client=p.get_client(client_id)
                 )
             except Exception,e:
+                print 'Payment Failed!!!'
                 raise ImmediateHttpResponse(response=http.HttpBadRequest(e.message))
             payment_id = payment.id
             phone_profile.paymill_payment_id = payment_id
