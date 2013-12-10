@@ -18,8 +18,8 @@ from ticketz_backend_app.encryption import EncryptedCharField
 from picklefield.fields import PickledObjectField
 from djorm_pgfulltext.models import SearchManager
 from djorm_pgfulltext.fields import VectorField
-from ticketz_backend_app.gcm import gcm_send_bulk_message
-from ticketz_backend_app.apns import apns_send_bulk_message
+from ticketz_backend_app.gcm import gcm_send_bulk_message, gcm_send_message
+from ticketz_backend_app.apns import apns_send_bulk_message, apns_send_message
 
 #===============================================================================
 # end imports
@@ -152,6 +152,12 @@ class PhoneProfile(BaseProfile):
     gcm_token = models.CharField(max_length=100, default=None, blank=True, null=True)
     
     objects = PhoneProfileManager()
+    
+    def send_message(self, message):
+        if self.gcm_token != None:
+            return gcm_send_message(registration_id=self.gcm_token, data={"message": message}, collapse_key="message")
+        if self.apn_token != None:
+            return apns_send_message(registration_id=self.apn_token, data=message)
     
 class BusinessProfile(BaseProfile):
     user_profile = models.ForeignKey(UserProfile, related_name='business_profile')
