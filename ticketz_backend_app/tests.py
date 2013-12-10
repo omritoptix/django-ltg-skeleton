@@ -283,6 +283,7 @@ class ApiTest(ResourceTestCase):
         print resp.status_code
         self.assertHttpAccepted(resp)
         self.assertEquals(UserProfile.objects.get(id=3).phone, '+972522441431')
+        self.assertNotEquals(UserProfile.objects.get(id=3).phone_profile.all()[0].paymill_client_id, None)
         
     def test_unpaid_transaction(self):
         '''
