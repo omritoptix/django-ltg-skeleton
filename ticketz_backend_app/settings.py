@@ -287,3 +287,16 @@ CELERY_ROUTES = {
 import djcelery
 djcelery.setup_loader()
 
+#setup push notification
+print os.path.dirname(os.path.realpath(__file__)) + '/Certificate.pem'
+PUSH_NOTIFICATIONS_SETTINGS = {
+        "GCM_API_KEY": os.environ.get('GCM_API_KEY', ''),
+        "APNS_CERTIFICATE": os.path.dirname(os.path.realpath(__file__)) + '/Certificate.pem',
+        "APNS_PORT": int(os.environ.get('APNS_PORT', '2195')),
+        "GCM_POST_URL": os.environ.get('GCM_POST_URL', 'https://android.googleapis.com/gcm/send'),
+}
+if os.environ.get('APNS_HOST', '') != '':
+    PUSH_NOTIFICATIONS_SETTINGS['APNS_HOST'] = os.environ.get('APNS_HOST')
+ 
+
+
