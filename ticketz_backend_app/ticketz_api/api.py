@@ -485,7 +485,8 @@ class TransactionResource(NerdeezResource):
             try:
                 payment = p.new_card(
                     token=token,
-                    client=client_id
+#                     client=client_id
+                    client=p.get_client(client_id)
                 )
             except Exception,e:
                 raise ImmediateHttpResponse(response=http.HttpBadRequest(e.message))
