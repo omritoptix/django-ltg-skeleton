@@ -442,16 +442,19 @@ class TransactionResource(NerdeezResource):
             
         #update the user object with the data entered
         print '3'
-        if first_name != '':
-            user.first_name = first_name
-        if last_name != '':
-            user.last_name = last_name
-        if email != '':
-            user.email = email
-        if phone != '':
-            user_profile.phone = phone
-            user_profile.save()
-        user.save()
+        try:
+            if first_name != '':
+                user.first_name = first_name
+            if last_name != '':
+                user.last_name = last_name
+            if email != '':
+                user.email = email
+            if phone != '':
+                user_profile.phone = phone
+                user_profile.save()
+            user.save()
+        except Exception, e:
+            print e.message
             
         #create a paymill instance
         print '4'
