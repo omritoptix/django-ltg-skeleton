@@ -130,18 +130,20 @@ class PhoneProfileQuerySet(models.query.QuerySet):
             for phone_profile in self:
                 if phone_profile.gcm_token != None:
                     registration_ids.append(phone_profile.gcm_token)
-            gcm_send_bulk_message(
-                registration_ids=registration_ids,
-                data={"message": message},
-                collapse_key="message"
-            )
+            if len(registration_ids) > 0:
+                gcm_send_bulk_message(
+                    registration_ids=registration_ids,
+                    data={"message": message},
+                    collapse_key="message"
+                )
             
             #send to all iphone devices
             apn_tokens = []
             for phone_profile in self:
                 if phone_profile.apn_token != None:
                     apn_tokens.append(phone_profile.apn_token)
-            apns_send_bulk_message(registration_ids=apn_tokens, data=message)
+            if len(apn_tokens) > 0:
+                apns_send_bulk_message(registration_ids=apn_tokens, data=message)
 
 class PhoneProfile(BaseProfile):
     user_profile = models.ForeignKey(UserProfile, related_name='phone_profile')
