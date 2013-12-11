@@ -151,6 +151,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'grappelli',
     'django.contrib.admin',
+#     "push_notifications",
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
@@ -281,8 +282,22 @@ CELERY_ROUTES = {
                      "tasks.activate_pending_deals": {"queue": "ticketz"},
                      "tasks.delete_old_api_keys": {"queue": "ticketz"},
                      "tasks.close_unactive_reservation": {"queue": "ticketz"},
+                     "tasks.send_push_notification": {"queue": "ticketz"},
                  }
 
 import djcelery
 djcelery.setup_loader()
+
+#setup push notification
+print os.path.dirname(os.path.realpath(__file__)) + '/Certificate.pem'
+PUSH_NOTIFICATIONS_SETTINGS = {
+        "GCM_API_KEY": os.environ.get('GCM_API_KEY', ''),
+        "APNS_CERTIFICATE": os.path.dirname(os.path.realpath(__file__)) + '/Certificate.pem',
+        "APNS_PORT": int(os.environ.get('APNS_PORT', '2195')),
+        "GCM_POST_URL": os.environ.get('GCM_POST_URL', 'https://android.googleapis.com/gcm/send'),
+}
+if os.environ.get('APNS_HOST', '') != '':
+    PUSH_NOTIFICATIONS_SETTINGS['APNS_HOST'] = os.environ.get('APNS_HOST')
+ 
+
 

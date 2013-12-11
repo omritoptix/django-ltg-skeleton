@@ -18,7 +18,7 @@ from tastypie.models import ApiKey
 from dateutil.relativedelta import relativedelta
 import datetime
 from ticketz_backend_app.tasks import close_unactive_reservation
-# from ticketz_backend_app.clock import close_deals
+from ticketz_backend_app.tasks import send_push_notification
 
 #===============================================================================
 # end imports
@@ -175,7 +175,7 @@ class ApiTest(ResourceTestCase):
         '''
         resp = self.api_client.get(uri='/api/v1/deal/', format='json', data={'status': 1, 'username': 'yariv1', 'api_key': '12345678'})
         self.assertHttpOK(resp)
-        self.assertEqual(len(self.deserialize(resp)['objects']), 2)
+        self.assertEqual(len(self.deserialize(resp)['objects']), 1)
         
     def test_register_user(self):
         '''
@@ -469,6 +469,13 @@ class ApiTest(ResourceTestCase):
         resp = self.api_client.put(uri='/api/v1/phoneprofile/2/', format='json', data={'username': 'yariv3', 'api_key': '12345678', 'apn_token': 'yariv'})
         self.assertHttpUnauthorized(resp)
         self.assertNotEquals(PhoneProfile.objects.get(id=2).apn_token, 'yariv')
+        
+    def test_push_notification_task(self):
+        '''
+        test the push notification async task
+        '''
+        send_push_notification()
+        
         
         
         

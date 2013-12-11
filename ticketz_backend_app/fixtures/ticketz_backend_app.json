@@ -154,7 +154,7 @@
             "user_profile": 1, 
             "creation_date": "2013-11-10T10:56:38Z", 
             "modified_data": "2013-11-10T10:56:38.407Z",
-            "city": null, 
+            "city": 1, 
             "web_service_url": "",
             "title": "Nerdeez", 
             "adapter_object": "gAJVAC4=", 
@@ -187,7 +187,8 @@
             "creation_date": "2013-11-10T13:35:09Z", 
             "user_profile": 3, 
             "modified_data": "2013-11-10T13:35:10.062Z",
-            "paymill_payment_id": "pay_d11e842b123d3d16970249eb"
+            "paymill_payment_id": "pay_d11e842b123d3d16970249eb",
+            "apn_token": "090725db017ca40e5f613a40556bb73e0bf76ebc225d64228a18a043ebf6b896"
         }
     }, 
     {
@@ -271,8 +272,9 @@
             "original_price": "20.000", 
             "creation_date": "2013-11-19T08:27:28Z", 
             "modified_data": "2013-11-21T13:10:43.489Z", 
-            "status": 1,
-            "num_places_left": 5
+            "status": 4,
+            "num_places_left": 5,
+            "is_notified": false
         }, 
         "model": "ticketz_backend_app.deal", 
         "pk": 3

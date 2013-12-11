@@ -18,6 +18,8 @@ from ticketz_backend_app.encryption import EncryptedCharField
 from picklefield.fields import PickledObjectField
 from djorm_pgfulltext.models import SearchManager
 from djorm_pgfulltext.fields import VectorField
+from ticketz_backend_app.gcm import gcm_send_bulk_message, gcm_send_message
+from ticketz_backend_app.apns import apns_send_bulk_message, apns_send_message
 
 #===============================================================================
 # end imports
@@ -107,7 +109,42 @@ class BaseProfile(NerdeezModel):
     def owner(self):
         return self.user_profile.user.username
     
-    
+
+class PhoneProfileManager(models.Manager):
+    '''
+    alows to override the regular querysets
+    '''
+    def get_query_set(self):
+        return PhoneProfileQuerySet(self.model)
+
+
+class PhoneProfileQuerySet(models.query.QuerySet):
+    '''
+    will allow to send push notifications via queryset (bulk messages)
+    '''
+    def send_message(self, message):
+        if self:
+            
+            #send to all android devices
+            registration_ids = []
+            for phone_profile in self:
+                if phone_profile.gcm_token != None:
+                    registration_ids.append(phone_profile.gcm_token)
+            if len(registration_ids) > 0:
+                gcm_send_bulk_message(
+                    registration_ids=registration_ids,
+                    data={"message": message},
+                    collapse_key="message"
+                )
+            
+            #send to all iphone devices
+            apn_tokens = []
+            for phone_profile in self:
+                if phone_profile.apn_token != None:
+                    apn_tokens.append(phone_profile.apn_token)
+            if len(apn_tokens) > 0:
+                apns_send_bulk_message(registration_ids=apn_tokens, data=message)
+
 class PhoneProfile(BaseProfile):
     user_profile = models.ForeignKey(UserProfile, related_name='phone_profile')
     uuid = models.CharField(max_length=50, default=None, blank=True, null=True, unique=True)
@@ -115,6 +152,15 @@ class PhoneProfile(BaseProfile):
     paymill_payment_id = models.CharField(max_length=50, default=None, blank=True, null=True)
     apn_token = models.CharField(max_length=100, default=None, blank=True, null=True)
     gcm_token = models.CharField(max_length=100, default=None, blank=True, null=True)
+    
+    objects = PhoneProfileManager()
+    
+    def send_message(self, message):
+        if self.gcm_token != None:
+            return gcm_send_message(registration_id=self.gcm_token, data={"message": message}, collapse_key="message")
+        if self.apn_token != None:
+            print '1'
+            return apns_send_message(registration_id=self.apn_token, data=message)
     
 class BusinessProfile(BaseProfile):
     user_profile = models.ForeignKey(UserProfile, related_name='business_profile')
@@ -191,6 +237,7 @@ class Deal(NerdeezModel):
     discounted_price = models.DecimalField(max_digits = 6, decimal_places = 3)
     status = models.PositiveIntegerField(choices=DEAL_STATUS, default=0)
     category = models.ForeignKey(Category, blank=True, null=True, default=None)
+    is_notified = models.BooleanField(default=False)
     
     search_index = VectorField()
 
@@ -289,6 +336,7 @@ class Logger(NerdeezModel):
     
     def __unicode__(self):
         return self.path
+    
     
     
 #===============================================================================
