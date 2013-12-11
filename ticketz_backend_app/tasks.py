@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 will hold the async tasks
 
@@ -69,6 +70,23 @@ def delete_old_api_keys():
     now = datetime.datetime.now()
     day_before = now + relativedelta(hours=-24)
     ApiKey.objects.filter(created__lt=day_before).delete()
+    
+@periodic_task(run_every=timedelta(minutes=5), name='tasks.send_push_notification')
+def send_push_notification():
+    '''
+    will send push notifications for all active deals that are not modified
+    '''
+    
+    print 'Sending push notifications'
+    deals = Deal.objects.filter(status=4, is_notified=False)
+    deal = deals[0]
+    deals.update(is_notified=True)
+    phone_profiles_ids = [deal.phone_profile.id for deal in deals]
+    phone_profiles = PhoneProfile.objects.filter(id__in=phone_profiles_ids)
+    push_message = u'מבצע חדש %s ב %s %s עד השעה %d:%d' % (deal.title, deal.business_profile.title, deal.business_profile.city.title, deal.valid_to.hour, deal.valid_to.minute)
+    print push_message
+    phone_profiles.send_message(push_message);
+    
     
 @periodic_task(run_every=timedelta(minutes=1), name='tasks.close_unactive_reservation')
 def close_unactive_reservation():

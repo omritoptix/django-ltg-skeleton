@@ -159,6 +159,7 @@ class PhoneProfile(BaseProfile):
         if self.gcm_token != None:
             return gcm_send_message(registration_id=self.gcm_token, data={"message": message}, collapse_key="message")
         if self.apn_token != None:
+            print '1'
             return apns_send_message(registration_id=self.apn_token, data=message)
     
 class BusinessProfile(BaseProfile):
@@ -236,6 +237,7 @@ class Deal(NerdeezModel):
     discounted_price = models.DecimalField(max_digits = 6, decimal_places = 3)
     status = models.PositiveIntegerField(choices=DEAL_STATUS, default=0)
     category = models.ForeignKey(Category, blank=True, null=True, default=None)
+    is_notified = models.BooleanField(default=False)
     
     search_index = VectorField()
 
