@@ -188,6 +188,8 @@ class ApiTest(ResourceTestCase):
         print resp.content
         print resp.status_code
         self.assertHttpAccepted(resp)
+        register_response = self.deserialize(resp)
+        self.assertTrue('phone_profile' in register_response)
         
     def test_register_and_deals(self):
         '''

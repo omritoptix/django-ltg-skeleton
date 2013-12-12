@@ -979,13 +979,16 @@ class UtilitiesResource(NerdeezResource):
         api_key, created = ApiKey.objects.get_or_create(user=user)
         api_key.save()
         
+        ur = PhoneProfileResource()
+        ur_bundle = ur.build_bundle(obj=phone_profile, request=request)
         if is_created:
             return self.create_response(request, {
                     'success': True,
                     'message': "registered a new device",
                     'api_key': api_key.key,
                     'username': user.username,
-                    'id': phone_profile.id
+                    'id': phone_profile.id,
+                    'phone_profile': json.loads(ur.serialize(None, ur.full_dehydrate(ur_bundle), 'application/json')),
                     }, HttpCreated)
         else:
             return self.create_response(request, {
@@ -993,7 +996,8 @@ class UtilitiesResource(NerdeezResource):
                     'message': "user is already registered",
                     'api_key': api_key.key,
                     'username': user.username,
-                    'id': phone_profile.id
+                    'id': phone_profile.id,
+                    'phone_profile': json.loads(ur.serialize(None, ur.full_dehydrate(ur_bundle), 'application/json')),
                     }, HttpAccepted)
             
     def confirm_transaction(self, request=None, **kwargs):
