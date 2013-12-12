@@ -40,8 +40,8 @@
         "model": "auth.user", 
         "fields": {
             "username": "yariv3", 
-            "first_name": "", 
-            "last_name": "", 
+            "first_name": "Marko", 
+            "last_name": "Polo", 
             "is_active": true, 
             "is_superuser": false, 
             "is_staff": false, 
