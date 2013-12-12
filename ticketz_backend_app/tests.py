@@ -478,6 +478,17 @@ class ApiTest(ResourceTestCase):
         '''
         send_push_notification()
         
+    def test_phoneprofile_ispayed(self):
+        '''
+        will test that the phone profile returns an is_payed and also that the paymill cradentials are hidden
+        '''
+        
+        resp = self.api_client.get(uri='/api/v1/phoneprofile/1/?username=yariv3&api_key=12345678', format='json')
+        print resp.content
+        phone_profile = self.deserialize(resp)
+        self.assertFalse('paymill_client_id' in phone_profile or 'paymill_payment_id' in phone_profile)
+        self.assertTrue(phone_profile['is_payed'])
+        
         
         
         

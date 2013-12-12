@@ -124,8 +124,9 @@ class NerdeezResource(ModelResource):
         invisible_fields = self.Meta.invisible_fields
         for field in invisible_fields:
             if field in bundle.data:
+                print field
                 del bundle.data[field]
-        return super(NerdeezResource, self).hydrate(bundle)
+        return super(NerdeezResource, self).dehydrate(bundle)
         
 #===============================================================================
 # end abstract resources
@@ -260,7 +261,20 @@ class PhoneProfileResource(NerdeezResource):
         authentication = NerdeezApiKeyAuthentication()
         authorization = NerdeezOnlyOwnerCanReadAuthorization()
         allowed_methods = ['get', 'put']
-        read_only_fields = ['paymill_client_id', 'paymill_client_id', 'user_profile', 'uuid']
+        read_only_fields = ['paymill_client_id', 'paymill_payment_id', 'user_profile', 'uuid']
+        invisible_fields = ['paymill_client_id', 'paymill_payment_id', 'apn_token', 'gcm_token']
+        
+    def dehydrate(self, bundle):
+        '''
+        will return also is_payed
+        '''
+        bundle.data['is_payed'] = False
+        try:
+            if bundle.obj.paymill_payment_id != None:
+                bundle.data['is_payed'] = True
+        except:
+            bundle.data['is_payed'] = False
+        return super(PhoneProfileResource, self).dehydrate(bundle)
         
 class BusinessProfileResource(NerdeezResource):
     '''
