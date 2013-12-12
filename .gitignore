@@ -3,3 +3,4 @@ venv
 .c9revisions
 src
 .pydevproject
+.settings
