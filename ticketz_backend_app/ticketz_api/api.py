@@ -557,6 +557,7 @@ class TransactionResource(NerdeezResource):
         bundle.data['hash'] = hash
         try:
             message = 'Your order confirmation code is: %s' % (bundle.data['hash'])
+            print user_profile.phone
             NerdeezResource.send_sms(user_profile.phone, message)
         except Exception,e:
             raise ImmediateHttpResponse(response=http.HttpBadRequest(e.message))
