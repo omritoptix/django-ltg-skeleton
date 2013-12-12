@@ -455,6 +455,19 @@ class ApiTest(ResourceTestCase):
         self.assertEqual(self.deserialize(resp)['num_places_left'], 9)
         self.assertEqual(Transaction.objects.get(id=transaction_id).status, 0)
         
+#     def test_transaction_search_index_updated(self):
+#         '''
+#         test that when the transaction search_index field gets updated  with user and deal
+#         details in the following scenarios
+#             1. transaction is created
+#             2. deal is updated
+#             3. user details are updated
+#         '''
+#         #create a transaction
+#         resp = self.api_client.post(uri='/api/v1/transaction/?username=yariv3&api_key=12345678', format='json', data={'deal': '/api/v1/deal/1/', 'amount': 1})
+#         self.assertHttpCreated(resp)
+#         transaction_id = self.deserialize(resp)['id']
+#         self.assertEqual(Transaction.objects.get(id=transaction_id).status, 1)
         
         
         

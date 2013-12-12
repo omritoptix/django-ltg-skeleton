@@ -13,11 +13,15 @@ Created on November 7th, 2013
 
 from django.db import models
 import datetime
+import sys
 from django.contrib.auth.models import User
 from ticketz_backend_app.encryption import EncryptedCharField
 from picklefield.fields import PickledObjectField
 from djorm_pgfulltext.models import SearchManager
 from djorm_pgfulltext.fields import VectorField
+from django.db import connection
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 #===============================================================================
 # end imports
@@ -73,7 +77,34 @@ class NerdeezModel(models.Model):
         @returns String: object description
         '''
         return self.title
+    
+    def updateSearchIndex(self,transactionsList):
+        '''
+        will update search_index field in each
+        transaction with appropriate search indexes
+        '''
         
+        for transaction in transactionsList:
+            
+            #get the deal for the transaction
+            tranDeal = Deal.objects.get(id = transaction.deal_id)           
+            
+            #get the userProfile for the transaction
+            tranPhoneProfile = PhoneProfile.objects.get(id = transaction.phone_profile_id)
+            tranUserProfile = UserProfile.objects.get(id = tranPhoneProfile.user_profile_id)
+            tranUser = User.objects.get(id = tranUserProfile.user_id)
+            
+            #update our data object
+            data = tranUser.email + " " + tranUser.first_name + " " + tranUser.last_name + " " + tranUserProfile.phone + " " + tranDeal.title + " " + tranDeal.description
+            
+            #update our search_index field
+            catalog = 'pg_catalog.english'
+            cursor = connection.cursor()
+            sql = "update ticketz_backend_app_transaction set search_index = to_tsvector(%s, %s) where id = %s"
+            cursor.execute(sql, (catalog, data, transaction.id))
+            cursor.execute("COMMIT;")
+            cursor.close()
+                
 #===============================================================================
 # end models abstract classes
 #===============================================================================
@@ -96,6 +127,40 @@ class UserProfile(NerdeezModel):
     def owner(self):
         return self.user.username
     
+    def save(self, *args, **kwargs):
+        '''
+        will update the search_index field for all the 
+        transactions related to this user profile
+        '''
+        # Call the "real" save() method.
+        super(UserProfile, self).save(*args, **kwargs)
+        
+        #get the phone profile for that user profile
+        #use 'filter' instead of 'get' to avoid 'doesNotExist' exception
+        phoneProfile = PhoneProfile.objects.filter(user_profile__id = self.id)
+        
+        #make sure phone profile exists, if not, its a business profile
+        #which we don't want to update the transactions for
+        if (phoneProfile.exists()):
+            
+            #get the phone profile object
+            phoneProfile = phoneProfile[0]
+            
+            #get all transactions related to this deal
+            transactionsToUpdate = Transaction.objects.filter(phone_profile__id = phoneProfile.id)
+            
+            #update the search_index field 
+            if (transactionsToUpdate.exists()):
+                try:
+                    self.updateSearchIndex(transactionsToUpdate)
+                    
+                except:
+                    #TODO - log to server
+                    print "Unexpected error:", sys.exc_info()[0]
+                    
+                finally:
+                    pass
+    
 class BaseProfile(NerdeezModel):
     
     class Meta(NerdeezModel.Meta):
@@ -106,13 +171,14 @@ class BaseProfile(NerdeezModel):
     
     def owner(self):
         return self.user_profile.user.username
-    
+       
     
 class PhoneProfile(BaseProfile):
     user_profile = models.ForeignKey(UserProfile, related_name='phone_profile')
     uuid = models.CharField(max_length=50, default=None, blank=True, null=True, unique=True)
     paymill_client_id = models.CharField(max_length=50, default=None, blank=True, null=True)
     paymill_payment_id = models.CharField(max_length=50, default=None, blank=True, null=True)
+    
     
 class BusinessProfile(BaseProfile):
     user_profile = models.ForeignKey(UserProfile, related_name='business_profile')
@@ -212,6 +278,30 @@ class Deal(NerdeezModel):
         
         return cls.objects.search(query).distinct()
     
+    def save(self, *args, **kwargs):
+        '''
+        will update the search_index field for all the 
+        transactions related to this deal
+        '''
+        # Call the "real" save() method.
+        super(Deal, self).save(*args, **kwargs)
+        
+        #get all transactions related to this deal
+        transactionsToUpdate = Transaction.objects.filter(deal__id = self.id)
+        
+        #update the search_index field 
+        if (transactionsToUpdate.exists()):
+            try:
+                self.updateSearchIndex(transactionsToUpdate)
+                
+            except:
+                #TODO - log to server
+                print "Unexpected error:", sys.exc_info()[0]
+                
+            finally:
+                pass
+        
+    
 class Transaction(NerdeezModel):
     '''
     will hold the table for a transaction
@@ -240,6 +330,24 @@ class Transaction(NerdeezModel):
     
     def __unicode__(self):
         return 'Transaction for user: %s with phone: %s' % (self.phone_profile.user_profile.user.email, self.phone_profile.user_profile.phone)
+    
+    def save(self, *args, **kwargs):
+        '''
+        will update the search_index field for the current transaction
+        '''
+        # Call the "real" save() method.
+        super(Transaction, self).save(*args, **kwargs)        
+        
+        #update the search_index field 
+        try:
+            self.updateSearchIndex([self])
+            
+        except:
+            #TODO - log to server
+            print "Unexpected error:", sys.exc_info()[0]
+            
+        finally:
+            pass
     
 class Refund(NerdeezModel):
     '''
@@ -298,6 +406,40 @@ class Logger(NerdeezModel):
 #===============================================================================
 
 User.profile = property(lambda u: UserProfile.objects.get_or_create(user=u)[0])
+
+@receiver(post_save, sender=User)
+def userPreSaveHandler(sender, **kwargs):
+    '''
+    will update the search_index field for all transactions related
+    to the current user
+    '''
+    try:
+        #get the related phone profile
+        userProfile = UserProfile.objects.get(user__id = kwargs['instance'].id)
+        
+        #use 'filter' instead of 'get' to avoid 'doesNotExist' exception
+        phoneProfile = PhoneProfile.objects.filter(user_profile__id = userProfile.id)
+        
+        #make sure phone profile exists, if not, its a business profile
+        #which we don't want to update the transactions for
+        if (phoneProfile.exists()):
+            
+            #get the phone profile object
+            phoneProfile = phoneProfile[0]
+            
+            #get transaction to related phone profile
+            transactionsList = Transaction.objects.filter(phone_profile_id = phoneProfile.id)
+        
+            #call nerdeezModel with the userProfile instance (since user does not inherit from nerdeezProfile)
+            NerdeezModel.updateSearchIndex(userProfile,transactionsList)
+            
+    except:
+        #TODO - log to server
+        print "Unexpected error:", sys.exc_info()[0]
+        
+    finally:
+        pass
+    
 
 #===============================================================================
 # end signals
