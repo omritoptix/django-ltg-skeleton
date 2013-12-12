@@ -18,6 +18,6 @@ class ProcessExceptionMiddleware(object):
 			log.post = str(request.POST)
 			log.get = str(request.GET)
 			log.content = response.content
-			log.save()
+# 			log.save()
 
 		return response
