@@ -98,12 +98,13 @@ class NerdeezModel(models.Model):
             data = tranUser.email + " " + tranUser.first_name + " " + tranUser.last_name + " " + tranUserProfile.phone + " " + tranDeal.title + " " + tranDeal.description
             
             #update our search_index field
-            catalog = 'pg_catalog.english'
-            cursor = connection.cursor()
-            sql = "update ticketz_backend_app_transaction set search_index = to_tsvector(%s, %s) where id = %s"
-            cursor.execute(sql, (catalog, data, transaction.id))
-            cursor.execute("COMMIT;")
-            cursor.close()
+            try:
+                catalog = 'pg_catalog.english'
+                cursor = connection.cursor()
+                sql = "update ticketz_backend_app_transaction set search_index = to_tsvector(%s, %s) where id = %s"
+                cursor.execute(sql, (catalog, data, transaction.id))
+            finally:
+                cursor.close()
                 
 #===============================================================================
 # end models abstract classes
@@ -414,33 +415,37 @@ def userPreSaveHandler(sender, **kwargs):
     to the current user
     '''
     try:
-        #get the related user profile
-        userProfile = UserProfile.objects.filter(user__id = kwargs['instance'].id)
         
-        if (userProfile.exists()):
-            
-            userProfile = userProfile[0]
-        
-            #use 'filter' instead of 'get' to avoid 'doesNotExist' exception
-            phoneProfile = PhoneProfile.objects.filter(user_profile__id = userProfile.id)
-            
-            #make sure phone profile exists, if not, its a business profile
-            #which we don't want to update the transactions for
-            if (phoneProfile.exists()):
-                
-                #get the phone profile object
-                phoneProfile = phoneProfile[0]
-                
-                #get transaction to related phone profile
-                transactionsList = Transaction.objects.filter(phone_profile_id = phoneProfile.id)
-            
-                #call nerdeezModel with the userProfile instance (since user does not inherit from nerdeezProfile)
-                NerdeezModel.updateSearchIndex(userProfile,transactionsList)
-                
+            #get the related user profile
+            userProfile = UserProfile.objects.filter(user__id = kwargs['instance'].id)
+             
+            if (userProfile.exists()):
+                 
+                userProfile = userProfile[0]
+             
+                #use 'filter' instead of 'get' to avoid 'doesNotExist' exception
+                phoneProfile = PhoneProfile.objects.filter(user_profile__id = userProfile.id)
+                 
+                #make sure phone profile exists, if not, its a business profile
+                #which we don't want to update the transactions for
+                if (phoneProfile.exists()):
+                     
+                    #get the phone profile object
+                    phoneProfile = phoneProfile[0]
+                     
+                    #get transaction to related phone profile
+                    transactionsList = Transaction.objects.filter(phone_profile_id = phoneProfile.id)
+                    
+                    #check if there are transactions for the current user
+                    if (transactionsList.exists()): 
+                 
+                        #call nerdeezModel with the userProfile instance (since user does not inherit from nerdeezProfile)
+                        NerdeezModel.updateSearchIndex(userProfile,transactionsList)
+                 
     except:
         #TODO - log to server
         print "Unexpected error:", sys.exc_info()[0]
-        
+         
     finally:
         pass
     
