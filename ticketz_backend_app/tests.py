@@ -491,8 +491,105 @@ class ApiTest(ResourceTestCase):
         
         
         
+    def test_transaction_create_search_index_updated(self):
+        '''
+        test that the transaction search_index field gets updated
+        when transaction is created
+        '''
+        #create a transaction
+        resp = self.api_client.post(uri='/api/v1/transaction/?username=yariv3&api_key=12345678', format='json', data={'deal': '/api/v1/deal/1/', 'amount': 1})
+        self.assertHttpCreated(resp)  
+              
         
+        def searchTransactionInResults(queryArg,transactionId):
+            '''
+            will test if a transaction is in the results
+            of the query.
+            @param {string} queryArg - a query argument
+            @param {int} transactionId - the transaction id
+            @return {boolean} - true if transaction found, false if not
+            '''
+            
+            query = connection.ops.quote_name(queryArg)
+            searchResults = Transaction.objects.search(query)
+            isTransactionFound = False
+            for result in searchResults:
+                if (result.id == transactionId):
+                    isTransactionFound = True
+                    break
+            
+            return isTransactionFound
+            
+        #get the transaction id we want to check
+        transaction_id = self.deserialize(resp)['id']
+            
+        #check if transaction is found by deal title
+        isTransactionFound = searchTransactionInResults(Deal.objects.get(id=1).title,transaction_id)
+        self.assertTrue(isTransactionFound)
         
+        #check if transaction is found by deal description
+        isTransactionFound = searchTransactionInResults(Deal.objects.get(id=1).description,transaction_id)
+        self.assertTrue(isTransactionFound)
+        
+        #check if transaction is found by user email
+        isTransactionFound = searchTransactionInResults(User.objects.get(id=3).email,transaction_id)
+        self.assertTrue(isTransactionFound)
+        
+        #check if transaction is found by user last name
+        isTransactionFound = searchTransactionInResults(User.objects.get(id=3).last_name,transaction_id)
+        self.assertTrue(isTransactionFound)
+        
+        #check if transaction is found by user first name
+        isTransactionFound = searchTransactionInResults(User.objects.get(id=3).first_name,transaction_id)
+        self.assertTrue(isTransactionFound)
+        
+    def test_deal_update_search_index_updated(self):
+        '''
+        will check the transaction search_index is updated
+        after a deal is updated
+        '''
+        
+        #get number of transactions associated to this deal
+        transactionsRelatedToDeal = Transaction.objects.filter(deal__id=1).count()
+
+        #assert no transactions can be found by the deal title, since the search_index is null
+        query = connection.ops.quote_name(Deal.objects.get(id=1).title)
+        searchResults = Transaction.objects.search(query)
+        self.assertFalse(searchResults.exists())
+        
+        #update the deal
+        resp = self.api_client.put(uri='/api/v1/deal/1/?username=yariv1&api_key=12345678', format='json', data={'title': 'Great'})
+        self.assertHttpAccepted(resp)
+        
+        #assert number of transactions can be found by query, and is equal to the transactionsRelatedToDeal
+        query = connection.ops.quote_name(Deal.objects.get(id=1).title)
+        searchResults = Transaction.objects.search(query)
+        self.assertTrue(searchResults.count() == transactionsRelatedToDeal)
+        
+    def test_user_update_search_index_updated(self):
+        '''
+        will check the transaction search_index is updated
+        after a user email is updated
+        '''
+        #get number of transactions associated to this user
+        userProfile = UserProfile.objects.get(user__id = 3)
+        phoneProfile = PhoneProfile.objects.get(user_profile__id = userProfile.id)      
+        transactionsRelatedToUser = Transaction.objects.filter(phone_profile__id=phoneProfile.id).count()
+
+        #assert no transactions can be found by the user email
+        query = connection.ops.quote_name(User.objects.get(id=3).email)
+        searchResults = Transaction.objects.search(query)
+        self.assertFalse(searchResults.exists())
+        
+        #update the user email
+        userToUpdate = User.objects.get(id=3)
+        userToUpdate.email = "test@test.test"
+        userToUpdate.save()
+        
+        #assert number of transactions can be found by query, and is equal to the transactionsRelatedToUser
+        query = connection.ops.quote_name(User.objects.get(id=3).email)
+        searchResults = Transaction.objects.search(query)
+        self.assertTrue(searchResults.count() == transactionsRelatedToUser)
         
         
         
