@@ -414,25 +414,29 @@ def userPreSaveHandler(sender, **kwargs):
     to the current user
     '''
     try:
-        #get the related phone profile
-        userProfile = UserProfile.objects.get(user__id = kwargs['instance'].id)
+        #get the related user profile
+        userProfile = UserProfile.objects.filter(user__id = kwargs['instance'].id)
         
-        #use 'filter' instead of 'get' to avoid 'doesNotExist' exception
-        phoneProfile = PhoneProfile.objects.filter(user_profile__id = userProfile.id)
+        if (userProfile.exists()):
+            
+            userProfile = userProfile[0]
         
-        #make sure phone profile exists, if not, its a business profile
-        #which we don't want to update the transactions for
-        if (phoneProfile.exists()):
+            #use 'filter' instead of 'get' to avoid 'doesNotExist' exception
+            phoneProfile = PhoneProfile.objects.filter(user_profile__id = userProfile.id)
             
-            #get the phone profile object
-            phoneProfile = phoneProfile[0]
+            #make sure phone profile exists, if not, its a business profile
+            #which we don't want to update the transactions for
+            if (phoneProfile.exists()):
+                
+                #get the phone profile object
+                phoneProfile = phoneProfile[0]
+                
+                #get transaction to related phone profile
+                transactionsList = Transaction.objects.filter(phone_profile_id = phoneProfile.id)
             
-            #get transaction to related phone profile
-            transactionsList = Transaction.objects.filter(phone_profile_id = phoneProfile.id)
-        
-            #call nerdeezModel with the userProfile instance (since user does not inherit from nerdeezProfile)
-            NerdeezModel.updateSearchIndex(userProfile,transactionsList)
-            
+                #call nerdeezModel with the userProfile instance (since user does not inherit from nerdeezProfile)
+                NerdeezModel.updateSearchIndex(userProfile,transactionsList)
+                
     except:
         #TODO - log to server
         print "Unexpected error:", sys.exc_info()[0]
