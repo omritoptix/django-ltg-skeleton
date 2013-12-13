@@ -1,11 +1,12 @@
 '''
-Created on Dec 8, 2013
-
 custom filter and tags for the template engine
 
 in order to use, incluse in the template {% ticketz_backend_extras %}
 
+Created on Dec 8, 2013
 @author: omri
+@version:1.0
+@copyright: Nerdeez.com
 '''
 
 
