@@ -104,9 +104,20 @@ def report(request,type):
         return response
     user = request.user
     user_profile = user.get_profile()
-    business = user_profile.business_profile.all()[0]
+    
+    #check that it has a business profile, and that it's not a phone profile 
+    #if not - return unauthorized
+    if not user_profile.business_profile.all().exists():
+        
+        #return unauthorized
+        response = HttpResponse(mimetype="text/plain")
+        response.write('Unautorized')
+        return response
     
     try:
+        
+        #get the business profile for this report
+        business_profile = BusinessProfile.objects.get(user_profile__id = user_profile.id)
         
         # create an API client instance
         client = pdfcrowd.Client(settings.PDFCROWD_USERNAME, settings.PDFCROWD_APIKEY)
@@ -131,10 +142,16 @@ def report(request,type):
             
             #will hold number of total transactions
             sumOfTransactions = 0        
+            
+            #copy the current request and add to it the business profile id (the original
+            #request.GET is immutable)
+            updated_request = request.GET.copy()
+            request_additional_dict = {'business_profile__id' : business_profile.id }
+            updated_request.update(request_additional_dict)
                 
             #get the deals from the rest server
             api_client = TestApiClient()
-            resp = api_client.get(uri='/api/v1/deal/', format='json', data=request.GET)
+            resp = api_client.get(uri='/api/v1/deal/', format='json', data=updated_request)
             deals = simplejson.loads(resp.content)['objects']
              
             #get transactions for each deal
@@ -179,9 +196,25 @@ def report(request,type):
             #will hold number of total transactions
             sumOfTransactions = 0        
             
+            #will hold all the relevant deals ids for this business
+            business_profile_deals = ""
+            
+            #get all the relevant deals ids
+            for deal in Deal.objects.filter(business_profile__id = business_profile.id, status__in = [1,2,3,4]):
+                business_profile_deals += str(deal.id) + ","
+                
+            #remove last comma
+            business_profile_deals = business_profile_deals[:-1]
+            
+            #copy the current request and add to it the business profile and transaction status params (the original
+            #request.GET is immutable)
+            updated_request = request.GET.copy()
+            request_additional_dict = {'deal__in' : business_profile_deals , 'status': 3 }
+            updated_request.update(request_additional_dict)
+            
             #get relevant transactions from the rest server
             api_client = TestApiClient()
-            resp = api_client.get(uri='/api/v1/transaction/', format='json', data=request.GET)
+            resp = api_client.get(uri='/api/v1/transaction/', format='json', data=updated_request)
             transactions_unicode = simplejson.loads(resp.content)['objects']
             
             #will hold the transactions list
@@ -218,8 +251,7 @@ def report(request,type):
                                      'transactions': transactions,
                                     'sumOfAmountPaidTransactions' : sumOfAmountPaidTransactions,
                                     'sumOfTransactions' : sumOfTransactions 
-                                     })).encode('utf-8')
-
+                                     })).encode('utf-8')                                     
                                      
         pdf = client.convertHtml(html)
 
