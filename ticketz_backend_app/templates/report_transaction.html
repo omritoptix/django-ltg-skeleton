@@ -1,0 +1,94 @@
+<html dir="rtl">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	</head>
+	<body>
+		<!-- load custom template helpers -->
+		{% load ticketz_backend_extras %}
+			
+		<div style="width: 90%;margin: 0 auto;">
+			
+			<!-- begin header -->
+			<table style="width: 100%; height: 45px;">
+				<tr>
+					<!-- <td>
+						<img src="https://s3-eu-west-1.amazonaws.com/workerim-server/pdf/logo004+%289%29XL.jpg" height="100"/>
+					</td> -->
+					<td style="width: 100%;vertical-align: left;"><h3 style="text-align: right;">2Nite</h3></td>
+					<td>
+						{{date}}
+					</td>
+				</tr>
+			</table>
+			<!-- end header -->
+			
+			<!-- begin document header -->
+			<div>
+				<h1 style="text-align: center; font-weight: normal; color: #484848;text-decoration: underline">
+				דו"ח מפורט לפי עסקה
+				</h1>
+			</div>
+			<!-- end document header -->
+			
+			{% if transactions %}								
+
+				<!-- begin transaction details table -->
+				<div>
+					<table border="1px" cellpadding="3px" width="100%" style="margin-top:10px;margin-bottom:40px;">
+						<tr>
+							<th>מס' עסקה</th>
+							<th>תאריך רכישה</th>
+							<th>שם משפחה</th>
+							<th>שם פרטי</th>
+							<th>טלפון</th>
+							<th>אימייל</th>
+							<th>מס' דיל</th>
+							<th>כמות דילים</th>
+							<th>סה"כ שולם</th>
+						</tr>	
+							
+						{% for transaction in transactions %}			
+							<tr>
+								<td align="center">{{transaction.id}}</td>
+								<td align="center">{{transaction.creation_date|date:"d/m/Y"}}</td>
+								<td align="center">{{transaction.phone_profile.user_profile.user.last_name}}</td>
+								<td align="center">{{transaction.phone_profile.user_profile.user.first_name}}</td>
+								<td align="center">{{transaction.phone_profile.user_profile.phone}}</td>
+								<td align="center">{{transaction.phone_profile.user_profile.user.email}}</td>
+								<td align="center">{{transaction.deal.id}}</td>
+								<td align="center">{{transaction.amount}}</td>
+								<td align="center">{% multiply transaction.amount transaction.deal.discounted_price %} ש"ח</td>								
+							</tr>
+						{% endfor %}
+					</table>
+					<hr/>
+				</div>
+				<!-- end transaction details table -->
+				
+				<!-- transactions summary -->
+				<div style="margin-top:40px">
+					<h2 style="text-decoration: underline;text-align: center;">סיכום:</h2>
+					<table border="1px" cellpadding="10px" width="100%">
+						<tr>
+							<th>סה"כ עסקאות</th>
+							<th>סכום  כולל</th>
+						</tr>
+						<tr>
+							<td align="center">{{sumOfTransactions}}</td>
+							<td align="center">{{sumOfAmountPaidTransactions}} ש"ח</td>
+						</tr>
+					</table>
+				</div>
+				<!-- end transactions summary -->
+					
+			{% else %}		
+				<div style="margin-top: 15px;text-align: center">
+					 לא נמצאו עסקאות
+				</div>			
+			{% endif %}
+				
+			
+			
+		</div>
+	</body>
+</html>

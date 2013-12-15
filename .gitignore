@@ -1,3 +1,6 @@
 venv
 *.pyc
 .c9revisions
+src
+.settings
+.pydevproject
