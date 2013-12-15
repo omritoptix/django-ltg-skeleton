@@ -99,20 +99,14 @@ def report(request,type):
     #check if the user is authorized to view this pdf
     auth = ApiKeyAuthentication()
     if auth.is_authenticated(request) != True:
-        response = HttpResponse(mimetype="text/plain")
-        response.write('Unautorized')
-        return response
+        return HttpResponse('Unauthorized', status=401)
     user = request.user
     user_profile = user.get_profile()
     
     #check that it has a business profile, and that it's not a phone profile 
     #if not - return unauthorized
     if not user_profile.business_profile.all().exists():
-        
-        #return unauthorized
-        response = HttpResponse(mimetype="text/plain")
-        response.write('Unautorized')
-        return response
+        return HttpResponse('Unauthorized', status=401)
     
     try:
         
