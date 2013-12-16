@@ -96,9 +96,8 @@ class ApiTest(ResourceTestCase):
     def test_deals(self):
         '''
         test the api for the deals
-        - get with no cradentials get unauthorize
-        - get with cradentials of other user get unauthorize
-        - get with cradentials of other users get 0 objects
+        - get with no cradentials get only active deals
+        - post for unautorized user fails
         - put with no cradentials fail
         - put with wrong cradentials fail
         - post for inactive user fail
@@ -106,7 +105,10 @@ class ApiTest(ResourceTestCase):
         '''
         
         resp = self.api_client.get(uri='/api/v1/deal/', format='json', data={})
-        self.assertHttpUnauthorized(resp)
+        self.assertHttpOK(resp)
+        self.assertTrue(len(self.deserialize(resp)['objects']) > 0)
+        for single_deal in self.deserialize(resp)['objects']:
+            self.assertEqual(single_deal['status'], 4)
         
         
         resp = self.api_client.post(uri='/api/v1/deal/?username=yariv&api_key=12345678', format='json', 

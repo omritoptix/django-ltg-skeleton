@@ -339,7 +339,7 @@ class DealResource(NerdeezResource):
     category = fields.ToOneField(CategoryResource, 'category', null=True, full=True)
     class Meta(NerdeezResource.Meta):
         queryset = Deal.objects.all()
-        authentication = NerdeezApiKeyAuthentication()
+        authentication = Authentication()
         authorization = NerdeezReadForFreeAuthorization()
         allowed_methods = ['get', 'put', 'post']
         filtering = {
@@ -361,6 +361,10 @@ class DealResource(NerdeezResource):
         '''
         search group logic
         '''
+        #if user is not authenticated return just the active deals
+        if NerdeezApiKeyAuthentication().is_authenticated(request) != True:
+            return Deal.objects.filter(status=4)
+        
         if request.GET.get('search') != None:
             return self.Meta.object_class.search(request.GET.get('search'))
         else:
@@ -368,6 +372,7 @@ class DealResource(NerdeezResource):
         
     def obj_create(self, bundle, **kwargs):
         #if the user is not a business than he is unauth to post
+        NerdeezApiKeyAuthentication().is_authenticated(bundle.request)
         try:
             if bundle.request.user.get_profile().business_profile.all()[0] == None:
                 raise ImmediateHttpResponse(response=http.HttpUnauthorized("Couldn't find the business profile"))
