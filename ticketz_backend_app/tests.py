@@ -257,9 +257,7 @@ class ApiTest(ResourceTestCase):
                                                                               "category":"/api/v1/category/1/"
         })
         self.assertHttpCreated(resp)
-        num_deals = Deal.objects.all().count()
-        deals = Deal.objects.all()
-        new_deal = deals[num_deals - 1]
+        new_deal = Deal.objects.get(id=self.deserialize(resp)['id'])
         self.assertEqual(new_deal.category.id, 1)
         
     def test_logger(self):
@@ -592,6 +590,14 @@ class ApiTest(ResourceTestCase):
         query = connection.ops.quote_name(User.objects.get(id=3).email)
         searchResults = Transaction.objects.search(query)
         self.assertTrue(searchResults.count() == transactionsRelatedToUser)
+        
+    def test_category_auth(self):
+        '''
+        test unauth user can view the categories
+        '''
+        
+        resp = self.api_client.get(uri='/api/v1/category/', format='json')
+        self.assertHttpOK(resp)
         
         
         
