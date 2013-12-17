@@ -4,7 +4,7 @@ will hold the reports views for our app
 Created on Dec 17, 2013
 @author: omri
 @version:1.0
-@company:Nerdeez.com
+@copyright:Nerdeez
 '''
 
 #===============================================================================
