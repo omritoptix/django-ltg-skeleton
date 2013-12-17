@@ -4,7 +4,7 @@ will hold custom views
 Created on Dec 16, 2013
 @author: omri
 @version : 1.0
-@copyright : Nerdeez
+@copyright: Nerdeez
 '''
 
 #===============================================================================
