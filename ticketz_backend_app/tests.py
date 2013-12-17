@@ -626,6 +626,30 @@ class ApiTest(ResourceTestCase):
         resp = self.api_client.get(uri='/api/v1/category/', format='json')
         self.assertHttpOK(resp)
         
+    def test_registration(self):
+        '''
+        test that the api for registration works
+        test success
+        test email duplication erro
+        test uuid duplication error
+        '''
+        
+        num_users = User.objects.count()
+        resp = self.api_client.post(uri='/api/v1/utilities/register/', format='json', data={'uuid': '123', 'first_name': 'yariv', 'last_name': 'katz', 'email': 'ywarezk@gmail.com', 'password': '12345678'})
+        self.assertHttpCreated(resp)
+        self.assertEqual(num_users + 1, User.objects.count())
+        self.assertTrue('api_key' in self.deserialize(resp))
+        self.assertTrue('username' in self.deserialize(resp))
+        self.assertTrue('phone_profile' in self.deserialize(resp))
+        
+        resp = self.api_client.post(uri='/api/v1/utilities/register/', format='json', data={'uuid': '123', 'first_name': 'yariv', 'last_name': 'katz', 'email': 'ywarezk1@gmail.com', 'password': '12345678'})
+        self.assertHttpConflict(resp)
+        self.assertEqual(num_users + 1, User.objects.count())
+        
+        resp = self.api_client.post(uri='/api/v1/utilities/register/', format='json', data={'uuid': '1234', 'first_name': 'yariv', 'last_name': 'katz', 'email': 'ywarezk@gmail.com', 'password': '12345678'})
+        self.assertHttpConflict(resp)
+        self.assertEqual(num_users + 1, User.objects.count())
+        
         
         
         
