@@ -4,7 +4,7 @@ will hold custom decorators
 Created on Dec 16, 2013
 @author: omri
 @version : 1.0
-@company : Nerdeez.com
+@copyright : Nerdeez
 '''
 #===============================================================================
 # begin imports
