@@ -16,7 +16,7 @@ from django.contrib import admin
 from tastypie.api import Api
 from ticketz_backend_app.ticketz_api.api import *
 import ticketz_backend_app.views
-from ticketz_backend_app.custom_views import ReportView
+import ticketz_backend_app.reports
 
 #===============================================================================
 # end imports
@@ -63,8 +63,8 @@ urlpatterns = patterns('',
     (r'^activate-business/(\d+)', ticketz_backend_app.views.activate_business),
     
     #report views
-    (r'^report/transaction/',ticketz_backend_app.views.TransactionReport.as_view()),
-    (r'^report/deal/',ticketz_backend_app.views.DealReport.as_view())
+    (r'^report/transaction/',ticketz_backend_app.reports.TransactionReport.as_view()),
+    (r'^report/deal/',ticketz_backend_app.reports.DealReport.as_view())
     
     
 )

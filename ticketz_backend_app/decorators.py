@@ -18,8 +18,12 @@ from django.utils.unittest.compatibility import wraps
 # end imports
 #===============================================================================
 
+#===============================================================================
+# begin custom decorators
+#===============================================================================
+
     
-def BusinessLoginRequired(func):
+def business_auth_required(func):
     '''
     will make sure the user trying
     to access if of type business profile 
@@ -42,3 +46,7 @@ def BusinessLoginRequired(func):
         return func(request, *args, **kwargs)
     
     return check_authorized
+
+#===============================================================================
+# end custom decorators
+#===============================================================================

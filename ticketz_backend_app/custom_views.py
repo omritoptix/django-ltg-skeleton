@@ -12,7 +12,7 @@ Created on Dec 16, 2013
 #===============================================================================
 
 from django.views.generic import View
-from ticketz_backend_app.decorators import BusinessLoginRequired
+from ticketz_backend_app.decorators import business_auth_required
 from django.utils.decorators import method_decorator
 from django.template.loader import get_template
 from django.template.context import Context
@@ -25,6 +25,9 @@ from ticketz_backend_app.models import BusinessProfile
 # end imports
 #===============================================================================
 
+#===============================================================================
+# begin custom views
+#===============================================================================
 
 class ReportView(View):
     '''
@@ -36,7 +39,7 @@ class ReportView(View):
     #will hold the business profile for the report
     business_profile = None
     
-    @method_decorator(BusinessLoginRequired)
+    @method_decorator(business_auth_required)
     def dispatch(self, *args, **kwargs):
         
         #call parent dispatch
@@ -95,3 +98,7 @@ class ReportView(View):
             
         finally:
             return response
+        
+#===============================================================================
+# end custom views
+#===============================================================================
