@@ -229,7 +229,7 @@ class ApiTest(ResourceTestCase):
         '''
         resp = self.api_client.get(uri='/api/v1/deal/', format='json', data={'username': 'yariv1', 'api_key': '12345678', 'order_by': '-valid_to'})
         objects = self.deserialize(resp)['objects']
-        self.assertEqual(len(objects), 3)
+        self.assertEqual(len(objects), 6)
         self.assertEqual(objects[0]['id'], 2)
         self.assertEqual(objects[1]['id'], 3)
         self.assertEqual(objects[2]['id'], 1)
@@ -257,7 +257,11 @@ class ApiTest(ResourceTestCase):
                                                                               "category":"/api/v1/category/1/"
         })
         self.assertHttpCreated(resp)
-        new_deal = Deal.objects.get(id=self.deserialize(resp)['id'])
+#         num_deals = Deal.objects.all().count()
+#         deals = Deal.objects.all()
+#         new_deal = deals[num_deals - 1]
+        deal_id = self.deserialize(resp)['id']
+        new_deal = Deal.objects.get(id=deal_id)
         self.assertEqual(new_deal.category.id, 1)
         
     def test_logger(self):
@@ -459,12 +463,35 @@ class ApiTest(ResourceTestCase):
         self.assertEqual(self.deserialize(resp)['num_places_left'], 9)
         self.assertEqual(Transaction.objects.get(id=transaction_id).status, 0)
         
+    
+    def test_report(self):
+        '''
+        test 3 scenarios :
+        1. test that we get back mime of type pdf when requesting a report
+        2. test we get unAuthorized if request a report and we're not authorized (phone profile)
+        2. test we get unAuthorized if request a report and we're not authenticated 
+        '''
+        #request report when wer'e authorized and authenticated (business profile)
+        resp = self.api_client.get(uri='/report/transaction/?username=yariv1&api_key=12345678', format='json')
+        self.assertHttpOK(resp)
+        self.assertEqual(resp['content-type'], 'application/pdf')
+        
+        #request report when wer'e authenticated but not authorized (phone profile)
+        resp = self.api_client.get(uri='/report/transaction/?username=yariv3&api_key=12345678', format='json')
+        self.assertHttpUnauthorized(resp)
+        
+        #request report when wer'e not authorized and not authenticated
+        resp = self.api_client.get(uri='/report/transaction/?username=Fake&api_key=Fake', format='json')
+        self.assertHttpUnauthorized(resp)
+        
+        
+        
+        
     def test_update_push_tokens(self):
         '''
         - test that we can put the user token
         - test that we cant change others token 
         '''
-        
         resp = self.api_client.put(uri='/api/v1/phoneprofile/1/', format='json', data={'username': 'yariv3', 'api_key': '12345678', 'apn_token': 'yariv'})
         self.assertHttpAccepted(resp)
         self.assertEqual(PhoneProfile.objects.get(id=1).apn_token, 'yariv')

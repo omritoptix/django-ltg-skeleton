@@ -1,0 +1,78 @@
+{% extends "base_report.html" %}
+
+<!-- load custom template helpers -->
+{% load ticketz_backend_extras %}
+			
+<!-- begin document title -->
+{%block title%}דו"ח עיסקאות{%endblock title%}
+
+<!-- begin report content -->
+{% block content %}
+			
+	{% if transactions %}								
+
+		<!-- begin transaction details table -->
+		<div>
+			<table border="1px" cellpadding="3px" width="100%" style="margin-top:10px;margin-bottom:40px;">
+				<tr>
+					<th>מס' עסקה</th>
+					<th>תאריך רכישה</th>
+					<th>שם משפחה</th>
+					<th>שם פרטי</th>
+					<th>טלפון</th>
+					<th>אימייל</th>
+					<th>מס' דיל</th>
+					<th>כמות דילים</th>
+					<th>סה"כ שולם</th>
+				</tr>	
+					
+				{% for transaction in transactions %}			
+					<tr>
+						<td align="center">{{transaction.id}}</td>
+						<td align="center">{{transaction.creation_date|date:"d/m/Y"}}</td>
+						<td align="center">{{transaction.phone_profile.user_profile.user.last_name}}</td>
+						<td align="center">{{transaction.phone_profile.user_profile.user.first_name}}</td>
+						<td align="center">{{transaction.phone_profile.user_profile.phone}}</td>
+						<td align="center">{{transaction.phone_profile.user_profile.user.email}}</td>
+						<td align="center">{{transaction.deal.id}}</td>
+						<td align="center">{{transaction.amount}}</td>
+						<td align="center">{% multiply transaction.amount transaction.deal.discounted_price %} ש"ח</td>								
+					</tr>
+				{% endfor %}
+			</table>
+			<hr/>
+		</div>
+		<!-- end transaction details table -->
+				
+	{% else %}		
+		<div style="margin-top: 15px;text-align: center">
+			 לא נמצאו עסקאות
+		</div>			
+	{% endif %}
+	
+{% endblock content %}
+<!-- end report content -->
+
+<!-- begin report summary -->
+{% block summary %}
+
+	{% if transactions %}
+	
+		<table border="1px" cellpadding="10px" width="100%">
+			<tr>
+				<th>סה"כ עסקאות</th>
+				<th>סכום  כולל</th>
+			</tr>
+			<tr>
+				<td align="center">{{sum_of_transactions}}</td>
+				<td align="center">{{sum_of_amount_paid_transactions}} ש"ח</td>
+			</tr>
+		</table>
+		
+	{% endif %}
+	
+{% endblock summary%}
+<!-- end report summary -->
+					
+			
+		
