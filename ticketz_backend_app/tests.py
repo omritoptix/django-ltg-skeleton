@@ -179,26 +179,13 @@ class ApiTest(ResourceTestCase):
         self.assertHttpOK(resp)
         self.assertEqual(len(self.deserialize(resp)['objects']), 1)
         
-    def test_register_user(self):
-        '''
-        test the user registration through uuid
-        '''
-        
-        resp = self.api_client.post(uri='/api/v1/utilities/register-user/', format='json', data={'uuid': 'helloworld'})
-        self.assertHttpCreated(resp)
-        resp = self.api_client.post(uri='/api/v1/utilities/register-user/', format='json', data={'uuid': 'helloworld'})
-        print resp.content
-        print resp.status_code
-        self.assertHttpAccepted(resp)
-        register_response = self.deserialize(resp)
-        self.assertTrue('phone_profile' in register_response)
         
     def test_register_and_deals(self):
         '''
         test the registration through the smartphone
         also test the registerd user can't add a deal
         '''
-        resp = self.api_client.post(uri='/api/v1/utilities/register-user/', format='json', data={'uuid': 'helloworld'})
+        resp = self.api_client.post(uri='/api/v1/utilities/register-user/', format='json', data={'uuid': 'test', 'first_name': 'yariv', 'last_name': 'katz', 'email': 'test@gmail.com', 'password': '12345678'})
         self.assertHttpCreated(resp)
         username = self.deserialize(resp)['username']
         api_key = self.deserialize(resp)['api_key']
@@ -635,18 +622,19 @@ class ApiTest(ResourceTestCase):
         '''
         
         num_users = User.objects.count()
-        resp = self.api_client.post(uri='/api/v1/utilities/register/', format='json', data={'uuid': '123', 'first_name': 'yariv', 'last_name': 'katz', 'email': 'ywarezk@gmail.com', 'password': '12345678'})
+        resp = self.api_client.post(uri='/api/v1/utilities/register-user/', format='json', data={'uuid': 'test', 'first_name': 'yariv', 'last_name': 'katz', 'email': 'test@gmail.com', 'password': '12345678'})
+        print resp.content
         self.assertHttpCreated(resp)
         self.assertEqual(num_users + 1, User.objects.count())
         self.assertTrue('api_key' in self.deserialize(resp))
         self.assertTrue('username' in self.deserialize(resp))
         self.assertTrue('phone_profile' in self.deserialize(resp))
         
-        resp = self.api_client.post(uri='/api/v1/utilities/register/', format='json', data={'uuid': '123', 'first_name': 'yariv', 'last_name': 'katz', 'email': 'ywarezk1@gmail.com', 'password': '12345678'})
+        resp = self.api_client.post(uri='/api/v1/utilities/register-user/', format='json', data={'uuid': 'test', 'first_name': 'yariv', 'last_name': 'katz', 'email': 'ywarezk1@gmail.com', 'password': '12345678'})
         self.assertHttpConflict(resp)
         self.assertEqual(num_users + 1, User.objects.count())
         
-        resp = self.api_client.post(uri='/api/v1/utilities/register/', format='json', data={'uuid': '1234', 'first_name': 'yariv', 'last_name': 'katz', 'email': 'ywarezk@gmail.com', 'password': '12345678'})
+        resp = self.api_client.post(uri='/api/v1/utilities/register-user/', format='json', data={'uuid': 'dfgsdfgs', 'first_name': 'yariv', 'last_name': 'katz', 'email': 'test@gmail.com', 'password': '12345678'})
         self.assertHttpConflict(resp)
         self.assertEqual(num_users + 1, User.objects.count())
         

@@ -667,7 +667,50 @@ class UtilitiesResource(NerdeezResource):
     
     class Meta(NerdeezResource.Meta):
         allowed_methods = ['post']
-      
+        
+    def _register_user(self, email, password=None, is_active=False, username=None, request=None):
+        '''
+        create a user object
+        @param string password: 
+        @param string email: 
+        @param boolean is_active: set if the user is active 
+        @param string username: if none than will create a random username
+        @return: boolean if created the user 
+        '''
+        
+        #create the username if needed
+        api_key = ApiKey()
+        if username == None:            
+            username = api_key.generate_key()[0:30]
+            
+        #create password if needed
+        if password == None:
+            password = api_key.generate_key()[0:30]
+        
+        #set the request post to contain email password and username
+        post_values = {}
+        post_values['username'] = username
+        post_values['password1'] = password
+        post_values['password2'] = password
+        post_values['email'] = email
+        
+        #validation success
+        user_form = UserCreateForm(post_values)
+        user = None
+        if user_form.is_valid():
+            
+            #create the user
+            username = user_form.clean_username()
+            password = user_form.clean_password2()
+            user_form.save()
+            user = authenticate(username=username,
+                                password=password)
+            login(request, user)
+            user.is_active = is_active
+            user.save()
+            
+        return (user_form.is_valid(), user)
+        
     def override_urls(self):
         return [
             url(r"^(?P<resource_name>%s)/contact%s$" %
@@ -799,18 +842,6 @@ class UtilitiesResource(NerdeezResource):
         city = post.get('city')
         title = post.get('title')
         
-        #create the username
-        api_key = ApiKey()
-        username = api_key.generate_key()[0:30]
-        password = api_key.generate_key()[0:30]
-        
-        #set the request post to contain email password and username
-        post_values = {}
-        post_values['username'] = username
-        post_values['password1'] = password
-        post_values['password2'] = password
-        post_values['email'] = email
-        
         #is the email already exists?
         try:
             user = User.objects.get(email=email)
@@ -821,21 +852,9 @@ class UtilitiesResource(NerdeezResource):
         except:
             pass
         
-        #validation success
-        user_form = UserCreateForm(post_values)
-        if user_form.is_valid():
-            
-            #create the user
-            username = user_form.clean_username()
-            password = user_form.clean_password2()
-            user_form.save()
-            user = authenticate(username=username,
-                                password=password)
-            login(request, user)
-            user.is_active = False
-            user.save()
-            
-            #create the business
+        #create the user and the business profile
+        is_created, user = self._register_user(email=email, password=None, is_active=False, username=None, request=request)
+        if is_created:
             user_profile = user.profile
             user_profile.phone = phone
             user_profile.save() 
@@ -946,7 +965,12 @@ class UtilitiesResource(NerdeezResource):
     def register_user(self, request=None, **kwargs):
         '''
         api for user registration will get the following post params
-        @param uuid: 
+        @param uuid:
+        @param first_name: the users first name 
+        @param last_name: the users last name 
+        @param email: the users email 
+        @param password: the users password 
+        @return  
                  success - 201 if created containing the following details
                  {
                      success: true
@@ -963,35 +987,35 @@ class UtilitiesResource(NerdeezResource):
                      username: 'username of the user'
                      'id': '<id of user>'    
                  }
-                  
         '''
         #get the params
         post = simplejson.loads(request.body)
         uuid = post.get('uuid')
+        first_name = post.get('first_name')
+        last_name = post.get('last_name')
+        email = post.get('email')
+        password = post.get('password')
         
-        #find a user profile with this uuid if none exist than create one
-        try:
-            phone_profile = PhoneProfile.objects.get(uuid=uuid)
-            user = phone_profile.user_profile.user
-            is_created = False
-        except:
-            #create the username
-            api_key = ApiKey()
-            username = api_key.generate_key()[0:30]
-            password = api_key.generate_key()[0:30]
-            user = User()
-            user.username = username
-            user.set_password(password)
-            user.is_active = True
-            user.save()
-            user_profile = UserProfile()
-            user_profile.user = user
-            user_profile.save()
+        #check for duplicates for uuid and email
+        if PhoneProfile.objects.filter(uuid=uuid).count() > 0 or User.objects.filter(email=email).count() > 0:
+            return self.create_response(request, {
+                    'success': False,
+                    'message': "Duplicated uuid or email",
+                    }, HttpConflict)
+        
+        #create the user and the phone profile             
+        is_created, user = self._register_user(email=email, password=password, is_active=True, username=None, request=request)
+        if is_created:
+            user_profile = user.profile
             phone_profile = PhoneProfile()
             phone_profile.uuid = uuid
             phone_profile.user_profile = user_profile
             phone_profile.save()
-            is_created = True
+        else:
+            return self.create_response(request, {
+                    'success': False,
+                    'message': "Failed to create the user",
+                    }, HttpApplicationError)
             
         #create a new api key for the user
         api_keys = ApiKey.objects.filter(user=user)
@@ -1001,24 +1025,13 @@ class UtilitiesResource(NerdeezResource):
         
         ur = PhoneProfileResource()
         ur_bundle = ur.build_bundle(obj=phone_profile, request=request)
-        if is_created:
-            return self.create_response(request, {
+        return self.create_response(request, {
                     'success': True,
-                    'message': "registered a new device",
+                    'message': "registered a new user",
                     'api_key': api_key.key,
                     'username': user.username,
-                    'id': phone_profile.id,
                     'phone_profile': json.loads(ur.serialize(None, ur.full_dehydrate(ur_bundle), 'application/json')),
                     }, HttpCreated)
-        else:
-            return self.create_response(request, {
-                    'success': True,
-                    'message': "user is already registered",
-                    'api_key': api_key.key,
-                    'username': user.username,
-                    'id': phone_profile.id,
-                    'phone_profile': json.loads(ur.serialize(None, ur.full_dehydrate(ur_bundle), 'application/json')),
-                    }, HttpAccepted)
             
     def confirm_transaction(self, request=None, **kwargs):
         '''
