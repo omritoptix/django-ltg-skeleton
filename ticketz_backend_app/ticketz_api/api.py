@@ -293,6 +293,15 @@ class BusinessProfileResource(NerdeezResource):
                      }
         
 
+class PushNotificationResource(NerdeezResource):
+    '''
+    api to save the user push notification cradentials
+    '''
+    class Meta(NerdeezResource.Meta):
+        queryset = PushNotification.objects.all()
+        authentication = Authentication()
+        authorization = Authorization()
+        allowed_methods = ['post']
         
 class RegionResource(NerdeezResource):
     class Meta(NerdeezResource.Meta):
@@ -970,6 +979,8 @@ class UtilitiesResource(NerdeezResource):
         @param last_name: the users last name 
         @param email: the users email 
         @param password: the users password 
+        @param apn_token: the token for push notification ios
+        @param gcm_token: the token for push notification android
         @return  
                  success - 201 if created containing the following details
                  {
@@ -991,10 +1002,12 @@ class UtilitiesResource(NerdeezResource):
         #get the params
         post = simplejson.loads(request.body)
         uuid = post.get('uuid')
-        first_name = post.get('first_name')
-        last_name = post.get('last_name')
+        first_name = post.get('first_name', '')
+        last_name = post.get('last_name', '')
         email = post.get('email')
         password = post.get('password')
+        apn_token = post.get('apn_token', '')
+        gcm_token = post.get('gcm_token', '')
         
         #check for duplicates for uuid and email
         if PhoneProfile.objects.filter(uuid=uuid).count() > 0 or User.objects.filter(email=email).count() > 0:
@@ -1005,6 +1018,9 @@ class UtilitiesResource(NerdeezResource):
         
         #create the user and the phone profile             
         is_created, user = self._register_user(email=email, password=password, is_active=True, username=None, request=request)
+        user.first_name = first_name
+        user.last_name = last_name
+        user.save()
         if is_created:
             user_profile = user.profile
             phone_profile = PhoneProfile()
@@ -1016,6 +1032,16 @@ class UtilitiesResource(NerdeezResource):
                     'success': False,
                     'message': "Failed to create the user",
                     }, HttpApplicationError)
+            
+        #do i need to connect a push notification
+        push_notification = None
+        if gcm_token != '':
+            push_notification, is_created = PushNotification.objects.get_or_create(gcm_token=gcm_token)
+        if apn_token != '':
+            push_notification, is_created = PushNotification.objects.get_or_create(apn_token=apn_token)
+        if push_notification:
+            push_notification.phone_profile = phone_profile
+            push_notification.save()
             
         #create a new api key for the user
         api_keys = ApiKey.objects.filter(user=user)

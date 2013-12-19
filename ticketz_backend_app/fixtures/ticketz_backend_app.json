@@ -187,8 +187,7 @@
             "creation_date": "2013-11-10T13:35:09Z", 
             "user_profile": 3, 
             "modified_data": "2013-11-10T13:35:10.062Z",
-            "paymill_payment_id": "pay_d11e842b123d3d16970249eb",
-            "apn_token": "090725db017ca40e5f613a40556bb73e0bf76ebc225d64228a18a043ebf6b896"
+            "paymill_payment_id": "pay_d11e842b123d3d16970249eb"
         }
     }, 
     {
@@ -446,6 +445,17 @@
             "deal": 1, 
             "phone_profile": 1, 
             "creation_date": "2013-11-27T14:59:25"
+        }
+    },
+    {
+        "pk": 1, 
+        "model": "ticketz_backend_app.pushnotification", 
+        "fields": {
+            "apn_token": "090725db017ca40e5f613a40556bb73e0bf76ebc225d64228a18a043ebf6b896", 
+            "gcm_token": "", 
+            "phone_profile": null, 
+            "modified_data": "2013-12-19T18:21:47.324", 
+            "creation_date": "2013-12-19T18:21:11"
         }
     }
 ]

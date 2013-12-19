@@ -80,6 +80,9 @@ class UnpaidTransactionAdmin(admin.ModelAdmin):
 
 class RefundAdmin(admin.ModelAdmin):
     pass
+
+class PushNotificationAdmin(admin.ModelAdmin):
+    pass
     
 
 
@@ -104,6 +107,7 @@ admin.site.register(Logger, LoggerAdmin)
 admin.site.register(Transaction, TransactionAdmin)
 admin.site.register(UnpaidTransaction, UnpaidTransactionAdmin)
 admin.site.register(Refund, RefundAdmin)
+admin.site.register(PushNotification, PushNotificationAdmin)
 
 #===============================================================================
 # end admin site registration

@@ -42,6 +42,7 @@ v1_api.register(TransactionResource())
 v1_api.register(UnpaidTransactionResource())
 v1_api.register(LoggerResource())
 v1_api.register(RefundResource())
+v1_api.register(PushNotificationResource())
 
 #register urls
 urlpatterns = patterns('',
