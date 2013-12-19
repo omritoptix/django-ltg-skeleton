@@ -265,6 +265,7 @@ class FlatPage(NerdeezModel):
     '''
     title = models.CharField(max_length=250, blank=False, null=False, unique=True)
     html = models.TextField(blank=True, null=True)
+    icon_name = models.CharField(max_length = 50, default=None, blank=True, null=True)
     
 class Region(NerdeezModel):
     '''
