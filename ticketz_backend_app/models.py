@@ -301,6 +301,7 @@ class Category(NerdeezModel):
     '''
     title = models.CharField(max_length=100, blank=False, null=False, unique=True)
     image = models.ImageField(upload_to='img/category', default=None, blank=True, null=True, max_length=1000)
+    icon_name = models.CharField(max_length = 50, default=None, blank=True, null=True)
     
     
 class Deal(NerdeezModel):

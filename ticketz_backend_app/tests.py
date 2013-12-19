@@ -651,6 +651,13 @@ class ApiTest(ResourceTestCase):
         phone_profile = PhoneProfile.objects.get(id=self.deserialize(resp)['phone_profile']['id'])
         self.assertTrue(phone_profile.push_notification != None)
         
+    def test_icon_name(self):
+        '''
+        test that i have icon_name in category
+        '''
+        resp = self.api_client.get(uri='/api/v1/category/1/', format='json')
+        self.assertTrue('icon_name' in self.deserialize(resp))
+        
         
         
         
