@@ -17,6 +17,7 @@ from django.template import Context
 from tastypie.test import TestApiClient
 from django.utils import simplejson
 from ticketz_backend_app.custom_views import ReportView
+from django.http import HttpResponse
  
 #===============================================================================
 # end imports
@@ -92,14 +93,26 @@ class TransactionReport(ReportView):
         
         # convert a web page and store the generated PDF to a variable
         t = get_template('report_transaction.html')
+        
+
         html = t.render(Context(
                                 {
                                 'transactions': transactions,
                                 'sum_of_amount_paid_transactions' : sum_of_amount_paid_transactions,
                                 'sum_of_transactions' : sum_of_transactions 
-                                 })).encode('utf-8')       
-                                     
-        return self.render_report(html)
+                                 })).encode('utf-8')      
+                                 
+        '''
+        uncomment the next line when in production
+        also, some reports tests will fail because of the comment out
+        ''' 
+                                      
+#         return self.render_report(html)
+
+        '''
+        delete the next line when in production
+        '''
+        return HttpResponse(html)
 
 class DealReport(ReportView):
     '''
@@ -159,7 +172,17 @@ class DealReport(ReportView):
                                  'sum_of_transactions' : sum_of_transactions 
                                  })).encode('utf-8')
                                      
-        return self.render_report(html)
+        '''
+        uncomment the next line when in production
+        also, some reports tests will fail because of the comment out
+        ''' 
+                                      
+#         return self.render_report(html)
+
+        '''
+        delete the next line when in production
+        '''
+        return HttpResponse(html)
     
 #===============================================================================
 # end reports
