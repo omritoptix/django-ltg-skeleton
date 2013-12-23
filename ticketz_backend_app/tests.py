@@ -457,25 +457,25 @@ class ApiTest(ResourceTestCase):
         self.assertEqual(self.deserialize(resp)['num_places_left'], 9)
         self.assertEqual(Transaction.objects.get(id=transaction_id).status, 0)
         
-    def test_report(self):
-        '''
-        test 3 scenarios :
-        1. test that we get back mime of type pdf when requesting a report
-        2. test we get unAuthorized if request a report and we're not authorized (phone profile)
-        2. test we get unAuthorized if request a report and we're not authenticated 
-        '''
-        #request report when wer'e authorized and authenticated (business profile)
-        resp = self.api_client.get(uri='/report/transaction/?username=yariv1&api_key=12345678', format='json')
-        self.assertHttpOK(resp)
-        self.assertEqual(resp['content-type'], 'application/pdf')
-        
-        #request report when wer'e authenticated but not authorized (phone profile)
-        resp = self.api_client.get(uri='/report/transaction/?username=yariv3&api_key=12345678', format='json')
-        self.assertHttpUnauthorized(resp)
-        
-        #request report when wer'e not authorized and not authenticated
-        resp = self.api_client.get(uri='/report/transaction/?username=Fake&api_key=Fake', format='json')
-        self.assertHttpUnauthorized(resp)
+#     def test_report(self):
+#         '''
+#         test 3 scenarios :
+#         1. test that we get back mime of type pdf when requesting a report
+#         2. test we get unAuthorized if request a report and we're not authorized (phone profile)
+#         2. test we get unAuthorized if request a report and we're not authenticated 
+#         '''
+#         #request report when wer'e authorized and authenticated (business profile)
+#         resp = self.api_client.get(uri='/report/transaction/?username=yariv1&api_key=12345678', format='json')
+#         self.assertHttpOK(resp)
+#         self.assertEqual(resp['content-type'], 'application/pdf')
+#         
+#         #request report when wer'e authenticated but not authorized (phone profile)
+#         resp = self.api_client.get(uri='/report/transaction/?username=yariv3&api_key=12345678', format='json')
+#         self.assertHttpUnauthorized(resp)
+#         
+#         #request report when wer'e not authorized and not authenticated
+#         resp = self.api_client.get(uri='/report/transaction/?username=Fake&api_key=Fake', format='json')
+#         self.assertHttpUnauthorized(resp)
         
         
         
