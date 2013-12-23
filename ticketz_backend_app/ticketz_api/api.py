@@ -744,6 +744,9 @@ class UtilitiesResource(NerdeezResource):
             url(r"^(?P<resource_name>%s)/confirm-transaction%s$" %
                 (self._meta.resource_name, trailing_slash()),
                 self.wrap_view('confirm_transaction'), name="api_confirm_transaction"),
+            url(r"^(?P<resource_name>%s)/login-user%s$" %
+                (self._meta.resource_name, trailing_slash()),
+                self.wrap_view('login_user'), name="api_login_user"),
         ]
         
     def contact(self, request=None, **kwargs):
@@ -774,6 +777,55 @@ class UtilitiesResource(NerdeezResource):
                     'message': 'Successfully sent your message',
                     }, HttpAccepted )
         
+    def _login(self, request):
+        '''
+        comon login for users and business
+        '''
+        #get the params
+        post = simplejson.loads(request.body)
+        password = post.get('password')
+        email = post.get('email')
+        
+        #get the user with that email address
+        try:
+            user = User.objects.get(email=email)
+        except:
+            return {
+                    'success': False,
+                    'message': 'Invalid email or password',
+                    }
+        
+        user = auth.authenticate(username=user.username, password=password)
+        if user is None:
+            return {
+                    'success': False,
+                    'message': 'Invalid email or password',
+                    }
+        if not user.is_active:
+            return {
+                'success': False,
+                'message': 'Account not activated',
+            }
+                    
+        # Correct password, and the user is marked "active"
+        auth.login(request, user)
+        
+        #successfull login delete all the old api key of the user and create a new one
+        #api_keys = ApiKey.objects.filter(user=user)
+        #api_keys.delete()
+        api_key, created = ApiKey.objects.get_or_create(user=user)
+        api_key.save()
+        
+        return {
+                'success': True,
+                'message': 'Successfully logged in',
+                'api_key': api_key.key,
+                'username': user.username
+                }
+        
+        
+        
+        
     def login(self, request=None, **kwargs):
         '''
         login request is sent here
@@ -789,50 +841,36 @@ class UtilitiesResource(NerdeezResource):
         }
         '''
         
-        #get the params
-        post = simplejson.loads(request.body)
-        password = post.get('password')
-        email = post.get('email')
+        #get the login status
+        login_status = self._login(request)
         
-        #get the user with that email address
-        try:
-            user = User.objects.get(email=email)
-        except:
-            return self.create_response(request, {
-                    'success': False,
-                    'message': 'Invalid email or password',
-                    }, HttpUnauthorized )
-        
-        user = auth.authenticate(username=user.username, password=password)
-        if user is None:
-            return self.create_response(request, {
-                    'success': False,
-                    'message': 'Invalid email or password',
-                    }, HttpUnauthorized )
-        if not user.is_active:
-            return self.create_response(request, {
-                    'success': False,
-                    'message': 'Account not activated',
-                    }, HttpUnauthorized )
-                    
-        # Correct password, and the user is marked "active"
-        auth.login(request, user)
-        
-        #successfull login delete all the old api key of the user and create a new one
-        #api_keys = ApiKey.objects.filter(user=user)
-        #api_keys.delete()
-        api_key, created = ApiKey.objects.get_or_create(user=user)
-        api_key.save()
-
+        #if the login was unsuccessfull than return
+        if not login_status['success']:
+            return self.create_response(request, login_status, HttpUnauthorized )
+            
         ur = BusinessProfileResource()
-        ur_bundle = ur.build_bundle(obj=user.profile.business_profile.all()[0], request=request)
-        return self.create_response(request, {
-                    'success': True,
-                    'message': 'Successfully logged in',
-                    "business_profile": json.loads(ur.serialize(None, ur.full_dehydrate(ur_bundle), 'application/json')),
-                    'api_key': api_key.key,
-                    'username': user.username
-                    }, HttpAccepted )
+        ur_bundle = ur.build_bundle(obj=request.user.profile.business_profile.all()[0], request=request)
+        login_status["business_profile"] = json.loads(ur.serialize(None, ur.full_dehydrate(ur_bundle), 'application/json')) 
+        return self.create_response(request, login_status, HttpAccepted )
+    
+    def login_user(self, request=None, **kwargs):
+        '''
+        login the user from the phone
+        '''
+        
+        #get the login status
+        login_status = self._login(request)
+        
+        #if the login was unsuccessfull than return
+        if not login_status['success']:
+            return self.create_response(request, login_status, HttpUnauthorized )
+        
+        ur = PhoneProfileResource()
+        ur_bundle = ur.build_bundle(obj=request.user.profile.phone_profile.all()[0], request=request)
+        login_status["phone_profile"] = json.loads(ur.serialize(None, ur.full_dehydrate(ur_bundle), 'application/json')) 
+        return self.create_response(request, login_status, HttpAccepted )
+        
+        
         
     def register(self, request=None, **kwargs):
         '''
@@ -1007,8 +1045,6 @@ class UtilitiesResource(NerdeezResource):
         last_name = post.get('last_name', '')
         email = post.get('email')
         password = post.get('password')
-        apn_token = post.get('apn_token', '')
-        gcm_token = post.get('gcm_token', '')
         
         #check for duplicates for uuid and email
         if PhoneProfile.objects.filter(uuid=uuid).count() > 0 or User.objects.filter(email=email).count() > 0:
@@ -1033,16 +1069,6 @@ class UtilitiesResource(NerdeezResource):
                     'success': False,
                     'message': "Failed to create the user",
                     }, HttpApplicationError)
-            
-        #do i need to connect a push notification
-        push_notification = None
-        if gcm_token != '':
-            push_notification, is_created = PushNotification.objects.get_or_create(gcm_token=gcm_token)
-        if apn_token != '':
-            push_notification, is_created = PushNotification.objects.get_or_create(apn_token=apn_token)
-        if push_notification:
-            push_notification.phone_profile = phone_profile
-            push_notification.save()
             
         #create a new api key for the user
         api_keys = ApiKey.objects.filter(user=user)

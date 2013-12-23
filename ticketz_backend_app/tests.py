@@ -639,17 +639,6 @@ class ApiTest(ResourceTestCase):
         self.assertHttpConflict(resp)
         self.assertEqual(num_users + 1, User.objects.count())
         
-        resp = self.api_client.post(uri='/api/v1/utilities/register-user/', format='json', data={'uuid': 'test2', 'first_name': 'yariv2', 'last_name2': 'katz', 'email': 'test2@gmail.com', 'password': '12345678', 'apn_token': 'test'})
-        self.assertEqual(PushNotification.objects.count(), 2)
-        phone_profile = PhoneProfile.objects.get(id=self.deserialize(resp)['phone_profile']['id'])
-        self.assertTrue(phone_profile.push_notification != None)
-        
-        resp = self.api_client.post(uri='/api/v1/utilities/register-user/', format='json', data={'uuid': 'test3', 'first_name': 'yariv2', 'last_name2': 'katz', 'email': 'test3@gmail.com', 'password': '12345678', 'apn_token': '090725db017ca40e5f613a40556bb73e0bf76ebc225d64228a18a043ebf6b896'})
-        self.assertEqual(PushNotification.objects.count(), 2)
-        print '!!!!!'
-        print resp.content
-        phone_profile = PhoneProfile.objects.get(id=self.deserialize(resp)['phone_profile']['id'])
-        self.assertTrue(phone_profile.push_notification != None)
         
     def test_icon_name(self):
         '''
@@ -657,6 +646,39 @@ class ApiTest(ResourceTestCase):
         '''
         resp = self.api_client.get(uri='/api/v1/category/1/', format='json')
         self.assertTrue('icon_name' in self.deserialize(resp))
+        
+    def test_register_and_login(self):
+        '''
+        test the registration and login of a phone profile
+        '''
+        
+        #register a user
+        data = {
+                'uuid': 'foobar',
+                'first_name': 'yariv',
+                'last_name': 'katz',
+                'email': 'test@nerdeez.com',
+                'password': '12345'
+                }
+        resp = self.api_client.post(uri='/api/v1/utilities/register-user/', format='json', data=data)
+        self.assertHttpCreated(resp)
+        
+        #login the user
+        data = {
+                'email': 'test@nerdeez.com',
+                'password': '12345'
+                }
+        resp = self.api_client.post(uri='/api/v1/utilities/login-user/', format='json', data=data)
+        print resp.status_code
+        self.assertHttpAccepted(resp)
+        self.assertTrue('phone_profile' in self.deserialize(resp))
+        
+        data = {
+                'email': 'testsfasdf@nerdeez.com',
+                'password': '12345'
+                }
+        resp = self.api_client.post(uri='/api/v1/utilities/login-user/', format='json', data=data)
+        self.assertHttpUnauthorized(resp)
         
         
         
