@@ -355,7 +355,8 @@ class DealResource(NerdeezResource):
                      'status': ALL_WITH_RELATIONS,
                      'business_profile': ALL_WITH_RELATIONS,
                      'category': ALL_WITH_RELATIONS,
-                     'valid_to': ALL_WITH_RELATIONS
+                     'valid_to': ALL_WITH_RELATIONS,
+                     'valid_from': ALL_WITH_RELATIONS
                      }
         ordering = ['valid_to']
         
