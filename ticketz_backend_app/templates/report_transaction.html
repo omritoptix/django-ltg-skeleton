@@ -8,6 +8,19 @@
 
 <!-- begin report content -->
 {% block content %}
+
+	<!-- begin between dates header -->
+			<div>
+				<h3 style="text-align: center; font-weight: normal; color: #484848;text-decoration: underline">
+				{% if creation_date_from %}
+					<span style="font-weight: bold;">מתאריך : </span>{{creation_date_from|date:"d/m/Y "}}
+				{% endif %}
+				{% if creation_date_to %}
+					<span style="font-weight: bold;">עד תאריך : </span>{{creation_date_to|date:"d/m/Y"}}
+				{% endif %}
+				</h3>
+			</div>
+	<!-- end between dates header -->
 			
 	{% if transactions %}								
 
