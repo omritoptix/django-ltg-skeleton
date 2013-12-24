@@ -870,8 +870,6 @@ class UtilitiesResource(NerdeezResource):
         login_status["phone_profile"] = json.loads(ur.serialize(None, ur.full_dehydrate(ur_bundle), 'application/json')) 
         return self.create_response(request, login_status, HttpAccepted )
         
-        
-        
     def register(self, request=None, **kwargs):
         '''
         will try and register the user
