@@ -18,6 +18,9 @@ from tastypie.test import TestApiClient
 from django.utils import simplejson
 from ticketz_backend_app.custom_views import ReportView
 from django.http import HttpResponse
+import dateutil.parser
+from dateutil import tz
+from ticketz_backend_app import settings
  
 #===============================================================================
 # end imports
@@ -53,6 +56,20 @@ class TransactionReport(ReportView):
             
         # remove last comma
         business_profile_deals = business_profile_deals[:-1]
+        
+        #get the creation date from and to from the request and convert it to local time zone
+        if 'creation_date__gte' in request.GET.keys():
+            creation_date_from = dateutil.parser.parse(request.GET['creation_date__gte'])
+            creation_date_from = creation_date_from.astimezone(tz.gettz(settings.TIME_ZONE))
+        else:
+            creation_date_from = None
+            
+        if 'creation_date__lte' in request.GET.keys():
+            creation_date_to = dateutil.parser.parse(request.GET['creation_date__lte'])
+            creation_date_to = creation_date_to.astimezone(tz.gettz(settings.TIME_ZONE))
+        else:
+            creation_date_to = None
+            
         
         # copy the current request and add to it the business profile and transaction status params (the original
         # request.GET is immutable)
@@ -99,7 +116,9 @@ class TransactionReport(ReportView):
                                 {
                                 'transactions': transactions,
                                 'sum_of_amount_paid_transactions' : sum_of_amount_paid_transactions,
-                                'sum_of_transactions' : sum_of_transactions 
+                                'sum_of_transactions' : sum_of_transactions,
+                                'creation_date_from' : creation_date_from,
+                                'creation_date_to' : creation_date_to,
                                  })).encode('utf-8')      
                                  
         '''
