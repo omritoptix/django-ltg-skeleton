@@ -175,7 +175,7 @@ class ApiTest(ResourceTestCase):
         '''
         test that the filtering works
         '''
-        resp = self.api_client.get(uri='/api/v1/deal/', format='json', data={'valid_from__gte' : '2011-05-20T00:46:38', 'valid_to__lte' : '2014-05-20T00:46:38',  'status': 1, 'username': 'yariv1', 'api_key': '12345678'})
+        resp = self.api_client.get(uri='/api/v1/deal/', format='json', data={'id__in' : '2,3' , 'valid_from__gte' : '2011-05-20T00:46:38', 'valid_to__lte' : '2014-05-20T00:46:38',  'status': 1, 'username': 'yariv1', 'api_key': '12345678'})
         self.assertHttpOK(resp)
         self.assertEqual(len(self.deserialize(resp)['objects']), 1)
         
