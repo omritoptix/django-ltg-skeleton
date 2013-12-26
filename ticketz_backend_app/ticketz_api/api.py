@@ -1059,9 +1059,11 @@ class UtilitiesResource(NerdeezResource):
         
         #create the user and the phone profile             
         is_created, user = self._register_user(email=email, password=password, is_active=True, username=None, request=request)
+        print '1'
         user.first_name = first_name
         user.last_name = last_name
         user.save()
+        print '2'
         if is_created:
             user_profile = user.profile
             phone_profile = PhoneProfile()
@@ -1070,6 +1072,7 @@ class UtilitiesResource(NerdeezResource):
             phone_profile.facebook_access_token = facebook_access_token
             phone_profile.facebook_user_id = facebook_user_id
             phone_profile.save()
+            print '3'
         else:
             return self.create_response(request, {
                     'success': False,
