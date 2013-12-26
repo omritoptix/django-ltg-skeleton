@@ -261,8 +261,8 @@ class PhoneProfileResource(NerdeezResource):
         authentication = NerdeezApiKeyAuthentication()
         authorization = NerdeezOnlyOwnerCanReadAuthorization()
         allowed_methods = ['get', 'put']
-        read_only_fields = ['paymill_client_id', 'paymill_payment_id', 'user_profile', 'uuid']
-        invisible_fields = ['paymill_client_id', 'paymill_payment_id', 'apn_token', 'gcm_token']
+        read_only_fields = ['paymill_client_id', 'paymill_payment_id', 'user_profile', 'uuid', 'facebook_user_id', 'facebook_access_token']
+        invisible_fields = ['paymill_client_id', 'paymill_payment_id', 'apn_token', 'gcm_token', 'facebook_user_id', 'facebook_access_token']
         
     def dehydrate(self, bundle):
         '''
@@ -748,6 +748,9 @@ class UtilitiesResource(NerdeezResource):
             url(r"^(?P<resource_name>%s)/login-user%s$" %
                 (self._meta.resource_name, trailing_slash()),
                 self.wrap_view('login_user'), name="api_login_user"),
+            url(r"^(?P<resource_name>%s)/register-facebook%s$" %
+                (self._meta.resource_name, trailing_slash()),
+                self.wrap_view('register_facebook'), name="api_register_facebook"),
         ]
         
     def contact(self, request=None, **kwargs):
@@ -950,7 +953,7 @@ class UtilitiesResource(NerdeezResource):
         else:
             return self.create_response(request, {
                     'success': False,
-                    'message': [(k, v[0]) for k, v in user_form.errors.items()],
+                    'message': 'Failed to register the user',
                     }, HttpBadRequest )
             
     def forgot_password(self, request=None, **kwargs):
@@ -1044,6 +1047,8 @@ class UtilitiesResource(NerdeezResource):
         last_name = post.get('last_name', '')
         email = post.get('email')
         password = post.get('password')
+        facebook_user_id = post.get('facebook_user_id', None)
+        facebook_access_token = post.get('facebook_access_token', None)
         
         #check for duplicates for uuid and email
         if PhoneProfile.objects.filter(uuid=uuid).count() > 0 or User.objects.filter(email=email).count() > 0:
@@ -1062,6 +1067,8 @@ class UtilitiesResource(NerdeezResource):
             phone_profile = PhoneProfile()
             phone_profile.uuid = uuid
             phone_profile.user_profile = user_profile
+            phone_profile.facebook_access_token = facebook_access_token
+            phone_profile.facebook_user_id = facebook_user_id
             phone_profile.save()
         else:
             return self.create_response(request, {
@@ -1084,6 +1091,62 @@ class UtilitiesResource(NerdeezResource):
                     'username': user.username,
                     'phone_profile': json.loads(ur.serialize(None, ur.full_dehydrate(ur_bundle), 'application/json')),
                     }, HttpCreated)
+        
+    def register_facebook(self, request=None, **kwargs):
+        '''
+        api for user facebook registration will get the following post params
+        @param uuid:
+        @param first_name: the users first name 
+        @param last_name: the users last name 
+        @param email: the users email 
+        @param facebook_user_id: the users id on facebook 
+        @param facebook_access_token: the users token on facebook 
+        @param password: will need something to do the registration
+        @return  
+                 success - 201 if created containing the following details
+                 {
+                     success: true
+                     message: 'registered a new device'
+                     api_key: 'api key for the user'
+                     username: 'username of the user',
+                     'phone_profile': '<profile object>'  
+                 }
+                 success - 202 if user exists containing the following details
+                 {
+                     success: true
+                     message: 'user is already registered'
+                     api_key: 'api key for the user'
+                     username: 'username of the user'
+                     'phone_profile': '<profile object>'    
+                 }
+        '''
+        
+        #get the params
+        post = simplejson.loads(request.body)
+        facebook_user_id = post.get('facebook_user_id', '')
+        facebook_access_token = post.get('facebook_access_token', '')
+        
+        #first lets check if the user exists
+        user = None
+        try:
+            phone_profile = PhoneProfile.objects.get(facebook_access_token=facebook_access_token, facebook_user_id=facebook_user_id)
+            user = phone_profile.user_profile.user
+            api_key, created = ApiKey.objects.get_or_create(user=user)
+            ur = PhoneProfileResource()
+            ur_bundle = ur.build_bundle(obj=phone_profile, request=request)
+            return self.create_response(request, {
+                        'success': True,
+                        'message': "registered a new user",
+                        'api_key': api_key.key,
+                        'username': user.username,
+                        'phone_profile': json.loads(ur.serialize(None, ur.full_dehydrate(ur_bundle), 'application/json')),
+                        }, HttpAccepted)
+        except:
+            pass
+        
+        #if we didnt find the user than we need to register him
+        return self.register_user(request)
+            
             
     def confirm_transaction(self, request=None, **kwargs):
         '''
