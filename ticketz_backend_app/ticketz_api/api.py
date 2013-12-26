@@ -1058,8 +1058,6 @@ class UtilitiesResource(NerdeezResource):
                     }, HttpConflict)
         
         #create the user and the phone profile    
-        print email
-        print password     
         is_created, user = self._register_user(email=email, password=password, is_active=True, username=None, request=request)
         print '1'
         user.first_name = first_name
@@ -1071,8 +1069,10 @@ class UtilitiesResource(NerdeezResource):
             phone_profile = PhoneProfile()
             phone_profile.uuid = uuid
             phone_profile.user_profile = user_profile
+            print facebook_access_token
             phone_profile.facebook_access_token = facebook_access_token
             phone_profile.facebook_user_id = facebook_user_id
+            print facebook_user_id
             phone_profile.save()
             print '3'
         else:
