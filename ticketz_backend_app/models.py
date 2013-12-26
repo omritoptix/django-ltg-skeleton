@@ -182,7 +182,7 @@ class PhoneProfile(BaseProfile):
     paymill_client_id = models.CharField(max_length=50, default=None, blank=True, null=True)
     paymill_payment_id = models.CharField(max_length=50, default=None, blank=True, null=True)
     facebook_user_id = models.CharField(max_length=50, default=None, blank=True, null=True)
-    facebook_access_token = models.CharField(max_length=200, default=None, blank=True, null=True)
+    facebook_access_token = models.CharField(max_length=300, default=None, blank=True, null=True)
     
     
 class BusinessProfile(BaseProfile):
