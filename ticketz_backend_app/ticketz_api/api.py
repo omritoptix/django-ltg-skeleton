@@ -1057,7 +1057,9 @@ class UtilitiesResource(NerdeezResource):
                     'message': "Duplicated uuid or email",
                     }, HttpConflict)
         
-        #create the user and the phone profile             
+        #create the user and the phone profile    
+        print email
+        print password     
         is_created, user = self._register_user(email=email, password=password, is_active=True, username=None, request=request)
         print '1'
         user.first_name = first_name
