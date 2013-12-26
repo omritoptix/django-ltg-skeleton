@@ -125,7 +125,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'ticketz_backend_app.exception_middleware.ProcessExceptionMiddleware',
+#     'ticketz_backend_app.exception_middleware.ProcessExceptionMiddleware',
     'ticketz_backend_app.jsonp_middleware.JsonpMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
