@@ -264,7 +264,7 @@ class PhoneProfileResource(NerdeezResource):
         authentication = NerdeezApiKeyAuthentication()
         authorization = NerdeezOnlyOwnerCanReadAuthorization()
         allowed_methods = ['get', 'put']
-        read_only_fields = ['paymill_client_id', 'paymill_payment_id', 'user_profile', 'uuid', 'facebook_user_id', 'facebook_access_token']
+        read_only_fields = ['paymill_client_id', 'paymill_payment_id', 'user_profile', 'facebook_user_id', 'facebook_access_token']
         invisible_fields = ['paymill_client_id', 'paymill_payment_id', 'apn_token', 'gcm_token', 'facebook_user_id', 'facebook_access_token']
         
     def dehydrate(self, bundle):
@@ -1045,14 +1045,13 @@ class UtilitiesResource(NerdeezResource):
         '''
         #get the params
         post = simplejson.loads(request.body)
-        uuid = post.get('uuid', None)
         first_name = post.get('first_name', '')
         last_name = post.get('last_name', '')
         email = post.get('email')
         password = post.get('password')
         
         #check for duplicates for uuid and email
-        if PhoneProfile.objects.filter(uuid=uuid).count() > 0 or User.objects.filter(email=email).count() > 0:
+        if User.objects.filter(email=email).count() > 0:
             return self.create_response(request, {
                     'success': False,
                     'message': "Duplicated uuid or email",
@@ -1066,7 +1065,6 @@ class UtilitiesResource(NerdeezResource):
         if is_created:
             user_profile = user.profile
             phone_profile = PhoneProfile()
-            phone_profile.uuid = uuid
             phone_profile.user_profile = user_profile
             phone_profile.save()
         else:

@@ -185,7 +185,7 @@ class ApiTest(ResourceTestCase):
         test the registration through the smartphone
         also test the registerd user can't add a deal
         '''
-        resp = self.api_client.post(uri='/api/v1/utilities/register-user/', format='json', data={'uuid': 'test', 'first_name': 'yariv', 'last_name': 'katz', 'email': 'test@gmail.com', 'password': '12345678'})
+        resp = self.api_client.post(uri='/api/v1/utilities/register-user/', format='json', data={'first_name': 'yariv', 'last_name': 'katz', 'email': 'test@gmail.com', 'password': '12345678'})
         self.assertHttpCreated(resp)
         username = self.deserialize(resp)['username']
         api_key = self.deserialize(resp)['api_key']
@@ -385,9 +385,9 @@ class ApiTest(ResourceTestCase):
         '''
         resp = self.api_client.get(uri='/api/v1/phoneprofile/1/?username=yariv1&api_key=12345678', format='json')
         self.assertHttpUnauthorized(resp)
-        resp = self.api_client.put(uri='/api/v1/phoneprofile/1/?username=yariv1&api_key=12345678', format='json', data={'uuid': '12345678'})
+        resp = self.api_client.put(uri='/api/v1/phoneprofile/1/?username=yariv1&api_key=12345678', format='json', data={'paymill_payment_id': '12345678'})
         self.assertHttpUnauthorized(resp)
-        self.assertNotEqual(PhoneProfile.objects.get(id=1).uuid, '12345678')
+        self.assertNotEqual(PhoneProfile.objects.get(id=1).paymill_payment_id, '12345678')
         
     def test_deal_contain_business(self):
         '''
@@ -624,18 +624,15 @@ class ApiTest(ResourceTestCase):
         '''
         
         num_users = User.objects.count()
-        resp = self.api_client.post(uri='/api/v1/utilities/register-user/', format='json', data={'uuid': 'test', 'first_name': 'yariv', 'last_name': 'katz', 'email': 'test@gmail.com', 'password': '12345678'})
+        resp = self.api_client.post(uri='/api/v1/utilities/register-user/', format='json', data={'first_name': 'yariv', 'last_name': 'katz', 'email': 'test@gmail.com', 'password': '12345678'})
         self.assertHttpCreated(resp)
         self.assertEqual(num_users + 1, User.objects.count())
         self.assertTrue('api_key' in self.deserialize(resp))
         self.assertTrue('username' in self.deserialize(resp))
         self.assertTrue('phone_profile' in self.deserialize(resp))
         
-        resp = self.api_client.post(uri='/api/v1/utilities/register-user/', format='json', data={'uuid': 'test', 'first_name': 'yariv', 'last_name': 'katz', 'email': 'ywarezk1@gmail.com', 'password': '12345678'})
-        self.assertHttpConflict(resp)
-        self.assertEqual(num_users + 1, User.objects.count())
         
-        resp = self.api_client.post(uri='/api/v1/utilities/register-user/', format='json', data={'uuid': 'dfgsdfgs', 'first_name': 'yariv', 'last_name': 'katz', 'email': 'test@gmail.com', 'password': '12345678'})
+        resp = self.api_client.post(uri='/api/v1/utilities/register-user/', format='json', data={'first_name': 'yariv', 'last_name': 'katz', 'email': 'test@gmail.com', 'password': '12345678'})
         self.assertHttpConflict(resp)
         self.assertEqual(num_users + 1, User.objects.count())
         
@@ -654,7 +651,6 @@ class ApiTest(ResourceTestCase):
         
         #register a user
         data = {
-                'uuid': 'foobar',
                 'first_name': 'yariv',
                 'last_name': 'katz',
                 'email': 'test@nerdeez.com',

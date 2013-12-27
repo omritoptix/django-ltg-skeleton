@@ -183,7 +183,6 @@
         "pk": 1, 
         "model": "ticketz_backend_app.phoneprofile", 
         "fields": {
-            "uuid": null, 
             "creation_date": "2013-11-10T13:35:09Z", 
             "user_profile": 3, 
             "modified_data": "2013-11-10T13:35:10.062Z",
@@ -194,7 +193,6 @@
         "pk": 2, 
         "model": "ticketz_backend_app.phoneprofile", 
         "fields": {
-            "uuid": null, 
             "creation_date": "2013-11-10T13:35:09Z", 
             "user_profile": 4, 
             "modified_data": "2013-11-10T13:35:10.062Z"
@@ -204,7 +202,6 @@
         "pk": 3, 
         "model": "ticketz_backend_app.phoneprofile", 
         "fields": {
-            "uuid": null, 
             "creation_date": "2014-11-10T13:35:09Z", 
             "user_profile": 1, 
             "modified_data": "2014-11-10T13:35:10.062Z"
@@ -214,7 +211,6 @@
         "pk": 4, 
         "model": "ticketz_backend_app.phoneprofile", 
         "fields": {
-            "uuid": null, 
             "creation_date": "2013-11-17T13:35:09Z", 
             "user_profile": 2, 
             "modified_data": "2013-11-17T13:35:10.062Z"

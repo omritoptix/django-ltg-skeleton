@@ -63,7 +63,7 @@ class BusinessProfileAdmin(admin.ModelAdmin):
     send_activation.allow_tags = True
     
 class PhoneProfileAdmin(admin.ModelAdmin):
-    list_display = ('id', 'uuid', 'get_email')
+    list_display = ('id', 'get_email')
     
     def get_email(self, phone_profile):
         return phone_profile.user_profile.user.email
