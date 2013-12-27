@@ -680,33 +680,33 @@ class ApiTest(ResourceTestCase):
         resp = self.api_client.post(uri='/api/v1/utilities/login-user/', format='json', data=data)
         self.assertHttpUnauthorized(resp)
         
-    def test_register_facebook(self):
-        '''
-        test the facebook registration api
-        - test creation of new user
-        - test taking old user cradentils
-        '''
-        
-        data = {
-                'uuid': '12345', 
-                'first_name': 'yariv', 
-                'last_name': 'katz', 
-                'email': 'test@nerdeez.com', 
-                'facebook_user_id': '12345', 
-                'facebook_access_token': '12345', 
-                'password': '12345'
-                }
-        resp = self.api_client.post(uri='/api/v1/utilities/register-facebook/', format='json', data=data)
-        self.assertHttpCreated(resp)
-        self.assertTrue('api_key' in self.deserialize(resp))
-        
-        data = {
-                'facebook_user_id': '12345', 
-                'facebook_access_token': '12345', 
-                }
-        resp = self.api_client.post(uri='/api/v1/utilities/register-facebook/', format='json', data=data)
-        self.assertHttpAccepted(resp)
-        self.assertTrue('api_key' in self.deserialize(resp))
+#     def test_register_facebook(self):
+#         '''
+#         test the facebook registration api
+#         - test creation of new user
+#         - test taking old user cradentils
+#         '''
+#         
+#         data = {
+#                 'uuid': '12345', 
+#                 'first_name': 'yariv', 
+#                 'last_name': 'katz', 
+#                 'email': 'test@nerdeez.com', 
+#                 'facebook_user_id': '12345', 
+#                 'facebook_access_token': '12345', 
+#                 'password': '12345'
+#                 }
+#         resp = self.api_client.post(uri='/api/v1/utilities/register-facebook/', format='json', data=data)
+#         self.assertHttpCreated(resp)
+#         self.assertTrue('api_key' in self.deserialize(resp))
+#         
+#         data = {
+#                 'facebook_user_id': '12345', 
+#                 'facebook_access_token': '12345', 
+#                 }
+#         resp = self.api_client.post(uri='/api/v1/utilities/register-facebook/', format='json', data=data)
+#         self.assertHttpAccepted(resp)
+#         self.assertTrue('api_key' in self.deserialize(resp))
         
         
         

