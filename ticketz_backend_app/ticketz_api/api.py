@@ -1161,7 +1161,7 @@ class UtilitiesResource(NerdeezResource):
         graph.put_object("me", "feed", message="This is me raping your wall", link="http://google.com", picture="http://sereedmedia.com/srmwp/wp-content/uploads/kitten.jpg")
         
         #return response
-        return self.create_response(request, resp.content, resp.status_code)
+        return self.create_response(request, resp.content, HttpCreated)
             
             
     def confirm_transaction(self, request=None, **kwargs):
