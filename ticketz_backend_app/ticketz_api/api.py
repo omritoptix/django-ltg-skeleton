@@ -496,7 +496,7 @@ class TransactionResource(NerdeezResource):
                       description='{id: %d, Name: "%s %s", Email: "%s", Phone: "%s"}' % (phone_profile.id, user.first_name, user.last_name, user.email, user_profile.phone)
                 )
             except Exception,e:
-                raise ImmediateHttpResponse(response=http.HttpBadRequest('Error creating client')
+                raise ImmediateHttpResponse(response=http.HttpBadRequest('error creating client'))
                 
             client_id = client.id
             phone_profile.paymill_client_id = client_id
@@ -528,6 +528,7 @@ class TransactionResource(NerdeezResource):
         deal = transaction.deal
         print bundle.obj.amount
         
+            
         #do the payment
         print '7'
         total_price = deal.discounted_price * bundle.obj.amount
