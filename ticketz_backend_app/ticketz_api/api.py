@@ -456,10 +456,7 @@ class TransactionResource(NerdeezResource):
         
         #get params
         print '1'
-        email = bundle.data.get('email', '')
         token = bundle.data.get('token','')
-        first_name = bundle.data.get('first_name', '')
-        last_name = bundle.data.get('last_name', '')
         phone = bundle.data.get('phone', '')
         bundle.data['status'] = 2
         if 'amount' in bundle.data:
@@ -476,16 +473,9 @@ class TransactionResource(NerdeezResource):
         #update the user object with the data entered
         print '3'
         try:
-            if first_name != '':
-                user.first_name = first_name
-            if last_name != '':
-                user.last_name = last_name
-            if email != '':
-                user.email = email
             if phone != '':
                 user_profile.phone = phone
                 user_profile.save()
-            user.save()
         except Exception, e:
             print e.message
             
@@ -538,7 +528,6 @@ class TransactionResource(NerdeezResource):
         deal = transaction.deal
         print bundle.obj.amount
         
-            
         #do the payment
         print '7'
         total_price = deal.discounted_price * bundle.obj.amount
