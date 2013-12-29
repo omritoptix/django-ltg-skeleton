@@ -495,7 +495,7 @@ class TransactionResource(NerdeezResource):
                 print '{id: %d, Name: "%s %s", Email: "%s", Phone: "%s"}' % (phone_profile.id, user.first_name, user.last_name, user.email, user_profile.phone)
                 client = p.new_client(
                       email=user.email,
-                      description=u'{id: %d, Name: "%s %s", Email: "%s", Phone: "%s"}' % (phone_profile.id, user.first_name, user.last_name, user.email, user_profile.phone)
+                      description=u'{id: %d, Name: "%s %s", Email: "%s", Phone: "%s"}' % (phone_profile.id, unicode(user.first_name), unicode(user.last_name), user.email, user_profile.phone)
                 )
             except Exception,e:
                 raise ImmediateHttpResponse(response=http.HttpBadRequest(e))
