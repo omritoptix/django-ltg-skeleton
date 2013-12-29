@@ -491,12 +491,14 @@ class TransactionResource(NerdeezResource):
             if user.email == None:
                 raise ImmediateHttpResponse(response=http.HttpBadRequest("user doesn't have a client defined - you must pass an email"))
             try:
+                print user.email
+                print '{id: %d, Name: "%s %s", Email: "%s", Phone: "%s"}' % (phone_profile.id, user.first_name, user.last_name, user.email, user_profile.phone)
                 client = p.new_client(
                       email=user.email,
                       description='{id: %d, Name: "%s %s", Email: "%s", Phone: "%s"}' % (phone_profile.id, user.first_name, user.last_name, user.email, user_profile.phone)
                 )
             except Exception,e:
-                raise ImmediateHttpResponse(response=http.HttpBadRequest('error creating client'))
+                raise ImmediateHttpResponse(response=http.HttpBadRequest(e))
                 
             client_id = client.id
             phone_profile.paymill_client_id = client_id
