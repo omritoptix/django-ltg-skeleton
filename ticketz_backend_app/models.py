@@ -239,8 +239,8 @@ class PushNotification(NerdeezModel):
     '''
     
     phone_profile = models.ForeignKey(PhoneProfile, related_name='push_notification', blank=True, null=True)
-    apn_token = models.CharField(max_length=100, default=None, blank=True, null=True, unique=True)
-    gcm_token = models.CharField(max_length=100, default=None, blank=True, null=True, unique=True)
+    apn_token = models.CharField(max_length=200, default=None, blank=True, null=True, unique=True)
+    gcm_token = models.CharField(max_length=200, default=None, blank=True, null=True, unique=True)
     objects = PushNotificationManager()
     
     def __unicode__(self):
