@@ -631,6 +631,10 @@ class ApiTest(ResourceTestCase):
         self.assertTrue('username' in self.deserialize(resp))
         self.assertTrue('phone_profile' in self.deserialize(resp))
         
+        resp = self.api_client.post(uri='/api/v1/utilities/register-user/', format='json', data={'first_name': 'yariv', 'last_name': 'katz', 'email': 'test@gmail.com', 'password': '12345678'})
+        self.assertHttpConflict(resp)
+        self.assertEqual(num_users + 1, User.objects.count())
+        
     def test_deal_dates_timezone(self):
         '''
         test that the dates returned from the post response when a deal is created
@@ -668,13 +672,11 @@ class ApiTest(ResourceTestCase):
         get_resp_valid_from =  objects['valid_from']
         
         #check the post valid_From and get valid_from are equal
+        print post_resp_valid_from
+        print get_resp_valid_from
+        print Deal.objects.get(id=post_resp_id).valid_from;
         self.assertEqual(post_resp_valid_from,get_resp_valid_from)
 
-        
-        resp = self.api_client.post(uri='/api/v1/utilities/register-user/', format='json', data={'first_name': 'yariv', 'last_name': 'katz', 'email': 'test@gmail.com', 'password': '12345678'})
-        self.assertHttpConflict(resp)
-        self.assertEqual(num_users + 1, User.objects.count())
-        
         
     def test_icon_name(self):
         '''
