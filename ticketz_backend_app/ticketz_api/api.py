@@ -477,7 +477,7 @@ class TransactionResource(NerdeezResource):
                 user_profile.phone = phone
                 user_profile.save()
         except Exception, e:
-            print e.message
+            print e
             
         #create a paymill instance
         print '4'
@@ -518,7 +518,7 @@ class TransactionResource(NerdeezResource):
                     client=p.get_client(client_id)
                 )
             except Exception,e:
-                raise ImmediateHttpResponse(response=http.HttpBadRequest(e.message['error']))
+                raise ImmediateHttpResponse(response=http.HttpBadRequest(e))
             payment_id = payment.id
             phone_profile.paymill_payment_id = payment_id
             phone_profile.save()
@@ -543,7 +543,7 @@ class TransactionResource(NerdeezResource):
                     )
             transaction_id = transaction.id
         except Exception,e:
-            raise ImmediateHttpResponse(response=http.HttpBadRequest(e.message['error']))
+            raise ImmediateHttpResponse(response=http.HttpBadRequest(e))
                 
         bundle.data['paymill_transaction_id'] = transaction_id
         
@@ -571,7 +571,7 @@ class TransactionResource(NerdeezResource):
             print user_profile.phone
             NerdeezResource.send_sms(user_profile.phone, message)
         except Exception,e:
-            raise ImmediateHttpResponse(response=http.HttpBadRequest(e.message))
+            raise ImmediateHttpResponse(response=http.HttpBadRequest(e))
         
         return super(TransactionResource, self).obj_update(bundle, skip_errors=skip_errors, **kwargs)
     
