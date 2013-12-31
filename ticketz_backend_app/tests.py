@@ -631,6 +631,45 @@ class ApiTest(ResourceTestCase):
         self.assertTrue('username' in self.deserialize(resp))
         self.assertTrue('phone_profile' in self.deserialize(resp))
         
+    def test_deal_dates_timezone(self):
+        '''
+        test that the dates returned from the post response when a deal is created
+        has the same timezone as dates returned from a get request to the same deal
+        '''
+
+        #post a new deal
+        resp = self.api_client.post(uri='/api/v1/deal/', format='json', data={
+                                                                              'username': 'yariv1', 
+                                                                              'api_key': '12345678', 
+                                                                              "title":"M&M",
+                                                                              "description":"a",
+                                                                              "valid_from":"Wed, 20 Nov 2013 12:53:00 GMT",
+                                                                              "valid_to":"Wed, 20 Nov 2013 14:53:00 GMT",
+                                                                              "num_total_places":5,
+                                                                              "image":None,
+                                                                              "original_price":5,
+                                                                              "discounted_price":2,
+                                                                              "status":0,
+                                                                              "num_available_places":5,
+                                                                              "creation_date":None,
+                                                                              "business_profile":"/api/v1/businessprofile/1/",
+                                                                              "category":"/api/v1/category/1/"
+        })
+        
+        #get the valid_from from the post response
+        post_resp_valid_from = self.deserialize(resp)['valid_from']
+        post_resp_id = self.deserialize(resp)['id']
+        
+        #get the deal we've just posted
+        resp = self.api_client.get(uri='/api/v1/deal/?username=yariv4&api_key=12345678&id=' + str(post_resp_id) ,format='json')
+    
+        #get valid_from from the get response
+        objects = self.deserialize(resp)['objects'][0]
+        get_resp_valid_from =  objects['valid_from']
+        
+        #check the post valid_From and get valid_from are equal
+        self.assertEqual(post_resp_valid_from,get_resp_valid_from)
+
         
         resp = self.api_client.post(uri='/api/v1/utilities/register-user/', format='json', data={'first_name': 'yariv', 'last_name': 'katz', 'email': 'test@gmail.com', 'password': '12345678'})
         self.assertHttpConflict(resp)
