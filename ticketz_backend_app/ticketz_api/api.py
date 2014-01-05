@@ -1010,13 +1010,11 @@ class UtilitiesResource(NerdeezResource):
     def register_user(self, request=None, **kwargs):
         '''
         api for user registration will get the following post params
-        @param uuid:
         @param first_name: the users first name 
         @param last_name: the users last name 
         @param email: the users email 
         @param password: the users password 
-        @param apn_token: the token for push notification ios
-        @param gcm_token: the token for push notification android
+        @param phone: the users phone number 
         @return  
                  success - 201 if created containing the following details
                  {
@@ -1041,9 +1039,10 @@ class UtilitiesResource(NerdeezResource):
         last_name = post.get('last_name', '')
         email = post.get('email')
         password = post.get('password')
+        phone = post.get('phone', '')
         
         #check for duplicates for uuid and email
-        if User.objects.filter(email=email).count() > 0:
+        if User.objects.filter(email=email).count() > 0 or UserProfile.objects.filter(phone=phone).count() > 0:
             return self.create_response(request, {
                     'success': False,
                     'message': "Duplicated uuid or email",
@@ -1058,6 +1057,7 @@ class UtilitiesResource(NerdeezResource):
             user_profile = user.profile
             phone_profile = PhoneProfile()
             phone_profile.user_profile = user_profile
+            phone_profile.phone = phone
             phone_profile.save()
         else:
             return self.create_response(request, {
