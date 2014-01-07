@@ -1055,6 +1055,8 @@ class UtilitiesResource(NerdeezResource):
         user.save()
         if is_created:
             user_profile = user.profile
+            user_profile.phone = phone
+            user_profile.save()
             phone_profile = PhoneProfile()
             phone_profile.user_profile = user_profile
             phone_profile.phone = phone

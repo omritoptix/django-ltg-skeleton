@@ -719,6 +719,16 @@ class ApiTest(ResourceTestCase):
         resp = self.api_client.post(uri='/api/v1/utilities/login-user/', format='json', data=data)
         self.assertHttpUnauthorized(resp)
         
+    def test_register_bug_save_phone(self):
+        '''
+        there was a bug in the registration with saving the users phone
+        '''
+        
+        resp = self.api_client.post(uri='/api/v1/utilities/register-user/', format='json', data={'first_name': 'yariv', 'last_name': 'katz', 'email': 'test@test.test', 'phone': '111111'})
+        self.assertHttpCreated(resp)
+        phone_profile = PhoneProfile.objects.get(id=self.deserialize(resp)['phone_profile']['id'])
+        self.assertEqual(phone_profile.user_profile.phone, '111111')
+        
 #     def test_register_facebook(self):
 #         '''
 #         test the facebook registration api
