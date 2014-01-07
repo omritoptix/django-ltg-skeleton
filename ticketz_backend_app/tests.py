@@ -695,7 +695,8 @@ class ApiTest(ResourceTestCase):
                 'first_name': 'yariv',
                 'last_name': 'katz',
                 'email': 'test@nerdeez.com',
-                'password': '12345'
+                'password': '12345',
+                'phone': '12345'
                 }
         resp = self.api_client.post(uri='/api/v1/utilities/register-user/', format='json', data=data)
         self.assertHttpCreated(resp)
@@ -707,6 +708,7 @@ class ApiTest(ResourceTestCase):
                 }
         resp = self.api_client.post(uri='/api/v1/utilities/login-user/', format='json', data=data)
         print resp.status_code
+        print resp.content
         self.assertHttpAccepted(resp)
         self.assertTrue('phone_profile' in self.deserialize(resp))
         

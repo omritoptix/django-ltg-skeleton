@@ -180,6 +180,7 @@ class PhoneProfile(BaseProfile):
     user_profile = models.ForeignKey(UserProfile, related_name='phone_profile')
     paymill_client_id = models.CharField(max_length=50, default=None, blank=True, null=True)
     paymill_payment_id = models.CharField(max_length=50, default=None, blank=True, null=True)
+    is_anonymous = models.BooleanField(default = True)
     
     
 class BusinessProfile(BaseProfile):

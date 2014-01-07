@@ -457,7 +457,6 @@ class TransactionResource(NerdeezResource):
         #get params
         print '1'
         token = bundle.data.get('token','')
-        phone = bundle.data.get('phone', '')
         bundle.data['status'] = 2
         if 'amount' in bundle.data:
             del bundle.data['amount']
@@ -469,15 +468,6 @@ class TransactionResource(NerdeezResource):
         user = bundle.request.user
         user_profile = user.get_profile()
         phone_profile = user_profile.phone_profile.all()[0]
-            
-        #update the user object with the data entered
-        print '3'
-        try:
-            if phone != '':
-                user_profile.phone = phone
-                user_profile.save()
-        except Exception, e:
-            print e
             
         #create a paymill instance
         print '4'
@@ -1033,20 +1023,30 @@ class UtilitiesResource(NerdeezResource):
                      'id': '<id of user>'    
                  }
         '''
+        #random password if necessary
+        api_key = ApiKey()
+        new_pass = api_key.generate_key()
+        
         #get the params
         post = simplejson.loads(request.body)
         first_name = post.get('first_name', '')
         last_name = post.get('last_name', '')
         email = post.get('email')
-        password = post.get('password')
+        password = post.get('password', '')
         phone = post.get('phone', '')
         
-        #check for duplicates for uuid and email
-        if User.objects.filter(email=email).count() > 0 or UserProfile.objects.filter(phone=phone).count() > 0:
-            return self.create_response(request, {
-                    'success': False,
-                    'message': "Duplicated uuid or email",
-                    }, HttpConflict)
+        is_register_anon = password == '' or password == None
+        
+        if is_register_anon:
+            password = new_pass
+        
+        #check for duplicates for uuid and email of registered users
+        if not is_register_anon:
+            if PhoneProfile.objects.filter(is_anonymous=False, user_profile__user__email=email).count() > 0:
+                return self.create_response(request, {
+                         'success': False,
+                         'message': "Duplicated uuid or email",
+                         }, HttpConflict)
         
         #create the user and the phone profile    
         is_created, user = self._register_user(email=email, password=password, is_active=True, username=None, request=request)
@@ -1058,6 +1058,7 @@ class UtilitiesResource(NerdeezResource):
             phone_profile = PhoneProfile()
             phone_profile.user_profile = user_profile
             phone_profile.phone = phone
+            phone_profile.is_anonymous = is_register_anon
             phone_profile.save()
         else:
             return self.create_response(request, {
