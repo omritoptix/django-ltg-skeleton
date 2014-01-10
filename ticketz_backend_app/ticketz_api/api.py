@@ -529,7 +529,7 @@ class TransactionResource(NerdeezResource):
             transaction = p.transact(
                         amount=int(total_price) * 100,
                         currency='ILS',
-                        description='{user_phone_id: %d, amount_purchased: %d, deal_id: %d, first_name: "%s", last_name: "%s", email: "%s", phone: "%s"}' % (phone_profile.id, bundle.obj.amount, deal.id, user.first_name, user.last_name, user.email, user_profile.phone),
+                        description='{user_phone_id: %d, amount_purchased: %d, deal_id: %d, email: "%s", phone: "%s"}' % (phone_profile.id, bundle.obj.amount, deal.id, user.email, user_profile.phone),
                         payment=payment_id
                     )
             transaction_id = transaction.id
