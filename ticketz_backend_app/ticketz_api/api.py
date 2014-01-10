@@ -250,8 +250,8 @@ class UserProfileResource(NerdeezResource):
         read_only_fields = ['user', 'phone']
     
     def dehydrate(self, bundle):
-        bundle.data['first_name'] = bundle.obj.user.first_name
-        bundle.data['last_name'] = bundle.obj.user.last_name
+#         bundle.data['first_name'] = bundle.obj.user.first_name
+#         bundle.data['last_name'] = bundle.obj.user.last_name
         bundle.data['email'] = bundle.obj.user.email
         return super(UserProfileResource, self).dehydrate(bundle)
         
