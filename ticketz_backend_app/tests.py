@@ -741,6 +741,10 @@ class ApiTest(ResourceTestCase):
         self.assertHttpCreated(resp)
         self.assertEqual(UserProfile.objects.filter(phone='111111').count(), 1)
         self.assertEqual(PhoneProfile.objects.count(), old_phone_count + 1)
+        resp = self.api_client.post(uri='/api/v1/utilities/register-user/', format='json', data={'first_name': 'yariv', 'last_name': 'katz', 'email': 'test@test.test', 'phone': '111111', 'password': '12345'})
+        self.assertHttpCreated(resp)
+        self.assertEqual(UserProfile.objects.filter(phone='111111').count(), 2)
+        self.assertEqual(PhoneProfile.objects.count(), old_phone_count + 2)
         
 #     def test_register_facebook(self):
 #         '''
