@@ -470,7 +470,8 @@ class TransactionResource(NerdeezResource):
         user_profile = user.get_profile()
         phone_profile = user_profile.phone_profile.all()[0]
         
-        print user.first_name
+        name = u"{0} {1}".format(user.first_name, user.last_name)
+        print name
             
         #create a paymill instance
         print '4'
