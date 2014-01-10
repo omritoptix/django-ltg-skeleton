@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 contains the db models
 Created on November 7th, 2013

@@ -564,6 +564,7 @@ class TransactionResource(NerdeezResource):
         except Exception,e:
             raise ImmediateHttpResponse(response=http.HttpBadRequest(e))
         
+        print '10'
         return super(TransactionResource, self).obj_update(bundle, skip_errors=skip_errors, **kwargs)
     
 class RefundResource(NerdeezResource):
