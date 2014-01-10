@@ -469,6 +469,8 @@ class TransactionResource(NerdeezResource):
         user = bundle.request.user
         user_profile = user.get_profile()
         phone_profile = user_profile.phone_profile.all()[0]
+        
+        print user.first_name
             
         #create a paymill instance
         print '4'
