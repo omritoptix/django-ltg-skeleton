@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 Tastypie will play with this file to create a rest server
 Created on Jun 20, 2013
@@ -482,7 +483,7 @@ class TransactionResource(NerdeezResource):
                 raise ImmediateHttpResponse(response=http.HttpBadRequest("user doesn't have a client defined - you must pass an email"))
             try:
                 print user.email
-                print '{id: %d, Name: "%s %s", Email: "%s", Phone: "%s"}' % (phone_profile.id, user.first_name, user.last_name, user.email, user_profile.phone)
+                print u'{id: %d, Name: "%s %s", Email: "%s", Phone: "%s"}' % (phone_profile.id, user.first_name.decode('utf-8'), user.last_name.decode('utf-8'), user.email.decode('utf-8'), user_profile.phone)
                 client = p.new_client(
                       email=user.email,
                       description=u'{id: %d, Email: "%s", Phone: "%s"}' % (phone_profile.id, user.email, user_profile.phone)
@@ -497,7 +498,7 @@ class TransactionResource(NerdeezResource):
         #get or create the payment
         print '5'
         payment_id = phone_profile.paymill_payment_id
-        if payment_id == None:
+        if payment_id == None or phone_profile.is_anonymous:
             print token
             if token == '':
                 raise ImmediateHttpResponse(response=http.HttpBadRequest("user doesn't have a payment defined - you must pass a token"))

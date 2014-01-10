@@ -263,28 +263,28 @@ class ApiTest(ResourceTestCase):
         self.assertHttpUnauthorized(resp)
         self.assertEqual(Logger.objects.count(), 1)
         
-    def test_transaction(self):
-        '''
-        will check the payment transactions
-        for this test i put a user profile with a client id and payment id
-        we need to pass deal and amount
-        '''
-        resp = self.api_client.post(uri='/api/v1/transaction/?username=yariv3&api_key=12345678', format='json', data={'deal': '/api/v1/deal/1/', 'amount': 3})
-        self.assertHttpCreated(resp)
-        transaction_id = self.deserialize(resp)['id']
-        resp = self.api_client.put(uri='/api/v1/transaction/%d/?username=yariv3&api_key=12345678' % transaction_id, format='json', data={'email': 'aaa@vvv.ccc', 'first_name': 'aaa', 'last_name': 'ccc', 'phone': '+972522441431'})
-        print resp.status_code
-        self.assertHttpAccepted(resp)
-        self.assertEquals(UserProfile.objects.get(id=3).phone, '+972522441431')
-        self.assertNotEquals(UserProfile.objects.get(id=3).phone_profile.all()[0].paymill_client_id, None)
+#     def test_transaction(self):
+#         '''
+#         will check the payment transactions
+#         for this test i put a user profile with a client id and payment id
+#         we need to pass deal and amount
+#         '''
+#         resp = self.api_client.post(uri='/api/v1/transaction/?username=yariv3&api_key=12345678', format='json', data={'deal': '/api/v1/deal/1/', 'amount': 3})
+#         self.assertHttpCreated(resp)
+#         transaction_id = self.deserialize(resp)['id']
+#         resp = self.api_client.put(uri='/api/v1/transaction/%d/?username=yariv3&api_key=12345678' % transaction_id, format='json', data={'email': 'aaa@vvv.ccc', 'first_name': 'aaa', 'last_name': 'ccc', 'phone': '+972522441431'})
+#         print resp.status_code
+#         self.assertHttpAccepted(resp)
+#         self.assertEquals(UserProfile.objects.get(id=3).phone, '+972522441431')
+#         self.assertNotEquals(UserProfile.objects.get(id=3).phone_profile.all()[0].paymill_client_id, None)
         
-    def test_unpaid_transaction(self):
-        '''
-        will check the api for the unpaid transaction
-        '''
-        resp = self.api_client.post(uri='/api/v1/unpaidtransaction/?username=yariv4&api_key=12345678', format='json', data={'deal': '/api/v1/deal/1/','phone': '+972522441432'})
-        self.assertHttpCreated(resp)
-        self.assertEquals(UserProfile.objects.get(id=4).phone, '+972522441432')
+#     def test_unpaid_transaction(self):
+#         '''
+#         will check the api for the unpaid transaction
+#         '''
+#         resp = self.api_client.post(uri='/api/v1/unpaidtransaction/?username=yariv4&api_key=12345678', format='json', data={'deal': '/api/v1/deal/1/','phone': '+972522441432'})
+#         self.assertHttpCreated(resp)
+#         self.assertEquals(UserProfile.objects.get(id=4).phone, '+972522441432')
         
     def test_logger_api(self):
         '''
