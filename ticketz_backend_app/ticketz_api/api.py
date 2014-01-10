@@ -471,7 +471,7 @@ class TransactionResource(NerdeezResource):
         phone_profile = user_profile.phone_profile.all()[0]
         
         name = u"{0} {1}".format(user.first_name, user.last_name)
-        print unicode(name)
+        print name.decode('utf-8')
             
         #create a paymill instance
         print '4'
