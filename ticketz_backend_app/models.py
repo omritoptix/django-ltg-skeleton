@@ -122,7 +122,7 @@ class UserProfile(NerdeezModel):
     note that email, first_name. last_name are contained in the user object
     '''
     user = models.ForeignKey(User, unique=True)
-    phone = models.CharField(max_length=20, default=None, blank=True, null=True, unique=True)
+    phone = models.CharField(max_length=20, default=None, blank=True, null=True)
     
     def __unicode__(self):
         return self.user.email

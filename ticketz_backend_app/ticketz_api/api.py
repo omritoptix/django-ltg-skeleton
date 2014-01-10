@@ -1048,25 +1048,35 @@ class UtilitiesResource(NerdeezResource):
                          'message': "Duplicated uuid or email",
                          }, HttpConflict)
         
-        #create the user and the phone profile    
-        is_created, user = self._register_user(email=email, password=password, is_active=True, username=None, request=request)
-        user.first_name = first_name
-        user.last_name = last_name
-        user.save()
-        if is_created:
-            user_profile = user.profile
-            user_profile.phone = phone
-            user_profile.save()
-            phone_profile = PhoneProfile()
-            phone_profile.user_profile = user_profile
-            phone_profile.phone = phone
-            phone_profile.is_anonymous = is_register_anon
-            phone_profile.save()
-        else:
-            return self.create_response(request, {
-                    'success': False,
-                    'message': "Failed to create the user",
-                    }, HttpApplicationError)
+        old_phone_profile = None    
+        if is_register_anon: 
+            try:
+                old_phone_profile = PhoneProfile.objects.filter(user_profile__phone=phone, user_profile__user__email=email, user_profile__user__first_name=first_name, user_profile__user__last_name=last_name)[0]
+                user = old_phone_profile.user_profile.user
+                phone_profile = old_phone_profile
+            except:
+                old_phone_profile = None
+            
+        #create the user and the phone profile
+        if old_phone_profile == None:    
+            is_created, user = self._register_user(email=email, password=password, is_active=True, username=None, request=request)
+            user.first_name = first_name
+            user.last_name = last_name
+            user.save()
+            if is_created:
+                user_profile = user.profile
+                user_profile.phone = phone
+                user_profile.save()
+                phone_profile = PhoneProfile()
+                phone_profile.user_profile = user_profile
+                phone_profile.phone = phone
+                phone_profile.is_anonymous = is_register_anon
+                phone_profile.save()
+            else:
+                return self.create_response(request, {
+                        'success': False,
+                        'message': "Failed to create the user",
+                        }, HttpApplicationError)
             
         #create a new api key for the user
         api_keys = ApiKey.objects.filter(user=user)

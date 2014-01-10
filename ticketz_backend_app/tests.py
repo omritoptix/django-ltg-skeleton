@@ -729,6 +729,19 @@ class ApiTest(ResourceTestCase):
         phone_profile = PhoneProfile.objects.get(id=self.deserialize(resp)['phone_profile']['id'])
         self.assertEqual(phone_profile.user_profile.phone, '111111')
         
+    def test_no_multiple_anonymous(self):
+        '''
+        bug fix: 2 anonymous users with same details are saved multiple times
+        '''
+        
+        old_phone_count = PhoneProfile.objects.count()
+        resp = self.api_client.post(uri='/api/v1/utilities/register-user/', format='json', data={'first_name': 'yariv', 'last_name': 'katz', 'email': 'test@test.test', 'phone': '111111'})
+        self.assertHttpCreated(resp)
+        resp = self.api_client.post(uri='/api/v1/utilities/register-user/', format='json', data={'first_name': 'yariv', 'last_name': 'katz', 'email': 'test@test.test', 'phone': '111111'})
+        self.assertHttpCreated(resp)
+        self.assertEqual(UserProfile.objects.filter(phone='111111').count(), 1)
+        self.assertEqual(PhoneProfile.objects.count(), old_phone_count + 1)
+        
 #     def test_register_facebook(self):
 #         '''
 #         test the facebook registration api
