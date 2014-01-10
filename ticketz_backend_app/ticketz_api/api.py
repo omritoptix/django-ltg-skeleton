@@ -470,8 +470,6 @@ class TransactionResource(NerdeezResource):
         user_profile = user.get_profile()
         phone_profile = user_profile.phone_profile.all()[0]
         
-        name = u"{0} {1}".format(user.first_name.decode('utf-8'), user.last_name.decode('utf-8'))
-        print name.decode('utf-8')
             
         #create a paymill instance
         print '4'
@@ -568,7 +566,7 @@ class TransactionResource(NerdeezResource):
             raise ImmediateHttpResponse(response=http.HttpBadRequest(e))
         
         print '10'
-        return super(TransactionResource, self).obj_update(bundle, skip_errors=skip_errors, **kwargs)
+        return super(TransactionResource, self).obj_update(bundle, **kwargs)
     
 class RefundResource(NerdeezResource):
     '''
