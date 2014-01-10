@@ -483,7 +483,7 @@ class TransactionResource(NerdeezResource):
                 raise ImmediateHttpResponse(response=http.HttpBadRequest("user doesn't have a client defined - you must pass an email"))
             try:
                 print user.email
-                print u'{id: %d, Name: "%s %s", Email: "%s", Phone: "%s"}' % (phone_profile.id, user.first_name.decode('utf-8'), user.last_name.decode('utf-8'), user.email.decode('utf-8'), user_profile.phone)
+                #print u'{id: %d, Name: "%s %s", Email: "%s", Phone: "%s"}' % (phone_profile.id, user.first_name.decode('utf-8'), user.last_name.decode('utf-8'), user.email.decode('utf-8'), user_profile.phone)
                 client = p.new_client(
                       email=user.email,
                       description=u'{id: %d, Email: "%s", Phone: "%s"}' % (phone_profile.id, user.email, user_profile.phone)
