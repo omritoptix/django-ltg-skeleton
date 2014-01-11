@@ -274,7 +274,7 @@ class PhoneProfileResource(NerdeezResource):
         '''
         bundle.data['is_payed'] = False
         try:
-            if bundle.obj.paymill_payment_id != None:
+            if bundle.obj.paymill_payment_id != None and not bundle.obj.is_anonymous:
                 bundle.data['is_payed'] = True
         except:
             bundle.data['is_payed'] = False

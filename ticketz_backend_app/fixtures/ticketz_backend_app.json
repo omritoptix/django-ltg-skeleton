@@ -186,7 +186,8 @@
             "creation_date": "2013-11-10T13:35:09Z", 
             "user_profile": 3, 
             "modified_data": "2013-11-10T13:35:10.062Z",
-            "paymill_payment_id": "pay_d11e842b123d3d16970249eb"
+            "paymill_payment_id": "pay_d11e842b123d3d16970249eb",
+            "is_anonymous": false
         }
     }, 
     {
