@@ -746,6 +746,14 @@ class ApiTest(ResourceTestCase):
         self.assertEqual(UserProfile.objects.filter(phone='111111').count(), 2)
         self.assertEqual(PhoneProfile.objects.count(), old_phone_count + 2)
         
+    def test_unicode_transaction_bug(self):
+        '''
+        heberw user bug with transactions
+        '''
+        
+        resp = self.api_client.get(uri='/api/v1/transaction/6/?username=yariv1&api_key=12345678', format='json')
+        print resp.content
+        
 #     def test_register_facebook(self):
 #         '''
 #         test the facebook registration api

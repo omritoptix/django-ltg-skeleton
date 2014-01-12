@@ -72,6 +72,24 @@
         }
     },
     {
+        "pk": 5, 
+        "model": "auth.user", 
+        "fields": {
+            "username": "yariv5", 
+            "first_name": "יריב", 
+            "last_name": "כץ", 
+            "is_active": true, 
+            "is_superuser": false, 
+            "is_staff": false, 
+            "last_login": "2013-11-10T13:35:09.901Z", 
+            "groups": [], 
+            "user_permissions": [], 
+            "password": "pbkdf2_sha256$10000$2bpfy5rvLM23$DPr4aQ5QAQzA5am3thP2fkx/XuhXLfREQg8TpM5paio=", 
+            "email": "yariv4@nerdeez.com", 
+            "date_joined": "2013-11-10T13:35:09.434Z"
+        }
+    },
+    {
         "pk": 1, 
         "model": "tastypie.apikey", 
         "fields": {
@@ -148,6 +166,16 @@
         }
     }, 
     {
+        "pk": 5, 
+        "model": "ticketz_backend_app.userprofile", 
+        "fields": {
+            "creation_date": "2013-11-10T13:35:09Z", 
+            "phone": "+972522441433", 
+            "user": 5, 
+            "modified_data": "2013-11-10T13:35:10.062Z"
+        }
+    }, 
+    {
         "pk": 1, 
         "model": "ticketz_backend_app.businessprofile", 
         "fields": {
@@ -214,6 +242,15 @@
         "fields": {
             "creation_date": "2013-11-17T13:35:09Z", 
             "user_profile": 2, 
+            "modified_data": "2013-11-17T13:35:10.062Z"
+        }
+    }, 
+    {
+        "pk": 5, 
+        "model": "ticketz_backend_app.phoneprofile", 
+        "fields": {
+            "creation_date": "2013-11-17T13:35:09Z", 
+            "user_profile": 5, 
             "modified_data": "2013-11-17T13:35:10.062Z"
         }
     }, 
@@ -427,6 +464,20 @@
             "modified_data": "2013-11-25T18:24:16.393", 
             "deal": 5, 
             "phone_profile": 2, 
+            "creation_date": "2012-11-25T18:24:11", 
+            "amount": 3, 
+            "paymill_transaction_id": "tran_d123ad1ab812ba753e38c5a01dd6"
+        }
+    },  
+    {
+        "pk": 6, 
+        "model": "ticketz_backend_app.transaction", 
+        "fields": {
+            "status": 3, 
+            "hash": "12345", 
+            "modified_data": "2013-11-25T18:24:16.393", 
+            "deal": 5, 
+            "phone_profile": 5, 
             "creation_date": "2012-11-25T18:24:11", 
             "amount": 3, 
             "paymill_transaction_id": "tran_d123ad1ab812ba753e38c5a01dd6"
