@@ -534,6 +534,7 @@ class TransactionResource(NerdeezResource):
                         payment=payment_id
                     )
             transaction_id = transaction.id
+            bundle.data['paymill_transaction_id'] = transaction_id
         except Exception,e:
             raise ImmediateHttpResponse(response=http.HttpBadRequest(e))
                 
