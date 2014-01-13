@@ -12,42 +12,17 @@ Created on Jun 20, 2013
 # begin imports
 #===============================================================================
 
-from tastypie.resources import ModelResource, ALL
-from tastypie import fields
-from tastypie.authorization import DjangoAuthorization, Authorization
-from tastypie.authentication import ApiKeyAuthentication, Authentication
-from ticketz_backend_app.models import *
+from tastypie.resources import ModelResource
+from tastypie.authorization import DjangoAuthorization
+from tastypie.authentication import ApiKeyAuthentication
 import os
-from django.template.loader import get_template
-from django.template import Context
-from django.utils.html import strip_tags
-from django.core.mail import EmailMultiAlternatives
-from ticketz_backend_app import settings
-from smtplib import SMTPSenderRefused
 
-from tastypie.http import HttpAccepted, HttpApplicationError
 from django.conf.urls import url
 from tastypie.utils import trailing_slash
 from django.utils import simplejson
 from tastypie.exceptions import Unauthorized
-from tastypie.http import HttpUnauthorized, HttpConflict, HttpCreated, HttpBadRequest, HttpNotFound, HttpBadRequest
-from django.contrib import auth
-from tastypie.models import ApiKey
-from django.utils import simplejson as json
-from ticketz_backend_app.forms import UserCreateForm
-from django.contrib.auth import authenticate, login
-import random
-from tastypie.resources import ALL_WITH_RELATIONS
-import pymill
-from twilio.rest import TwilioRestClient
 from django.core.urlresolvers import resolve, get_script_prefix
 from django.db.models import Q
-from tastypie import http
-from tastypie.exceptions import ImmediateHttpResponse
-from kombu.transport.django.managers import select_for_update
-from django.db import transaction
-from ticketz_backend_app import facebook
-from tastypie.test import TestApiClient
 
 
 
@@ -70,7 +45,7 @@ API_URL = '/api/v1/'
 # begin abstract resources
 #===============================================================================
 
-class NerdeezResource(ModelResource):
+class LtgResource(ModelResource):
     '''
     abstract class with commone attribute common to all my rest models
     '''
@@ -108,7 +83,7 @@ class NerdeezResource(ModelResource):
         for field in read_only_fields:
             if field in bundle.data:
                 del bundle.data[field]
-        return super(NerdeezResource, self).hydrate(bundle)
+        return super(LtgResource, self).hydrate(bundle)
     
     def dehydrate(self, bundle):
         invisible_fields = self.Meta.invisible_fields
@@ -116,7 +91,7 @@ class NerdeezResource(ModelResource):
             if field in bundle.data:
                 print field
                 del bundle.data[field]
-        return super(NerdeezResource, self).dehydrate(bundle)
+        return super(LtgResource, self).dehydrate(bundle)
         
 #===============================================================================
 # end abstract resources
@@ -144,7 +119,7 @@ def is_send_grid():
 
 class LtgApiKeyAuthentication(ApiKeyAuthentication):
     def extract_credentials(self, request):
-        username, api_key = super(NerdeezApiKeyAuthentication, self).extract_credentials(request)
+        username, api_key = super(LtgApiKeyAuthentication, self).extract_credentials(request)
         if username == None and api_key == None and (request.method == 'POST' or request.method == 'PUT'):
             post = simplejson.loads(request.body)
             username = post.get('username')
@@ -152,7 +127,7 @@ class LtgApiKeyAuthentication(ApiKeyAuthentication):
         return username, api_key
             
 
-class LtgReadForFreeAuthentication(NerdeezApiKeyAuthentication):
+class LtgReadForFreeAuthentication(LtgApiKeyAuthentication):
     
     def is_authenticated(self, request, **kwargs):
         '''
@@ -161,7 +136,7 @@ class LtgReadForFreeAuthentication(NerdeezApiKeyAuthentication):
         '''
         if request.method == 'GET':
             return True
-        return super( NerdeezReadForFreeAuthentication, self ).is_authenticated( request, **kwargs )
+        return super( LtgReadForFreeAuthentication, self ).is_authenticated( request, **kwargs )
         
 class LtgReadForFreeAuthorization( DjangoAuthorization ):
     '''
@@ -197,7 +172,7 @@ class LtgReadForFreeAuthorization( DjangoAuthorization ):
     def delete_detail(self, object_list, bundle):
         return self.owner_auth(bundle)
     
-class LtgOnlyOwnerCanReadAuthorization( NerdeezReadForFreeAuthorization ):
+class LtgOnlyOwnerCanReadAuthorization( LtgReadForFreeAuthorization ):
     '''
     Authorizes every authenticated owner to perform GET, for all others
     performs NerdeezReadForFreeAuthorization.
@@ -219,7 +194,7 @@ class LtgOnlyOwnerCanReadAuthorization( NerdeezReadForFreeAuthorization ):
         
     
         
-class UtilitiesResource(NerdeezResource):
+class UtilitiesResource(LtgResource):
     '''
     the api for things that are not attached to models: 
     - contact us: url: /api/v1/utilities/contact/

@@ -14,9 +14,8 @@ Created on November 7, 2013
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from tastypie.api import Api
-from ticketz_backend_app.ticketz_api.api import *
-import ticketz_backend_app.views
-import ticketz_backend_app.reports
+from ltg_backend_app.ltg_api.api import *
+import ltg_backend_app.views
 
 #===============================================================================
 # end imports
@@ -39,6 +38,8 @@ urlpatterns = patterns('',
     
     #grappelli
     (r'^grappelli/', include('grappelli.urls')),
+    
+    ('^$', ltg_backend_app.views.homepage),
     
     
 )
