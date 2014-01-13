@@ -25,10 +25,11 @@ from django import forms
 
 class UserCreateForm(UserCreationForm):
     email = forms.EmailField(required=True)
-
+    first_name = forms.CharField(required=True, max_length=30, min_length=2)
+    last_name = forms.CharField(required=True, max_length=30, min_length=2)
     class Meta:
         model = User
-        fields = ( "username", "email" )
+        fields = ( "username", "email", "first_name", "last_name" )
         
 #===============================================================================
 # end forms
