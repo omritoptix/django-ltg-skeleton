@@ -22,8 +22,11 @@ from tastypie.utils import trailing_slash
 from django.utils import simplejson
 from tastypie.exceptions import Unauthorized
 from django.core.urlresolvers import resolve, get_script_prefix
-from django.db.models import Q
-
+from ltg_backend_app.ltg_forms.user_create import UserCreateForm
+from django.contrib.auth.models import User
+from tastypie.http import HttpConflict, HttpBadRequest, HttpCreated
+from tastypie.models import ApiKey
+from django.template.loader import get_template
 
 
 #===============================================================================
@@ -220,9 +223,6 @@ class UtilitiesResource(LtgResource):
                 self.wrap_view('register_facebook'), name="api_register_facebook"),
         ]
         
-        
-        
-        
     def login(self, request=None, **kwargs):
         '''
         login request is sent here
@@ -241,14 +241,88 @@ class UtilitiesResource(LtgResource):
     
     def register(self, request=None, **kwargs):
         '''
-        will try and register the user
-        we expect here an email and a password sent as post params
-        @return:    201 if user is created
-                    500 failed to send emails
-                    409 conflict with existing account
+        will try and register the user will except the following post params
+        @param first_name: 
+        @param last_name: 
+        @param email: 
+        @param password: 
+        @return success: will return a 201 code with the following object 
+        {
+            success: <Boolean>,
+            message: <String>
+        } 
         '''
         
-        pass
+        #get params
+        post = simplejson.loads(request.body)
+        email = post.get('email', None)
+        password = post.get('password', None)
+        first_name = post.get('first_name', None)
+        last_name = post.get('last_name', None)
+        
+        #create the username
+        api_key = ApiKey()
+        username = api_key.generate_key()[0:30]
+        
+        #check if the user exists with this mail
+        if User.objects.filter(email=email).count() > 0:
+            return self.create_response(request, {
+                         'success': False,
+                         'message': "Duplicate email",
+                         }, HttpConflict)
+            
+        #check validation and create the user
+        create_form = UserCreateForm({
+                                      'username': username,
+                                      'email': email,
+                                      'password1': password, 
+                                      'password2': password, 
+                                      'first_name': first_name, 
+                                      'last_name': last_name, 
+        })
+        if create_form.is_valid():
+            create_form.save()
+            
+            #send the mail
+            #send the verification mail
+            if is_send_grid():
+                t = get_template('emails/register_approval_mail.html')
+                html = t.render(Context({'admin_mail': settings.ADMIN_MAIL, 'admin_phone': settings.ADMIN_PHONE}))
+                text_content = strip_tags(html)
+                msg = EmailMultiAlternatives('2Nite Registration', text_content, settings.FROM_EMAIL_ADDRESS, [email])
+                msg.attach_alternative(html, "text/html")
+                try:
+                    msg.send()
+                except SMTPSenderRefused, e:
+                    return self.create_response(request, {
+                        'success': False,
+                        'message': 'Failed to send mail',
+                        }, HttpApplicationError )
+                    
+                #send the admin mail that he should activate the business
+                t = get_template('emails/admin_new_business_mail.html')
+                html = t.render(Context({}))
+                text_content = strip_tags(html)
+                msg = EmailMultiAlternatives('Business approval', text_content, settings.FROM_EMAIL_ADDRESS, [settings.ADMIN_MAIL])
+                msg.attach_alternative(html, "text/html")
+                try:
+                    msg.send()
+                except SMTPSenderRefused, e:
+                    pass
+            
+            return self.create_response(request, {
+                         'success': True,
+                         'message': "User created successfully",
+                         }, HttpCreated)
+        else:
+            return self.create_response(request, {
+                         'success': False,
+                         'message': "Bad params passed",
+                         'errors': create_form.errors
+                         }, HttpBadRequest)
+            
+        
+        
             
     def forgot_password(self, request=None, **kwargs):
         '''
