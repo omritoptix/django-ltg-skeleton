@@ -12,11 +12,11 @@ Created on Jun 20, 2013
 # begin imports
 #===============================================================================
 
+from ltg_backend_app import settings
 from tastypie.resources import ModelResource
 from tastypie.authorization import DjangoAuthorization
 from tastypie.authentication import ApiKeyAuthentication
 import os
-
 from django.conf.urls import url
 from tastypie.utils import trailing_slash
 from django.utils import simplejson
@@ -24,9 +24,15 @@ from tastypie.exceptions import Unauthorized
 from django.core.urlresolvers import resolve, get_script_prefix
 from ltg_backend_app.ltg_forms.user_create import UserCreateForm
 from django.contrib.auth.models import User
-from tastypie.http import HttpConflict, HttpBadRequest, HttpCreated
+from tastypie.http import HttpConflict, HttpBadRequest, HttpCreated,\
+    HttpApplicationError
 from tastypie.models import ApiKey
 from django.template.loader import get_template
+from django.utils.html import strip_tags
+from django.core.mail.message import EmailMultiAlternatives
+from smtplib import SMTPSenderRefused
+from django.template.context import Context
+
 
 
 #===============================================================================
