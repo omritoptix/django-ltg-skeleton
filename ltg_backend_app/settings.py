@@ -38,7 +38,7 @@ ALLOWED_HOSTS = []
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
 # In a Windows environment this must be set to your system time zone.
-TIME_ZONE = 'Asia/Jerusalem'
+TIME_ZONE = 'UTC'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -218,8 +218,8 @@ except:
 # TWITTER_KEY = os.environ.get('TWITTER_KEY', '')
 # TWITTER_SECRET = os.environ.get('TWITTER_SECRET', '')
 
-# ADMIN_MAIL = os.environ.get('ADMIN_MAIL', 'yariv@nerdeez.com')
-# ADMIN_PHONE = os.environ.get('ADMIN_PHONE', '0522441431')
+ADMIN_MAIL = os.environ.get('ADMIN_MAIL', 'info@ltgexam.com')
+ADMIN_PHONE = os.environ.get('ADMIN_PHONE', '+0000000000')
 
 os.environ['LANG'] = 'en_US.UTF-8'
 
