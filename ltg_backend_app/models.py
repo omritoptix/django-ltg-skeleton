@@ -14,6 +14,7 @@ Created on November 7th, 2013
 
 from django.db import models
 import datetime
+from django.contrib.auth.models import User
 
 #===============================================================================
 # end imports
@@ -52,6 +53,28 @@ class LtgModel(models.Model):
 # begin tables - models
 #===============================================================================
 
+class UserProfile(LtgModel):
+    '''
+    will hold the user profile model
+    '''
+    user = models.ForeignKey(User, unique=True)
+    uuid = models.CharField(max_length=200, default=None, blank=True, null=True)
+    
+    def __unicode__(self):
+        return self.user.email
+    
+    def owner(self):
+        '''
+        will retrieve all owners of the instance
+        '''   
+        #list that will hold instance owners
+        owner = []
+        try: 
+            owner.append(self.user.username)
+        except: 
+            return []
+        
+        return owner
     
     
     
