@@ -14,24 +14,26 @@ Created on Jun 20, 2013
 
 from ltg_backend_app import settings
 from tastypie.resources import ModelResource
-from tastypie.authorization import DjangoAuthorization
-from tastypie.authentication import ApiKeyAuthentication
 import os
 from django.conf.urls import url
 from tastypie.utils import trailing_slash
 from django.utils import simplejson
-from tastypie.exceptions import Unauthorized
 from django.core.urlresolvers import resolve, get_script_prefix
-from ltg_backend_app.ltg_forms.user_create import UserCreateForm
 from django.contrib.auth.models import User
-from tastypie.http import HttpConflict, HttpBadRequest, HttpCreated,\
-    HttpApplicationError
+from tastypie.http import *
 from tastypie.models import ApiKey
 from django.template.loader import get_template
 from django.utils.html import strip_tags
 from django.core.mail.message import EmailMultiAlternatives
 from smtplib import SMTPSenderRefused
 from django.template.context import Context
+import logging
+from tastypie import fields
+from django.core.exceptions import ValidationError
+from ltg_backend_app.forms import UserCreateForm, UserProfileForm
+from ltg_backend_app.models import UserProfile
+from django.core.exceptions import ObjectDoesNotExist
+
 
 
 
@@ -58,13 +60,13 @@ class LtgResource(ModelResource):
     '''
     abstract class with commone attribute common to all my rest models
     '''
+    creation_date = fields.DateTimeField(attribute='creation_date',readonly=True)
+    modified_data = fields.DateTimeField(attribute='modified_data',readonly=True)
     
     #set read only fields
     class Meta:
         allowed_methods = ['get']
         always_return_data = True
-        read_only_fields = ['creation_date', 'modified_data']
-        invisible_fields = []
         
     @staticmethod
     def get_pk_from_uri(uri):
@@ -86,21 +88,7 @@ class LtgResource(ModelResource):
             return 0
     
         return kwargs['pk']
-    
-    def hydrate(self, bundle):
-        read_only_fields = self.Meta.read_only_fields
-        for field in read_only_fields:
-            if field in bundle.data:
-                del bundle.data[field]
-        return super(LtgResource, self).hydrate(bundle)
-    
-    def dehydrate(self, bundle):
-        invisible_fields = self.Meta.invisible_fields
-        for field in invisible_fields:
-            if field in bundle.data:
-                print field
-                del bundle.data[field]
-        return super(LtgResource, self).dehydrate(bundle)
+
         
 #===============================================================================
 # end abstract resources
@@ -123,78 +111,16 @@ def is_send_grid():
 #===============================================================================
 
 #===============================================================================
-# begin authorization/authentication
+# begin globals
 #===============================================================================
 
-class LtgApiKeyAuthentication(ApiKeyAuthentication):
-    def extract_credentials(self, request):
-        username, api_key = super(LtgApiKeyAuthentication, self).extract_credentials(request)
-        if username == None and api_key == None and (request.method == 'POST' or request.method == 'PUT'):
-            post = simplejson.loads(request.body)
-            username = post.get('username')
-            api_key = post.get('api_key')
-        return username, api_key
-            
-
-class LtgReadForFreeAuthentication(LtgApiKeyAuthentication):
-    
-    def is_authenticated(self, request, **kwargs):
-        '''
-        get is allowed without cradentials and all other actions require api key and username
-        @return: boolean if authenticated
-        '''
-        if request.method == 'GET':
-            return True
-        return super( LtgReadForFreeAuthentication, self ).is_authenticated( request, **kwargs )
-        
-class LtgReadForFreeAuthorization( DjangoAuthorization ):
-    '''
-    Authorizes every authenticated user to perform GET, 
-    it will allow post to everyone
-    and put/delete if there is owner only he can do it.
-    '''
-    
-    def owner_auth(self, bundle):
-        '''
-        gets a bundle and return true if the current user is the owner
-        @param Object bundle: tastypie bundle object
-        @return: true if owner raise Unauthorized if not
-        '''
-        obj = bundle.obj
-        if hasattr(obj, 'owner') and (obj.owner() == bundle.request.user.username or bundle.request.user.username in obj.owner()):
-            return True
-        else:
-            raise Unauthorized('you are not auth to modify this record');
-        
-    def read_detail(self, object_list, bundle):
-        return True
-    
-    def create_detail(self, object_list, bundle):
-        return True
-    
-    def create_list(self, object_list, bundle):
-        return object_list
-    
-    def update_detail(self, object_list, bundle):
-        return self.owner_auth(bundle)
-    
-    def delete_detail(self, object_list, bundle):
-        return self.owner_auth(bundle)
-    
-class LtgOnlyOwnerCanReadAuthorization( LtgReadForFreeAuthorization ):
-    '''
-    Authorizes every authenticated owner to perform GET, for all others
-    performs NerdeezReadForFreeAuthorization.
-    '''
-    
-    def read_detail(self, object_list, bundle):
-        return self.owner_auth(bundle)
-
-        
+# set global logger to be root logger
+logger = logging.getLogger()
 
 #===============================================================================
-# end authorization/authentication
+# end globals
 #===============================================================================
+
 
 #===============================================================================
 # begin the actual rest api
@@ -247,89 +173,99 @@ class UtilitiesResource(LtgResource):
     
     def register(self, request=None, **kwargs):
         '''
-        will try and register the user will except the following post params
+        will try and register the user will expect the following post params
         @param first_name: 
         @param last_name: 
         @param email: 
-        @param password: 
+        @param password:
+        @param uuid: 
         @return success: will return a 201 code with the following object 
         {
             success: <Boolean>,
             message: <String>
         } 
         '''
-        
         #get params
         post = simplejson.loads(request.body)
         email = post.get('email', None)
         password = post.get('password', None)
         first_name = post.get('first_name', None)
         last_name = post.get('last_name', None)
+        uuid = post.get('uuid', None)
+        
+        #check if there is a user connected to this uuid, if so return it with it's api key and username
+        try:
+            if (email is None and uuid is not None):
+                user = UserProfile.objects.get(uuid=uuid).user
+                return self.create_response(request, {
+                         'success': True,
+                         'message': 'Successfully logged in',
+                         'username':user.username,
+                         'api_key':user.api_key.key,
+                         }, HttpAccepted)
+            
+        except ObjectDoesNotExist:
+            pass
         
         #create the username
         api_key = ApiKey()
         username = api_key.generate_key()[0:30]
         
-        #check if the user exists with this mail
-        if User.objects.filter(email=email).count() > 0:
-            return self.create_response(request, {
-                         'success': False,
-                         'message': "Duplicate email",
-                         }, HttpConflict)
+        #if email is none, it's an anonymous user. generate a password
+        if (email is None):
+            password = api_key.generate_key()[0:16]
+
+        try:               
+            #create user form
+            user_create_form = UserCreateForm({
+                                          'username': username,
+                                          'email': email,
+                                          'password1': password, 
+                                          'password2': password, 
+                                          'first_name': first_name, 
+                                          'last_name': last_name, 
+                                          })
+            #validate the form
+            if not user_create_form.is_valid():
+                raise ValidationError(user_create_form.errors)
+            #create user profile form 
+            user_profile_form = UserProfileForm({
+                                                'uuid':uuid,
+            })   
+            #validate the user profile form
+            if not user_profile_form.is_valid():
+                raise ValidationError((user_profile_form.errors))
             
-        #check validation and create the user
-        create_form = UserCreateForm({
-                                      'username': username,
-                                      'email': email,
-                                      'password1': password, 
-                                      'password2': password, 
-                                      'first_name': first_name, 
-                                      'last_name': last_name, 
-        })
-        if create_form.is_valid():
-            create_form.save()
-            
-            #send the mail
-            #send the verification mail
-            if is_send_grid():
-                t = get_template('emails/register_approval_mail.html')
-                html = t.render(Context({'admin_mail': settings.ADMIN_MAIL, 'admin_phone': settings.ADMIN_PHONE}))
-                text_content = strip_tags(html)
-                msg = EmailMultiAlternatives('2Nite Registration', text_content, settings.FROM_EMAIL_ADDRESS, [email])
-                msg.attach_alternative(html, "text/html")
-                try:
-                    msg.send()
-                except SMTPSenderRefused, e:
-                    return self.create_response(request, {
-                        'success': False,
-                        'message': 'Failed to send mail',
-                        }, HttpApplicationError )
+            #create the user and save it
+            user = user_create_form.save()
+            #create the user profile but don't save it yet
+            user_profile = user_profile_form.save(commit=False)
+            #attach the user to user profile
+            user_profile.user = user
+            user_profile.save()
                     
-                #send the admin mail that he should activate the business
-                t = get_template('emails/admin_new_business_mail.html')
-                html = t.render(Context({}))
-                text_content = strip_tags(html)
-                msg = EmailMultiAlternatives('Business approval', text_content, settings.FROM_EMAIL_ADDRESS, [settings.ADMIN_MAIL])
-                msg.attach_alternative(html, "text/html")
-                try:
-                    msg.send()
-                except SMTPSenderRefused, e:
-                    pass
-            
             return self.create_response(request, {
                          'success': True,
                          'message': "User created successfully",
+                         'username':user.username,
+                         'api_key':user.api_key.key,
                          }, HttpCreated)
-        else:
+
+        # handle exceptions
+        except ValidationError as e:
             return self.create_response(request, {
-                         'success': False,
-                         'message': "Bad params passed",
-                         'errors': create_form.errors
-                         }, HttpBadRequest)
+                 'success': False,
+                 'errors': e.message_dict,
+                 }, HttpBadRequest)
+            
+        except:
+            return self.create_response(request, {
+                 'success': False,
+                 'errors': 'could not register user',
+                 }, HttpApplicationError)
+        
             
         
-        
-            
     def forgot_password(self, request=None, **kwargs):
         '''
         api for the user to create a new password
