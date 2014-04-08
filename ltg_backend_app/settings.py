@@ -155,6 +155,10 @@ INSTALLED_APPS = (
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'root': {
+        'level': 'WARNING',
+        'handlers': ['console'],
+    },
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
@@ -165,7 +169,15 @@ LOGGING = {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
-        }
+        },
+        'sentry': {
+            'level': 'WARNING',
+            'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
     },
     'loggers': {
         'django.request': {
@@ -173,9 +185,18 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
+        'raven': {
+            'level': 'WARNING',
+            'handlers': ['console','sentry'],
+            'propagate': False,
+        },
     }
 }
 
+# add sentry handler to root logger if in prod
+ENABLE_SENTRY = os.environ.get('ENABLE_SENTRY', 'FALSE') == 'TRUE'
+if (ENABLE_SENTRY):
+    LOGGING['root']['handlers'] = ['console','sentry']
 
 # Parse database configuration from $DATABASE_URL
 import dj_database_url
@@ -188,6 +209,7 @@ INSTALLED_APPS = INSTALLED_APPS + ('gunicorn',)
 INSTALLED_APPS = INSTALLED_APPS + ('south',)
 INSTALLED_APPS = INSTALLED_APPS + ('ltg_backend_app',)
 INSTALLED_APPS = INSTALLED_APPS + ('tastypie',)
+INSTALLED_APPS = INSTALLED_APPS + ('raven.contrib.django.raven_compat',)
 # INSTALLED_APPS = INSTALLED_APPS + ('django_facebook',)
 
 #s3 storage
@@ -198,7 +220,7 @@ INSTALLED_APPS = INSTALLED_APPS + ('tastypie',)
 # STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 
 #tell django about the user profile
-# AUTH_PROFILE_MODULE = "ticketz_backend_app.UserProfile"
+AUTH_PROFILE_MODULE = "ticketz_backend_app.UserProfile"
 
 #for send grid
 try:
