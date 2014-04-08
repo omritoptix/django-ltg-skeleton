@@ -33,6 +33,8 @@ from django.core.exceptions import ValidationError
 from ltg_backend_app.forms import UserCreateForm, UserProfileForm
 from ltg_backend_app.models import UserProfile
 from django.core.exceptions import ObjectDoesNotExist
+from tastypie.authentication import ApiKeyAuthentication, Authentication
+from ltg_backend_app.ltg_api.api_auth import LtgApiKeyAuthentication
 
 
 
@@ -137,6 +139,7 @@ class UtilitiesResource(LtgResource):
     
     class Meta(LtgResource.Meta):
         allowed_methods = ['post']
+        authentication = Authentication()
         
         
     def override_urls(self):
@@ -153,6 +156,9 @@ class UtilitiesResource(LtgResource):
             url(r"^(?P<resource_name>%s)/register-facebook%s$" %
                 (self._meta.resource_name, trailing_slash()),
                 self.wrap_view('register_facebook'), name="api_register_facebook"),
+            url(r"^(?P<resource_name>%s)/send-email%s$" %
+                (self._meta.resource_name, trailing_slash()),
+                self.wrap_view('send_email'), name="api_send_email"),
         ]
         
     def login(self, request=None, **kwargs):
@@ -304,8 +310,62 @@ class UtilitiesResource(LtgResource):
         
         pass
             
+    def send_email(self, request=None, **kwargs):
+        '''
+        will send mail to info@ltgexam.com from the application users.
+        @param username: the requesting user username
+        @param api_key: the requesting user api_key
+        @param subject: the subject of the mail
+        @param message: the body of the mail
+        @return:
+            accepted - 202 if mail was successfully sent
+        '''
+        #get the post params
+        post = simplejson.loads(request.body)
+        message = post.get('message', "No Message Spcified")
+        subject = post.get('subject', "No Subject Specified")
+        
+        #authenticate the user
+        LtgApiKeyAuthentication().is_authenticated(request)
+        
+        # set 'from email' field. if user anonymous or doesn't have mail set it with it's uuid.
+        try:
+            from_email ='anonymous@uuid-' + str(request.user.profile.uuid) + '.com'
+        except:
+            from_email = 'anonymous@ltg-user.com'
+            
+        # if user is not anonymous set it with it's mail
+        if (not request.user.is_anonymous()):
+            if (request.user.email):
+                from_email = request.user.email
+                               
+        #send the mail
+        if is_send_grid():
+            t = get_template('emails/contact_us_email.html')
+            html = t.render(Context({'message':message}))
+            text_content = strip_tags(html)
+            msg = EmailMultiAlternatives('Contact-Us: ' + subject, text_content, from_email, [settings.ADMIN_MAIL])
+            msg.attach_alternative(html, "text/html")
+            try:
+                msg.send()
+            except SMTPSenderRefused:
+                return self.create_response(request, {
+                    'success': False,
+                    'message': 'Failed to send mail',
+                    }, HttpApplicationError )
+            
+            return self.create_response(request, {
+                'success': True,
+                'message': 'email was successfully sent',
+                }, HttpAccepted )
+            
+        else:
+            return self.create_response(request, {
+                'success': False,
+                'message': 'mail server not defined',
+                }, HttpApplicationError )
             
         
 #===============================================================================
-# end teh actual rest api
+# end the actual rest api
 #===============================================================================

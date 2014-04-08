@@ -73,7 +73,7 @@ class ApiTest(ResourceTestCase):
         #test login of already registered anonymous user. will be indentified by uuid.
         resp = self.api_client.post(uri='/api/v1/utilities/register/', format='json', data={'uuid':'12345678'})
         self.assertHttpAccepted(resp)
-    
+            
     
 #===============================================================================
 # end testing
