@@ -1,10 +1,10 @@
 '''
 Will contain the settings for our django app
 
-Created November 7, 2013
-@author: Yariv Katz
+Created March 15, 2013
+@author: Yariv Katz & Omri Dagan
 @version: 1.0
-@copyright: Nerdeez
+@copyright: LTG
 '''
 
 import os
