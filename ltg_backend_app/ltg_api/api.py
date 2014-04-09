@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 '''
 Tastypie will play with this file to create a rest server
-Created on Jun 20, 2013
+Created on March 15, 2013
 
-@author: Yariv Katz
+@author: Yariv Katz & Omri Dagan
 @version: 1.0
-@copyright: nerdeez.com
+@copyright: LTG
 '''
 
 #===============================================================================
@@ -327,17 +327,17 @@ class UtilitiesResource(LtgResource):
         
         #authenticate the user
         LtgApiKeyAuthentication().is_authenticated(request)
-        
-        # set 'from email' field. if user anonymous or doesn't have mail set it with it's uuid.
-        try:
-            from_email ='anonymous@uuid-' + str(request.user.profile.uuid) + '.com'
-        except:
-            from_email = 'anonymous@ltg-user.com'
             
-        # if user is not anonymous set it with it's mail
-        if (not request.user.is_anonymous()):
-            if (request.user.email):
-                from_email = request.user.email
+        # if user is not anonymous set 'from email' it with it's mail
+        if (not request.user.is_anonymous() and request.user.email):
+            from_email = request.user.email
+        # else set 'from email' with it's uuid.
+        else:
+            try:
+                from_email ='anonymous@uuid-' + str(request.user.profile.uuid) + '.com'
+            except:
+                from_email = 'anonymous@ltg-user.com'
+            
                                
         #send the mail
         if is_send_grid():
