@@ -91,6 +91,25 @@ class UserProfile(LtgModel):
         return owner
     
     
+class Tutor(object):
+    '''
+    will hold our tutor object
+    '''
+    def __init__(self, **kwargs):
+        self.id = kwargs.get('id',None)
+        self.first_name = kwargs.get('first_name',None)
+        self.last_name = kwargs.get('last_name',None)
+        self.file_upload = kwargs.get('file_upload',None)
+        self.email = kwargs.get('email',None)
+        self.skype_id = kwargs.get('skype_id',None)
+        self.tutor_description = kwargs.get('tutor_description',None)
+        self.tutor_rate = kwargs.get('tutor_rate',None)
+        self.tutor_video = kwargs.get('tutor_video',None)
+        self.tutor_speciality = kwargs.get('tutor_speciality',None)
+        self.tutor_groups = kwargs.get('tutor_groups',None)
+        self.country = kwargs.get('country',None)
+        
+    
     
 #===============================================================================
 # end tables - models

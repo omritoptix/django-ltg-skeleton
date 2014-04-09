@@ -240,6 +240,11 @@ except:
 # TWITTER_KEY = os.environ.get('TWITTER_KEY', '')
 # TWITTER_SECRET = os.environ.get('TWITTER_SECRET', '')
 
+#hubspot api settings
+HUBSPOT_API_KEY = os.environ.get('HUBSPOT_API_KEY','12ac2329-070b-483a-a79e-61f9fbf544be')
+HUBSPOT_LIST_ID = os.environ.get('HUBSPOT_LIST_ID','59')
+
+
 ADMIN_MAIL = os.environ.get('ADMIN_MAIL', 'info@ltgexam.com')
 ADMIN_PHONE = os.environ.get('ADMIN_PHONE', '+0000000000')
 
