@@ -12,6 +12,10 @@ Created on April 9, 2014
 #===============================================================================
 
 import requests
+import logging
+from tastypie.exceptions import ImmediateHttpResponse
+from tastypie.http import HttpApplicationError
+from requests.exceptions import RequestException
 
 #===============================================================================
 # end imports
@@ -31,8 +35,22 @@ API_KEY_QUERY_STRING = 'hapikey=%s'
 #===============================================================================
 
 #===============================================================================
+# begin globals
+#===============================================================================
+
+# set global logger to be root logger
+logger = logging.getLogger()
+
+#===============================================================================
+# end globals
+#===============================================================================
+
+#===============================================================================
 # begin client
 #===============================================================================
+
+class HubSpotClientError(Exception):
+    pass
 
 class HubSpotClient(object):
     '''
@@ -40,8 +58,31 @@ class HubSpotClient(object):
     '''
        
     def __init__(self, api_key):
-        # init the client with the hubspot api_key
+        '''
+        init the client with a hubspot api_key
+        '''
         self._api_key = api_key
+        
+    def _handle_exception(self,message):
+        '''
+        will handle our client exceptions by prefixing it with
+        message info
+        @param message str: an exception message
+        @return: a prefixed message
+        '''
+        return "HubSpot api client Exception: " + message
+    
+    def _request_handler(self,url):
+        '''
+        will handle our client api calls
+        @param url str: the url to which will make the api request
+        @return resp requests.models.Response : response object  
+        '''
+        resp = requests.get(url)
+        if resp.ok:
+            return resp
+        else:
+            resp.raise_for_status()
         
     def _parse_contact(self,**kwargs):
         '''
@@ -65,7 +106,6 @@ class HubSpotClient(object):
         data['country'] = properties.get('country',{}).get('value')
         return data
         
-        
     def get_contact(self,contact_id):
         '''
         will return a parsed contact dict by using hubspot contact api as it's data source.
@@ -74,15 +114,13 @@ class HubSpotClient(object):
         '''
         try:
             # call the hubspot contact api
-            req = requests.get((BASE_API_URL + CONTACT_API + API_KEY_QUERY_STRING) % (contact_id, self._api_key))
-            if req.ok:
-                # return a parsed contact json
-                contact_json = req.json()
-                return self._parse_contact(**contact_json)
-            else:
-                raise Exception                
-        except:
-            pass
+            resp = self._request_handler((BASE_API_URL + CONTACT_API + API_KEY_QUERY_STRING) % (contact_id, self._api_key))
+            # return a parsed contact json
+            contact_json = resp.json()
+            return self._parse_contact(**contact_json)
+        
+        except Exception as e:
+            raise ImmediateHttpResponse(HttpApplicationError(self._handle_exception(e.message)))
         
     def get_contact_list(self,list_id):
         '''
@@ -92,18 +130,16 @@ class HubSpotClient(object):
         '''
         try:
             # call the hubspot contact list api
-            req = requests.get((BASE_API_URL + CONTACT_LIST_API + API_KEY_QUERY_STRING) % (list_id, self._api_key))
-            if req.ok:
-                #popluate our results list with parsed contacts dicts
-                results =[]
-                contacts_json = req.json()['contacts']
-                for contact in contacts_json:
-                    results.append(self._parse_contact(**contact))
-                return results
-            else:
-                raise Exception                
-        except:
-            pass
+            resp = self._request_handler((BASE_API_URL + CONTACT_LIST_API + API_KEY_QUERY_STRING) % (list_id, self._api_key))
+            #popluate our results list with parsed contacts dicts
+            results =[]
+            contacts_json = resp.json()['contacts']
+            for contact in contacts_json:
+                results.append(self._parse_contact(**contact))
+            return results
+               
+        except Exception as e:
+            raise ImmediateHttpResponse(HttpApplicationError(self._handle_exception(e.message)))
         
 #===============================================================================
 # end client
