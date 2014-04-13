@@ -28,6 +28,7 @@ admin.autodiscover()
 v1_api = Api(api_name='v1')
 v1_api.register(UtilitiesResource())
 v1_api.register(TutorResource())
+v1_api.register(UserResource())
 
 #register urls
 urlpatterns = patterns('',

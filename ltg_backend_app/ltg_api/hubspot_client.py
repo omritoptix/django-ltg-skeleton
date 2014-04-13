@@ -15,7 +15,6 @@ import requests
 import logging
 from tastypie.exceptions import ImmediateHttpResponse
 from tastypie.http import HttpApplicationError
-from requests.exceptions import RequestException
 
 #===============================================================================
 # end imports

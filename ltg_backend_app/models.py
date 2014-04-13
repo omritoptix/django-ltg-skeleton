@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 '''
 contains the db models
-Created on November 7th, 2013
+Created on April 1st, 2014
 
-@author: Yariv Katz
+@author: Yariv Katz & Omri Dagan
 @version: 1.0
-@copyright: nerdeez.com
+@copyright: LTG
 '''
 
 #===============================================================================
@@ -76,7 +76,8 @@ class UserProfile(LtgModel):
     uuid = models.CharField(max_length=200, default=None,unique=True)
     
     def __unicode__(self):
-        return self.user.email
+        if (self.user):
+            return "profile with username:%s and email:%s" % (self.user.username, self.user.email)
     
     def owner(self):
         '''

@@ -38,6 +38,9 @@ from ltg_backend_app.ltg_api.api_auth import LtgApiKeyAuthentication
 from tastypie.bundle import Bundle
 import requests
 from ltg_backend_app.ltg_api.hubspot_client import HubSpotClient
+from tastypie.validation import FormValidation
+import uuid
+from tastypie.authorization import Authorization
 
 
 
@@ -131,6 +134,54 @@ logger = logging.getLogger()
 #===============================================================================
 # begin the actual rest api
 #===============================================================================
+
+class UserResource(ModelResource):
+    '''
+    resource for our user model
+    '''
+    class Meta:
+        resource_name = 'user'
+        excludes = ['password']
+        allowed_methods = ['post']
+        include_resource_uri = False
+        always_return_data = True
+        validation = FormValidation(form_class=UserCreateForm)
+        authentication = Authentication()
+        authorization = Authorization()
+        queryset = User.objects.all()
+
+    def obj_create(self, bundle , **kwargs):
+        # assign username and password if not assigned
+        bundle.data['password1'] = bundle.data.get('password',uuid.uuid4().hex[:16])
+        bundle.data['password2'] = bundle.data['password1']
+        bundle.data['username'] = bundle.data.get('username',uuid.uuid4().hex[:30])
+        # create the object using the form validation
+        bundle = super(UserResource, self).obj_create(bundle)
+        # set the new password
+        bundle.obj.set_password(bundle.data['password1'])
+        bundle.obj.save()
+        # return the api_key in the response
+        bundle.data['api_key'] = bundle.obj.api_key.key
+        # del the extra bundle fields so it won't be included in the response
+        del bundle.data['password1']
+        del bundle.data['password2']
+
+        return bundle
+    
+class UserProfileResource(LtgResource):
+    '''
+    resource for our user profile model
+    '''
+    user = fields.ToOneField(UserResource,'user')
+    class Meta:
+        allowed_methods = ['post']
+        include_resource_uri = True
+        always_return_data = True
+        validation = FormValidation(form_class=UserProfileForm)
+        authentication = Authentication()
+        authorization = Authorization()
+        queryset = UserProfile.objects.all()
+        
 
 class TutorResource(Resource):
     '''
@@ -241,7 +292,7 @@ class UtilitiesResource(LtgResource):
             'username': <the username of the password>
         }
         '''
-        pass
+        pass       
     
     def register(self, request=None, **kwargs):
         '''
@@ -259,84 +310,26 @@ class UtilitiesResource(LtgResource):
         '''
         #get params
         post = simplejson.loads(request.body)
-        email = post.get('email', None)
-        password = post.get('password', None)
-        first_name = post.get('first_name', None)
-        last_name = post.get('last_name', None)
-        uuid = post.get('uuid', None)
-        
-        #check if there is a user connected to this uuid, if so return it with it's api key and username
+        user_resource = UserResource()
+        # build bundle of user resource
+        user = user_resource.obj_create(user_resource.build_bundle(data=post))
         try:
-            if (email is None and uuid is not None):
-                user = UserProfile.objects.get(uuid=uuid).user
-                return self.create_response(request, {
-                         'success': True,
-                         'message': 'Successfully logged in',
-                         'username':user.username,
-                         'api_key':user.api_key.key,
-                         }, HttpAccepted)
-            
-        except ObjectDoesNotExist:
-            pass
-        
-        #create the username
-        api_key = ApiKey()
-        username = api_key.generate_key()[0:30]
-        
-        #if email is none, it's an anonymous user. generate a password
-        if (email is None):
-            password = api_key.generate_key()[0:16]
-
-        try:               
-            #create user form
-            user_create_form = UserCreateForm({
-                                          'username': username,
-                                          'email': email,
-                                          'password1': password, 
-                                          'password2': password, 
-                                          'first_name': first_name, 
-                                          'last_name': last_name, 
-                                          })
-            #validate the form
-            if not user_create_form.is_valid():
-                raise ValidationError(user_create_form.errors)
-            #create user profile form 
-            user_profile_form = UserProfileForm({
-                                                'uuid':uuid,
-            })   
-            #validate the user profile form
-            if not user_profile_form.is_valid():
-                raise ValidationError((user_profile_form.errors))
-            
-            #create the user and save it
-            user = user_create_form.save()
-            #create the user profile but don't save it yet
-            user_profile = user_profile_form.save(commit=False)
-            #attach the user to user profile
-            user_profile.user = user
-            user_profile.save()
+            # update the post dict with the user we just created
+            post['user'] = user_resource.get_resource_uri(user)
+            # build bundle of user profile resource
+            user_profile_resource = UserProfileResource()
+            user_profile_resource.obj_create(bundle=user_profile_resource.build_bundle(data=post))
+          
+        except Exception as e:
+            user.obj.delete()
+            raise e
                     
-            return self.create_response(request, {
-                         'success': True,
-                         'message': "User created successfully",
-                         'username':user.username,
-                         'api_key':user.api_key.key,
-                         }, HttpCreated)
-
-        # handle exceptions
-        except ValidationError as e:
-            return self.create_response(request, {
-                 'success': False,
-                 'errors': e.message_dict,
-                 }, HttpBadRequest)
-            
-        except:
-            return self.create_response(request, {
-                 'success': False,
-                 'errors': 'could not register user',
-                 }, HttpApplicationError)
-        
-            
+        return self.create_response(request, {
+                     'success': True,
+                     'message': "User created successfully",
+                     'username':user.obj.username,
+                     'api_key':user.obj.api_key.key,
+                     }, HttpCreated)            
         
     def forgot_password(self, request=None, **kwargs):
         '''
@@ -403,8 +396,7 @@ class UtilitiesResource(LtgResource):
                 from_email ='anonymous@uuid-' + str(request.user.profile.uuid) + '.com'
             except:
                 from_email = 'anonymous@ltg-user.com'
-            
-                               
+                                    
         #send the mail
         if is_send_grid():
             t = get_template('emails/contact_us_email.html')

@@ -220,7 +220,7 @@ INSTALLED_APPS = INSTALLED_APPS + ('raven.contrib.django.raven_compat',)
 # STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 
 #tell django about the user profile
-AUTH_PROFILE_MODULE = "ticketz_backend_app.UserProfile"
+# AUTH_PROFILE_MODULE = "ticketz_backend_app.UserProfile"
 
 #for send grid
 try:
