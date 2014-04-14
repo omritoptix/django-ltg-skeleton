@@ -115,7 +115,7 @@ class HubSpotClient(object):
         '''
         try:
             # call the hubspot contact api
-            resp = self._request_handler((BASE_API_URL + CONTACT_API + API_KEY_QUERY_STRING + "ddd") % (contact_id, self._api_key))
+            resp = self._request_handler((BASE_API_URL + CONTACT_API + API_KEY_QUERY_STRING) % (contact_id, self._api_key))
             # return a parsed contact json
             contact_json = resp.json()
             return self._parse_contact(**contact_json)
