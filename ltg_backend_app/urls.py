@@ -29,6 +29,9 @@ v1_api = Api(api_name='v1')
 v1_api.register(UtilitiesResource())
 v1_api.register(TutorResource())
 v1_api.register(UserResource())
+v1_api.register(AnonymousUserResource())
+v1_api.register(UserProfileResource())
+v1_api.register(AnonymousUserProfileResource())
 
 #register urls
 urlpatterns = patterns('',
