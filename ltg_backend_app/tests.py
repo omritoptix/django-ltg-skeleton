@@ -14,6 +14,7 @@ Created on April 8, 2014
 from tastypie.test import ResourceTestCase
 from django.contrib.auth.models import User
 import pdb
+from ltg_backend_app.models import UserProfile
 
 #===============================================================================
 # end imports
@@ -25,57 +26,73 @@ import pdb
 
 class UtilitiesRegister(ResourceTestCase):
     '''
-    Ltg backend tests will be written here
+    will test the 'register' and 'skip-register' methods of the utilities resouce.
     '''
     fixtures = ['ltg_backend_app']
     
     def test_register(self):
         '''
         test registration api
-        1. regular user registration is successfull
-        2. registration with duplicate email of the first this should fail
+        1. valid details registration is successfull
+        2. registration with duplicate email should fail
         3. registration without uuid should fail
-        4. fourth with validation errors
-        5. anonymous user registration only with uuid successfull
-        5. registration only with uuid and mail fail (since not recognized as anonymous if email exists)
-        6. test login of already registered anonymous user. will be indentified by uuid. 
+        4. registration with validation error
         '''
-        #regular user registration successfull
+        # valid details registration is successfull
         user_count = User.objects.count()
         resp = self.api_client.post(uri='/api/v1/utilities/register/', format='json', data={'first_name': 'yariv', 'last_name': 'katz', 'email': 'ywarezk@gmail.com', 'password': '12345678','uuid':'12345'})
         self.assertHttpCreated(resp)
         self.assertEqual(User.objects.count(), user_count + 1)
+        # make sure user created with is_anonymous = False
+        latest_user = User.objects.latest('date_joined')
+        self.assertFalse(latest_user.profile.is_anonymous)
     
-        #duplicate email
+        # registration with duplicate email will fail
         resp = self.api_client.post(uri='/api/v1/utilities/register/', format='json', data={'first_name': 'yariv', 'last_name': 'katz', 'email': 'ywarezk@gmail.com', 'password': '12345678','uuid':'123456'})
         self.assertHttpBadRequest(resp)
         self.assertEqual(User.objects.count(), user_count + 1)
           
-        #registration without uuid
+        # registration without uuid will fail
         resp = self.api_client.post(uri='/api/v1/utilities/register/', format='json', data={'first_name': 'yariv', 'last_name': 'katz', 'email': 'ywarezk20@gmail.com', 'password': '12345678'})
         self.assertHttpBadRequest(resp)
         self.assertEqual(User.objects.count(), user_count + 1)
           
-        #various validation errors
+        # various validation errors
         resp = self.api_client.post(uri='/api/v1/utilities/register/', format='json', data={'first_name': 'yariv', 'last_name': 'katz', 'email': 'yariv1gmail.com', 'password': '12','uuid':'1234567'})
         self.assertHttpBadRequest(resp)
         self.assertEqual(User.objects.count(), user_count + 1)
-          
-        #anonymous registration successfull
-        resp = self.api_client.post(uri='/api/v1/utilities/register/', format='json', data={'uuid':'12345678'})
-        self.assertHttpCreated(resp)
-        self.assertEqual(User.objects.count(), user_count + 2)
-          
-        #registration only with uuid and mail fail (since not recognized as anonymous if email exists)
-        resp = self.api_client.post(uri='/api/v1/utilities/register/', format='json', data={'uuid':'123456789','email':'omri@ltg.com'})
-        self.assertHttpBadRequest(resp)
-        self.assertEqual(User.objects.count(), user_count + 2)
-          
-        #test login of already registered anonymous user. will be indentified by uuid.
-        resp = self.api_client.post(uri='/api/v1/utilities/register/', format='json', data={'uuid':'12345678'})
-        self.assertHttpAccepted(resp)
-        
 
+    def test_skip_register(self):
+        '''
+        test skip register
+        1. skip register for the first time will create the user
+        2. skip register for the next times will get the user and not create it
+        3. skip register without uuid will fail
+        4. skip register with uuid and mail is not allowed
+        '''
+        # skip register for the first time will create the user
+        user_count = User.objects.count()
+        resp = self.api_client.post(uri='/api/v1/utilities/skip-register/', format='json', data={'uuid':'12345678'})
+        self.assertHttpCreated(resp)
+        self.assertEqual(User.objects.count(), user_count + 1)
+        # make sure user created with is_anonymous = True
+        latest_user = User.objects.latest('date_joined')
+        self.assertTrue(latest_user.profile.is_anonymous)
+        
+        # skip register for the next times will get the user and not create it
+        resp = self.api_client.post(uri='/api/v1/utilities/skip-register/', format='json', data={'uuid':'12345678'})
+        self.assertHttpOK(resp)
+        self.assertEqual(User.objects.count(), user_count + 1)
+        
+        # skip register without uuid will fail
+        resp = self.api_client.post(uri='/api/v1/utilities/skip-register/', format='json')
+        self.assertHttpBadRequest(resp)
+        
+        # skip register with uuid and mail is not allowed
+        resp = self.api_client.post(uri='/api/v1/utilities/skip-register/', format='json', data={'uuid':'123456789','email':'omri@ltg.com'})
+        self.assertHttpBadRequest(resp)
+        
+        
 class Tutor(ResourceTestCase):
     
     def test_get_tutor(self):
@@ -86,6 +103,7 @@ class Tutor(ResourceTestCase):
         '''
         #get tutor
         resp = self.api_client.get(uri='/api/v1/tutor/8092/', format='json')
+        print resp
         self.assertHttpOK(resp)
         self.assertTrue(len(self.deserialize(resp)) > 0)
         self.assertTrue(self.deserialize(resp)['first_name'])
@@ -95,6 +113,47 @@ class Tutor(ResourceTestCase):
         self.assertHttpOK(resp)
         self.assertTrue(len(self.deserialize(resp)) > 0)
         self.assertTrue(len(self.deserialize(resp)['objects'][0]['first_name']))
+        
+        
+class UtilitiesLogin(ResourceTestCase):
+    
+    def setUp(self):
+        '''
+        create a user and user profile for the login test
+        '''
+        user = User.objects.create_user(username='omridagan', email='omridagan@ltg.com', password='top_secret')
+        user.save()
+        user_profile = UserProfile.objects.create(uuid='12345678',user=user)
+        user_profile.save()
+        return super(UtilitiesLogin,self).setUp()
+        
+    def test_login(self):
+        '''
+        will test email password login.
+        1. test successfull login with correct credentails.
+        2. test login without email
+        3. test login without password
+        4. test login with bad credentails
+        '''
+        # test successfull login with correct credentails.
+        resp = self.api_client.post(uri='/api/v1/utilities/login/', format='json', data={'email': 'omridagan@ltg.com','password':'top_secret'})
+        self.assertHttpOK(resp)
+        # make sure username and api key are returned in the response and are correct
+        self.assertEqual(self.deserialize(resp)['username'],'omridagan')
+        self.assertEqual(self.deserialize(resp)['api_key'],User.objects.get(username='omridagan').api_key.key)
+        
+        # test login without email 
+        resp = self.api_client.post(uri='/api/v1/utilities/login/', format='json', data={'password':'top_secret'})
+        self.assertHttpUnauthorized(resp)
+        
+        # test login without password 
+        resp = self.api_client.post(uri='/api/v1/utilities/login/', format='json', data={'email': 'omri@ltg.com'})
+        self.assertHttpUnauthorized(resp)
+        
+        # test login with bad credentails
+        resp = self.api_client.post(uri='/api/v1/utilities/login/', format='json', data={'email': 'omri2@ltg.com','password':'bottom_secret'})
+        self.assertHttpUnauthorized(resp)
+        
         
 
             
