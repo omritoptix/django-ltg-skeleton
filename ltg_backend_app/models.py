@@ -74,6 +74,7 @@ class UserProfile(LtgModel):
     '''
     user = models.ForeignKey(User, unique=True)
     uuid = models.CharField(max_length=200, default=None,unique=True)
+    is_anonymous = models.BooleanField(default=False)
     
     def __unicode__(self):
         if (self.user):
