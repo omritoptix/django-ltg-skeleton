@@ -25,15 +25,14 @@ from ltg_backend_app.models import UserProfile
 # begin forms
 #===============================================================================
 
-class UserCreateForm(UserCreationForm):
+class UserForm(ModelForm):
     '''
     form for creating a user
     '''
-    email = forms.EmailField(required=True,max_length=50,min_length=5)
     first_name = forms.CharField(required=True,max_length=30)
+    email = forms.EmailField(required=True,max_length=50,min_length=5)
     last_name = forms.CharField(required=True,max_length=30)
-    password1 = forms.CharField(required=True, max_length=16, min_length=8)
-    password2 = forms.CharField(required=True, max_length=16, min_length=8)
+    password = forms.CharField(required=True,max_length=16,min_length=8)
     
     def clean_email(self):
         email = self.cleaned_data.get('email')
@@ -46,7 +45,7 @@ class UserCreateForm(UserCreationForm):
         model = User
         fields = ( "username", "email", "first_name", "last_name" )
         
-class AnonymousUserCreateForm(UserCreateForm):
+class AnonymousUserCreateForm(UserForm):
     '''
     form for creating anonymous user
     '''
@@ -63,7 +62,7 @@ class AnonymousUserCreateForm(UserCreateForm):
             raise forms.ValidationError(u'You are not allowed to update email on skip-register action')
         return email    
     
-    class Meta(UserCreateForm.Meta):
+    class Meta(UserForm.Meta):
         model = User
         
 class UserProfileForm(ModelForm):

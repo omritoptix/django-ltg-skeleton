@@ -30,8 +30,8 @@ from django.template.context import Context
 import logging
 from tastypie import fields
 from django.core.exceptions import ValidationError
-from ltg_backend_app.forms import UserCreateForm, UserProfileForm,\
-    AnonymousUserCreateForm, AnonymousUserProfileForm
+from ltg_backend_app.forms import UserProfileForm,\
+    AnonymousUserCreateForm, AnonymousUserProfileForm, UserForm
 from ltg_backend_app.models import UserProfile, Tutor
 from django.core.exceptions import ObjectDoesNotExist
 from tastypie.authentication import ApiKeyAuthentication, Authentication
@@ -43,6 +43,7 @@ from tastypie.validation import FormValidation
 import uuid
 from tastypie.authorization import Authorization
 from django.contrib.auth import login, authenticate
+
 
 
 
@@ -99,23 +100,7 @@ class LtgResource(ModelResource):
             return 0
     
         return kwargs['pk']
-    
-    @staticmethod
-    def mail_authenticate(email=None, password=None):
-        """ 
-        Authenticate a user based on email address.
-        @param email
-        @param passwrod
-        @return: the user if authenticated 
-        """
-        try:
-            user = User.objects.get(email=email)
-            if user.check_password(password):
-                return authenticate(username = user.username,password = password)
-        except User.DoesNotExist:
-            return None 
-    
-        
+            
 #===============================================================================
 # end abstract resources
 #===============================================================================
@@ -162,29 +147,30 @@ class UserResource(ModelResource):
         allowed_methods = ['post']
         include_resource_uri = False
         always_return_data = True
-        validation = FormValidation(form_class=UserCreateForm)
+        validation = FormValidation(form_class=UserForm)
         authentication = Authentication()
         authorization = Authorization()
         queryset = User.objects.all()
 
     def obj_create(self, bundle , **kwargs):
-        # get username and password
-        bundle.data['username'] = bundle.data.get('username',uuid.uuid4().hex[:30])
-        bundle.data['password1'] = bundle.data.get('password',uuid.uuid4().hex[:16])
-        bundle.data['password2'] = bundle.data['password1']
+        # set username
+        bundle.data['username'] = uuid.uuid4().hex[:30]
         # create the object 
         bundle = super(UserResource, self).obj_create(bundle)
         # set the new password
-        bundle.obj.set_password(bundle.data['password1'])
+        bundle.obj.set_password(bundle.data['password'])
         bundle.obj.save()
-        # return the api_key in the response
-        bundle.data['api_key'] = bundle.obj.api_key.key
-        # del the extra bundle fields so it won't be included in the response
-        del bundle.data['password1']
-        del bundle.data['password2']
-
         return bundle
     
+    def obj_update(self, bundle, **kwargs):
+        # get the username
+        bundle.data['username'] = bundle.obj.username
+        # update the object 
+        bundle = super(UserResource, self).obj_update(bundle)
+        # set the new password
+        bundle.obj.set_password(bundle.data['password'])
+        bundle.obj.save()
+        return bundle
     
 class AnonymousUserResource(UserResource):
     '''
@@ -192,6 +178,11 @@ class AnonymousUserResource(UserResource):
     '''
     class Meta(UserResource.Meta):
         validation = FormValidation(form_class=AnonymousUserCreateForm)
+        
+    def obj_create(self, bundle, **kwargs):
+        # assign password to anonymous user
+        bundle.data['password'] = bundle.data.get('password',uuid.uuid4().hex[:16])
+        return super(AnonymousUserResource,self).obj_create(bundle,**kwargs)
     
 class UserProfileResource(LtgResource):
     '''
@@ -338,8 +329,8 @@ class UtilitiesResource(LtgResource):
         password = post.get('password','')
         email = post.get('email','')
         
-        # try to login the user using it's mail
-        user = self.mail_authenticate(email=email, password=password)
+        # try to login the user using it's mail using our custom backend 'authenticate'
+        user = authenticate(username=email, password=password)
         if (user):
             if user.is_active and not user.profile.is_anonymous:
                 login(request, user)
@@ -389,7 +380,8 @@ class UtilitiesResource(LtgResource):
 
     def register(self, request=None, user_resource = UserResource(), user_profile_resource = UserProfileResource(), **kwargs):
         '''
-        will try and register the user. 
+        will try and register the user.
+        if the user was previously registered as anonymous user, will update it's user and user profile details.
         @param user_resource : the resource which we will use to create the user (either UserResource or AnonymnousUserResource)
         @param user_profile_resource : the resource which we will use to create the user profile (either UserProfileResource or AnonymnousProfileUserResource) 
         @return success: will return a 201 code with the following object.
@@ -398,16 +390,29 @@ class UtilitiesResource(LtgResource):
             message: <String>
         } 
         '''
+        new_user = True
         # get params
-        post = simplejson.loads(request.body)
-        # build bundle of user resource
-        user = user_resource.obj_create(user_resource.build_bundle(data=post))
+        post = simplejson.loads(request.body)      
+        # if uuid exist - update the new user flag
         try:
-            # update the post dict with the user we just created
+            existing_user = UserProfile.objects.get(uuid=post.get('uuid',None)).user
+            new_user = False
+        except UserProfile.DoesNotExist:
+            pass
+        # create/update user from user resource
+        if (new_user):
+            user = user_resource.obj_create(user_resource.build_bundle(data=post))
+        else:
+            user = user_resource.obj_update(user_resource.build_bundle(obj=existing_user,data=post))
+        try:           
+            # update the post dict with the user we've just created/updated
             post['user'] = user_resource.get_resource_uri(user)
-            # build bundle of user profile resource
-            user_profile_resource.obj_create(bundle=user_profile_resource.build_bundle(data=post))
-          
+            # create/update user profile from user resource
+            if (new_user):
+                user_profile_resource.obj_create(bundle=user_profile_resource.build_bundle(data=post))
+            else:
+                user_profile_resource.obj_update(bundle=user_profile_resource.build_bundle(data=post))
+            
         except Exception as e:
             user.obj.delete()
             raise e
