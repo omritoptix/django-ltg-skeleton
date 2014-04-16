@@ -274,6 +274,7 @@ INTERNAL_IPS = (
 )
 
 AUTHENTICATION_BACKENDS = (
+    'ltg_backend_app.auth_backends.EmailAuthBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
 
