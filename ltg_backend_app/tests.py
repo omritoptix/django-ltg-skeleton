@@ -37,6 +37,7 @@ class UtilitiesRegister(ResourceTestCase):
         2. registration with duplicate email should fail
         3. registration without uuid should fail
         4. registration with validation error
+        5. registration without password should fail
         '''
         # valid details registration is successfull
         user_count = User.objects.count()
@@ -61,6 +62,10 @@ class UtilitiesRegister(ResourceTestCase):
         resp = self.api_client.post(uri='/api/v1/utilities/register/', format='json', data={'first_name': 'yariv', 'last_name': 'katz', 'email': 'yariv1gmail.com', 'password': '12','uuid':'1234567'})
         self.assertHttpBadRequest(resp)
         self.assertEqual(User.objects.count(), user_count + 1)
+        
+        # registration without password should fail
+        resp = self.api_client.post(uri='/api/v1/utilities/register/', format='json', data={'first_name': 'yariv', 'last_name': 'katz', 'email': 'ywarezk3@gmail.com','uuid':'12345abcd'})
+        self.assertHttpBadRequest(resp)
 
     def test_skip_register(self):
         '''
@@ -92,6 +97,51 @@ class UtilitiesRegister(ResourceTestCase):
         resp = self.api_client.post(uri='/api/v1/utilities/skip-register/', format='json', data={'uuid':'123456789','email':'omri@ltg.com'})
         self.assertHttpBadRequest(resp)
         
+    def test_register_existing_anonymous_user(self):
+        '''
+        will test anonymous user which used to do 'skip register' now wants to register.
+        the user is identified by it's uuid.
+        1. test register without email will fail
+        2. test register without password will fail
+        3. test register with existing email will fail
+        4. test anonymous register will update the anonymous user details and not create new user.
+        '''
+        # create the anonymous user (skip-register)
+        resp = self.api_client.post(uri='/api/v1/utilities/skip-register/', format='json', data={'uuid':'12345678'})
+        self.assertHttpCreated(resp)
+        anonymous_user = User.objects.latest('date_joined')
+        # assert email is empty
+        self.assertEqual(anonymous_user.email,'')
+        # get current number of users
+        user_count = User.objects.count()
+        
+        # test register without email will fail
+        resp = self.api_client.post(uri='/api/v1/utilities/register/', format='json', data={'first_name': 'omri', 'last_name': 'dagan', 'password': '12345678','uuid':'12345678'})
+        self.assertHttpBadRequest(resp)
+        self.assertEqual(User.objects.count(), user_count)
+        
+        # test register without password will fail
+        resp = self.api_client.post(uri='/api/v1/utilities/register/', format='json', data={'first_name': 'omri', 'last_name': 'dagan', 'email': 'omri@gmail.com','uuid':'12345678'})
+        self.assertHttpBadRequest(resp)
+        self.assertEqual(User.objects.count(), user_count)
+        
+        # test register with existing email will fail
+        resp = self.api_client.post(uri='/api/v1/utilities/register/', format='json', data={'first_name': 'omri', 'last_name': 'dagan', 'email': 'yariv@nerdeez.com','uuid':'12345678','password': '12345678'})
+        self.assertHttpBadRequest(resp)
+        self.assertEqual(User.objects.count(), user_count)
+        
+        # test anonymous register will update the anonymous user details and not create new user
+        user_count = User.objects.count()
+        resp = self.api_client.post(uri='/api/v1/utilities/register/', format='json', data={'first_name': 'yariv', 'last_name': 'katz', 'email': 'ywarezk@gmail.com', 'password': '12345678','uuid':'12345678'})
+        self.assertHttpCreated(resp)
+        # assert new user not created
+        self.assertEqual(User.objects.count(), user_count)
+        registered_user = User.objects.latest('date_joined')
+        # assert the former and later user are the same user only with updated details
+        self.assertEqual(anonymous_user.id, registered_user.id)
+        # assert email was updated
+        self.assertEqual(registered_user.email,'ywarezk@gmail.com')
+        
         
 class Tutor(ResourceTestCase):
     
@@ -103,7 +153,6 @@ class Tutor(ResourceTestCase):
         '''
         #get tutor
         resp = self.api_client.get(uri='/api/v1/tutor/8092/', format='json')
-        print resp
         self.assertHttpOK(resp)
         self.assertTrue(len(self.deserialize(resp)) > 0)
         self.assertTrue(self.deserialize(resp)['first_name'])
