@@ -13,3 +13,5 @@ sqlparse==0.1.10
 wsgiref==0.1.2
 raven>=3
 requests==1.2.3
+django-timedeltafield
+numpy
