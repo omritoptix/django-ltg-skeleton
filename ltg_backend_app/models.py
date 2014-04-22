@@ -173,15 +173,17 @@ class Question(LtgModel):
         @return float: percentage of people which answered right.
         '''
         total_answers = Attempt.objects.filter(question_id=self.id,attempt=1).count()
+        if (total_answers == 0):
+            return 100.0
         right_answers = Attempt.objects.filter(question_id=self.id,attempt=1,answer = self.answer).count()
         return ((float(right_answers)/total_answers) * 100)
     
     @property
-    def wrong_answeres(self):
+    def wrong_answers(self):
         '''
         iterate over all the first attempts for each question and calc
-        the wrong answeres percetange 
-        @return: dictionary with answeres as keys and percentage of wrong answeres as values 
+        the wrong answers percetange 
+        @return: dictionary with answers as keys and percentage of wrong answers as values 
         '''
         # init params
         wrong_ans = {}
@@ -191,10 +193,12 @@ class Question(LtgModel):
             wrong_ans = {'A':0,'B':0,'C':0,'D':0,'E':0}
             for attempt in Attempt.objects.filter(question_id=self.id,attempt=1).exclude(answer=self.answer):
                     wrong_ans[attempt.get_answer_display()] += 1
-            # total wrong answers
-            total_wrong_ans = Attempt.objects.filter(question_id=self,attempt=1).exclude(answer=self.answer).count()
             # delete the right answer key
             del wrong_ans[self.get_answer_display()]
+            # total wrong answers
+            total_wrong_ans = Attempt.objects.filter(question_id=self,attempt=1).exclude(answer=self.answer).count()
+            if (total_wrong_ans == 0):
+                return wrong_ans
             # calc wrong answers percentage per answer
             for wrong_ans_key in wrong_ans.keys():
                 wrong_ans[wrong_ans_key] = (float(wrong_ans[wrong_ans_key])/total_wrong_ans) * 100

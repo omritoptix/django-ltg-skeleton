@@ -29,7 +29,7 @@ class QuestionResource(LtgResource):
     resource for the question model
     '''
     percentage_right = fields.DecimalField(attribute='percentage_right')
-    wrong_answeres = fields.DictField(attribute='wrong_answeres')
+    wrong_answers = fields.DictField(attribute='wrong_answers')
     score = fields.IntegerField(attribute='score')
     time_statistics = fields.ListField(attribute='time_statistics')
     
