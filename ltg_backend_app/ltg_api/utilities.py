@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 '''
-Tastypie will play with this file to create a rest server
-Created on March 15, 2013
-
-@author: Yariv Katz & Omri Dagan
+will hold our utilities resource
+Created on April 22, 2014
+ 
+@author: Omri Dagan
 @version: 1.0
 @copyright: LTG
 '''
@@ -12,270 +11,36 @@ Created on March 15, 2013
 # begin imports
 #===============================================================================
 
-from ltg_backend_app import settings
-from tastypie.resources import ModelResource, Resource
-import os
+from ltg_backend_app.ltg_api.base import LtgResource, is_send_grid
+from tastypie.authentication import Authentication
 from django.conf.urls import url
-from tastypie.utils import trailing_slash
+from tastypie.utils.urls import trailing_slash
 from django.utils import simplejson
-from django.core.urlresolvers import resolve, get_script_prefix
-from django.contrib.auth.models import User
-from tastypie.http import *
-from tastypie.models import ApiKey
+from django.contrib.auth import authenticate, login
+from tastypie.http import HttpForbidden, HttpUnauthorized, HttpCreated,\
+    HttpApplicationError, HttpAccepted
+from ltg_backend_app.models import UserProfile
+from ltg_backend_app.ltg_api.anonymous_user_profile import AnonymousUserProfileResource
+from ltg_backend_app.ltg_api.user_profile import UserProfileResource
+from ltg_backend_app.ltg_api.user import UserResource
+from ltg_backend_app.ltg_api.authentication import LtgApiKeyAuthentication
+import settings
 from django.template.loader import get_template
+from django.template.context import Context
 from django.utils.html import strip_tags
 from django.core.mail.message import EmailMultiAlternatives
 from smtplib import SMTPSenderRefused
-from django.template.context import Context
-import logging
-from tastypie import fields
-from django.core.exceptions import ValidationError
-from ltg_backend_app.forms import UserProfileForm,\
-    AnonymousUserCreateForm, AnonymousUserProfileForm, UserForm
-from ltg_backend_app.models import UserProfile, Tutor
-from django.core.exceptions import ObjectDoesNotExist
-from tastypie.authentication import ApiKeyAuthentication, Authentication
-from ltg_backend_app.ltg_api.api_auth import LtgApiKeyAuthentication
-from tastypie.bundle import Bundle
-import requests
-from ltg_backend_app.ltg_api.hubspot_client import HubSpotClient
-from tastypie.validation import FormValidation
-import uuid
-from tastypie.authorization import Authorization
-from django.contrib.auth import login, authenticate
-
-
-
-
-
+from tastypie.models import ApiKey
+from ltg_backend_app.ltg_api.anonymous_user import AnonymousUserResource
 
 #===============================================================================
 # end imports
 #===============================================================================
 
 #===============================================================================
-# begin constants
+# begin utilities resource
 #===============================================================================
 
-API_URL = '/api/v1/'
-
-#===============================================================================
-# end constants
-#===============================================================================
-
-
-#===============================================================================
-# begin abstract resources
-#===============================================================================
-
-class LtgResource(ModelResource):
-    '''
-    abstract class with commone attribute common to all my rest models
-    '''
-    creation_date = fields.DateTimeField(attribute='creation_date',readonly=True)
-    modified_data = fields.DateTimeField(attribute='modified_data',readonly=True)
-    
-    #set read only fields
-    class Meta:
-        allowed_methods = ['get']
-        always_return_data = True
-        
-    @staticmethod
-    def get_pk_from_uri(uri):
-        '''
-        gets a uri and return the pk from the url
-        @param uri: the url
-        @return: string the pk 
-        '''
-        
-        prefix = get_script_prefix()
-        chomped_uri = uri
-    
-        if prefix and chomped_uri.startswith(prefix):
-            chomped_uri = chomped_uri[len(prefix)-1:]
-    
-        try:
-            view, args, kwargs = resolve(chomped_uri)
-        except:
-            return 0
-    
-        return kwargs['pk']
-            
-#===============================================================================
-# end abstract resources
-#===============================================================================
-
-#===============================================================================
-# begin global function
-#===============================================================================
-
-def is_send_grid():
-    '''
-    determine if i can send mails in this server
-    @return: True if i can
-    '''
-    return 'SENDGRID_USERNAME' in os.environ
-
-
-#===============================================================================
-# end global function
-#===============================================================================
-
-#===============================================================================
-# begin globals
-#===============================================================================
-
-# set global logger to be root logger
-logger = logging.getLogger()
-
-#===============================================================================
-# end globals
-#===============================================================================
-
-
-#===============================================================================
-# begin the actual rest api
-#===============================================================================
-
-class UserResource(ModelResource):
-    '''
-    resource for our user model
-    '''
-    class Meta:
-        resource_name = 'user'
-        excludes = ['password']
-        allowed_methods = ['post']
-        include_resource_uri = False
-        always_return_data = True
-        validation = FormValidation(form_class=UserForm)
-        authentication = Authentication()
-        authorization = Authorization()
-        queryset = User.objects.all()
-
-    def obj_create(self, bundle , **kwargs):
-        # set username
-        bundle.data['username'] = uuid.uuid4().hex[:30]
-        # create the object 
-        bundle = super(UserResource, self).obj_create(bundle)
-        # set the new password
-        bundle.obj.set_password(bundle.data['password'])
-        bundle.obj.save()
-        return bundle
-    
-    def obj_update(self, bundle, **kwargs):
-        # get the username
-        bundle.data['username'] = bundle.obj.username
-        # update the object 
-        bundle = super(UserResource, self).obj_update(bundle)
-        # set the new password
-        bundle.obj.set_password(bundle.data['password'])
-        bundle.obj.save()
-        return bundle
-    
-class AnonymousUserResource(UserResource):
-    '''
-    resource for anonymous user creation
-    '''
-    class Meta(UserResource.Meta):
-        validation = FormValidation(form_class=AnonymousUserCreateForm)
-        
-    def obj_create(self, bundle, **kwargs):
-        # assign password to anonymous user
-        bundle.data['password'] = bundle.data.get('password',uuid.uuid4().hex[:16])
-        return super(AnonymousUserResource,self).obj_create(bundle,**kwargs)
-    
-class UserProfileResource(LtgResource):
-    '''
-    resource for our user profile model
-    '''
-    user = fields.ToOneField(UserResource,'user')
-    class Meta:
-        allowed_methods = ['post']
-        include_resource_uri = True
-        always_return_data = True
-        validation = FormValidation(form_class=UserProfileForm)
-        authentication = Authentication()
-        authorization = Authorization()
-        queryset = UserProfile.objects.all()
-    
-        
-class AnonymousUserProfileResource(UserProfileResource):
-    '''
-    resource for anonymous user profile creation
-    '''  
-    class Meta(UserProfileResource.Meta):
-        validation = FormValidation(form_class=AnonymousUserProfileForm)
-        
-    def hydrate(self,bundle):
-        bundle.obj.is_anonymous = True
-        return super(AnonymousUserProfileResource,self).hydrate(bundle)
-
-class TutorResource(Resource):
-    '''
-    will return all tutors by using hubspot api as it's data source.
-    '''
-    id = fields.CharField(attribute='id',null=True)
-    first_name = fields.CharField(attribute='first_name',null=True)
-    last_name = fields.CharField(attribute='last_name', null=True)
-    file_upload = fields.CharField(attribute='file_upload', null=True)
-    email = fields.CharField(attribute='image_url', null=True)
-    skype_id = fields.CharField(attribute='skype_id', null=True)
-    tutor_description = fields.CharField(attribute='tutor_description', null=True)
-    tutor_rate = fields.CharField(attribute='tutor_rate', null=True)
-    tutor_video = fields.CharField(attribute='tutor_video', null=True)
-    tutor_speciality = fields.CharField(attribute='tutor_speciality', null=True)
-    tutor_groups = fields.CharField(attribute='tutor_groups', null=True)
-    country = fields.CharField(attribute='country', null=True)
-
-    class Meta:
-        resource_name = 'tutor'
-        allowed_methods = ['get']
-        object_class = Tutor
-        authentication = Authentication()
-        
-    def _client(self):
-        #define our api client
-        return HubSpotClient(settings.HUBSPOT_API_KEY)
-        
-    def detail_uri_kwargs(self, bundle_or_obj):
-        kwargs = {}
-    
-        if isinstance(bundle_or_obj, Bundle):
-            kwargs['pk'] = bundle_or_obj.obj.id
-        else:
-            kwargs['pk'] = bundle_or_obj['id']
-    
-        return kwargs
-    
-    def obj_get(self, request=None, **kwargs):
-        result = self._client().get_contact(kwargs['pk'])
-        return Tutor(**result)
-    
-    def get_object_list(self, request):
-        list_id = request.GET.get('list_id',settings.HUBSPOT_LIST_ID)
-        contact_list = self._client().get_contact_list(list_id)
-        
-        results = []
-        for result in contact_list:
-            tutor = Tutor(**result)
-            results.append(tutor)
-     
-        return results
-    
-    def obj_get_list(self, bundle, **kwargs):
-        return self.get_object_list(bundle.request)
-    
-    def dehydrate(self,bundle):
-        updated_data = {}
-        # remove null fields
-        for key in bundle.data:
-            if (bundle.data[key] is not None):
-                updated_data[key] = bundle.data[key]
-        
-        bundle.data = updated_data
-        return super(TutorResource, self).dehydrate(bundle)    
-        
-        
 class UtilitiesResource(LtgResource):
     '''
     the api for things that are not attached to models: 
@@ -516,7 +281,7 @@ class UtilitiesResource(LtgResource):
                 'message': 'mail server not defined',
                 }, HttpApplicationError )
             
-        
 #===============================================================================
-# end the actual rest api
+# end utilities resource
 #===============================================================================
+            

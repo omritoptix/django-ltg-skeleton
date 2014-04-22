@@ -14,8 +14,15 @@ Created on November 7, 2013
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from tastypie.api import Api
-from ltg_backend_app.ltg_api.api import *
 import ltg_backend_app.views
+from ltg_backend_app.ltg_api.utilities import UtilitiesResource
+from ltg_backend_app.ltg_api.tutor import TutorResource
+from ltg_backend_app.ltg_api.user import UserResource
+from ltg_backend_app.ltg_api.anonymous_user import AnonymousUserResource
+from ltg_backend_app.ltg_api.user_profile import UserProfileResource
+from ltg_backend_app.ltg_api.anonymous_user_profile import AnonymousUserProfileResource
+from ltg_backend_app.ltg_api.question import QuestionResource
+# from ltg_backend_app.ltg_api.api import *
 
 #===============================================================================
 # end imports
@@ -32,6 +39,7 @@ v1_api.register(UserResource())
 v1_api.register(AnonymousUserResource())
 v1_api.register(UserProfileResource())
 v1_api.register(AnonymousUserProfileResource())
+v1_api.register(QuestionResource())
 
 #register urls
 urlpatterns = patterns('',

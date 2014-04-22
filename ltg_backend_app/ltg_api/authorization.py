@@ -1,8 +1,8 @@
 '''
-Authorization for our tastypie api
-Created on Apr 7, 2014
-
-@author: Omri Dagan
+will hold our authorization for the api
+Created on April 22, 2014
+ 
+@author: Omri Dagan & Yariv Katz
 @version: 1.0
 @copyright: LTG
 '''
@@ -11,41 +11,18 @@ Created on Apr 7, 2014
 # begin imports
 #===============================================================================
 
-from tastypie.authentication import ApiKeyAuthentication
-import json
 from tastypie.authorization import DjangoAuthorization
 from tastypie.exceptions import Unauthorized
+from ltg_backend_app.ltg_api.authentication import LtgApiKeyAuthentication
 
 #===============================================================================
 # end imports
 #===============================================================================
 
-
 #===============================================================================
-# begin authentication/authorization 
+# begin authorization
 #===============================================================================
 
-class LtgApiKeyAuthentication(ApiKeyAuthentication):
-    def extract_credentials(self, request):
-        username, api_key = super(LtgApiKeyAuthentication, self).extract_credentials(request)
-        if username == None and api_key == None and (request.method == 'POST' or request.method == 'PUT'):
-            post = json.loads(request.body)
-            username = post.get('username')
-            api_key = post.get('api_key')
-        return username, api_key
-            
-
-class LtgReadForFreeAuthentication(LtgApiKeyAuthentication):
-    
-    def is_authenticated(self, request, **kwargs):
-        '''
-        get is allowed without cradentials and all other actions require api key and username
-        @return: boolean if authenticated
-        '''
-        if request.method == 'GET':
-            return True
-        return super( LtgReadForFreeAuthentication, self ).is_authenticated( request, **kwargs )
-        
 class LtgReadForFreeAuthorization( DjangoAuthorization ):
     '''
     Authorizes every authenticated user to perform GET, 
@@ -141,5 +118,5 @@ class LtgOnlyOwnerCanReadAuthorization( LtgReadForFreeAuthorization ):
         return allowed
     
 #===============================================================================
-# end authentication/authorization 
+# end authorization
 #===============================================================================
