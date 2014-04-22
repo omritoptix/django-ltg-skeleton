@@ -25,5 +25,109 @@
             "key": "12345678", 
             "created": "2013-11-11T16:29:54.453Z"
         }
+    },
+    {
+    "pk": 1, 
+    "model": "ltg_backend_app.scoretable", 
+    "fields": {
+        "percentile": "0.00", 
+        "score": 205
     }
+	},
+	{
+	    "pk": 2, 
+	    "model": "ltg_backend_app.scoretable", 
+	    "fields": {
+	        "percentile": "1.00", 
+	        "score": 230
+	    }
+	},
+	{
+	    "pk": 3, 
+	    "model": "ltg_backend_app.scoretable", 
+	    "fields": {
+	        "percentile": "2.00", 
+	        "score": 260
+	    }
+	},
+	{
+	    "pk": 4, 
+	    "model": "ltg_backend_app.scoretable", 
+	    "fields": {
+	        "percentile": "100.00", 
+	        "score": 800
+	    }
+	},
+	{
+	    "pk": 1, 
+	    "model": "ltg_backend_app.attempt", 
+	    "fields": {
+	        "attempt": 1, 
+	        "modified_data": "2014-04-17T14:24:15.825Z", 
+	        "question": 1, 
+	        "creation_date": "2014-04-17T14:24:15Z", 
+	        "duration": "0:00:44", 
+	        "user": 1, 
+	        "answer": 2
+		}
+	},
+	{
+	    "pk": 2, 
+	    "model": "ltg_backend_app.attempt", 
+	    "fields": {
+	        "attempt": 1, 
+	        "modified_data": "2014-04-17T14:24:15.827Z", 
+	        "question": 2, 
+	        "creation_date": "2014-04-17T14:24:15Z", 
+	        "duration": "0:00:59", 
+	        "user": 1, 
+	        "answer": 2
+	    }
+	},
+	{
+	    "pk": 3, 
+	    "model": "ltg_backend_app.attempt", 
+	    "fields": {
+	        "attempt": 2, 
+	        "modified_data": "2014-04-17T14:24:15.829Z", 
+	        "question": 1, 
+	        "creation_date": "2014-04-17T14:24:15Z", 
+	        "duration": "0:00:45", 
+	        "user": 1, 
+	        "answer": 4
+	    }
+	},
+	{
+	    "pk": 4, 
+	    "model": "ltg_backend_app.attempt", 
+	    "fields": {
+	        "attempt": 2, 
+	        "modified_data": "2014-04-17T14:24:15.830Z", 
+	        "question": 2, 
+	        "creation_date": "2014-04-17T14:24:15Z", 
+	        "duration": "0:01:09", 
+	        "user": 1, 
+	        "answer": 3
+	    }
+	},
+	{
+	    "pk": 1, 
+	    "model": "ltg_backend_app.question", 
+	    "fields": {
+	        "answer": 1, 
+	        "index": 1, 
+	        "modified_data": "2014-04-17T12:16:49.329Z", 
+	        "creation_date": "2014-04-17T12:16:49Z"
+	    }
+	},
+	{
+	    "pk": 2, 
+	    "model": "ltg_backend_app.question", 
+	    "fields": {
+	        "answer": 2, 
+	        "index": 2, 
+	        "modified_data": "2014-04-17T12:16:49.332Z", 
+	        "creation_date": "2014-04-17T12:16:49Z"
+	    }
+	}
 ]
