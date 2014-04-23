@@ -39,7 +39,6 @@ class Question(ResourceTestCase):
         #get questions
         resp = self.api_client.get(uri='/api/v1/question/', format='json')
         self.assertHttpOK(resp)
-        print resp
         self.assertTrue(len(self.deserialize(resp)['objects']) > 0)
         
 #===============================================================================
