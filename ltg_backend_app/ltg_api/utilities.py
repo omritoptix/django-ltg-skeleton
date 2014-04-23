@@ -102,10 +102,13 @@ class UtilitiesResource(LtgResource):
                 # get the user api key
                 api_key, created = ApiKey.objects.get_or_create(user=user)
                 if (created):
-                    api_key.save()                    
+                    api_key.save()
+                # build user profile uri
+                user_profile_uri = UserProfileResource().get_resource_uri(user.profile)                    
                 return self.create_response(request, {
                     'success': True,
                     'message':'Successfully logged in!',
+                    'user_profile': user_profile_uri,
                     'username':user.username,
                     'api_key':api_key.key
                 })
@@ -125,15 +128,26 @@ class UtilitiesResource(LtgResource):
         '''
         will check if the user which skipped registration is already registered
         by it's uuid. if not , it will register him.
+        @return success: will return a 201 code with the following object.
+        {
+            success: <Boolean>,
+            message: <String>,
+            user_profile:<String>,
+            username:<String>,
+            api_key:<String>
+        } 
         '''       
         # get params
         post = simplejson.loads(request.body)
         try:
             # check if user is already registered
             user_profile = UserProfile.objects.get(uuid = post.get('uuid'),is_anonymous=True)
+            # build user profile uri
+            user_profile_uri = UserProfileResource().get_resource_uri(user_profile)  
             return self.create_response(request, {
                  'success': True,
                  'message': "User created successfully",
+                 'user_profile':user_profile_uri,
                  'username':user_profile.user.username,
                  'api_key':user_profile.user.api_key.key,
                  },)  
@@ -152,7 +166,10 @@ class UtilitiesResource(LtgResource):
         @return success: will return a 201 code with the following object.
         {
             success: <Boolean>,
-            message: <String>
+            message: <String>,
+            user_profile:<String>,
+            username:<String>,
+            api_key:<String>
         } 
         '''
         new_user = True
@@ -174,17 +191,20 @@ class UtilitiesResource(LtgResource):
             post['user'] = user_resource.get_resource_uri(user)
             # create/update user profile from user resource
             if (new_user):
-                user_profile_resource.obj_create(bundle=user_profile_resource.build_bundle(data=post))
+                user_profile = user_profile_resource.obj_create(bundle=user_profile_resource.build_bundle(data=post))
             else:
-                user_profile_resource.obj_update(bundle=user_profile_resource.build_bundle(data=post))
+                user_profile = user_profile_resource.obj_update(bundle=user_profile_resource.build_bundle(data=post))
             
         except Exception as e:
             user.obj.delete()
             raise e
                     
+        # build user profile uri
+        user_profile_uri = UserProfileResource().get_resource_uri(user_profile)
         return self.create_response(request, {
                      'success': True,
                      'message': "User created successfully",
+                     'user_profile' : user_profile_uri,
                      'username':user.obj.username,
                      'api_key':user.obj.api_key.key,
                      }, HttpCreated)            
