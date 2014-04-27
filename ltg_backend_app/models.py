@@ -66,7 +66,6 @@ class LtgModel(models.Model):
     
     class Meta:
         abstract = True
-        
                 
 #===============================================================================
 # end models abstract classes
@@ -126,9 +125,9 @@ class Question(LtgModel):
     '''
     will hold the question model
     '''
-    index = models.IntegerField(unique=True, blank=False, null=False)
-    answer = models.PositiveSmallIntegerField(choices=ANSWER, blank=False, null=False)
-    attempts = models.ManyToManyField(User, through='Attempt')
+    index = models.IntegerField(unique=True)
+    answer = models.PositiveSmallIntegerField(choices=ANSWER)
+    attempts = models.ManyToManyField(UserProfile, through='Attempt')
     
     def __unicode__(self):
         return str(self.index)
@@ -187,7 +186,7 @@ class Question(LtgModel):
         '''
         # init params
         wrong_ans = {}
-        # it attempt exists for the question, iterate over all attempts for the question and clac the statistics
+        # it attempt exists for the question, iterate over all attempts for the question and calc the statistics
         if Attempt.objects.filter(question_id = self.id,attempt = 1).exists():
             # will hold the number of wrong answers for each option
             wrong_ans = {'A':0,'B':0,'C':0,'D':0,'E':0}
@@ -209,7 +208,7 @@ class Question(LtgModel):
     def score(self):
         '''
         get percentage , turn it to percentile, and convert it to the question score. 
-        @return int : question score
+        @return: int - question score
         '''
         percentage = self.percentage_right
         # get percentile
@@ -232,37 +231,75 @@ class Concept(LtgModel):
     '''
     will hold the concept model
     '''
-    title = models.CharField(unique=True, blank=False, null=False,max_length=200)
+    title = models.CharField(unique=True,max_length=200)
     questions = models.ManyToManyField(Question)
     
     def __unicode__(self):
         return self.title
     
+    @property
+    def statistics(self):
+        concept_scores = ConceptScore.objects.filter(concept_id = self.id).values_list('score')
+        mean = numpy.mean(concept_scores)
+        std = numpy.std(concept_scores)
+        return {'mean':mean,'std':std}
+    
 class Section(LtgModel):
     '''
-    will hold the Section model
+    will hold the section model
     '''
-    title = models.CharField(unique=True, blank=False, null=False,max_length=200)
+    title = models.CharField(unique=True,max_length=200)
     questions = models.ManyToManyField(Question)
     
     def __unicode__(self):
-        return self.title      
+        return self.title
+    
+    @property
+    def statistics(self):
+        section_scores = SectionScore.objects.filter(section_id = self.id).values_list('score')
+        mean = numpy.mean(section_scores)
+        std = numpy.std(section_scores)
+        return {'mean':mean,'std':std}
+    
+class QuestionSetAttempt(LtgModel):
+    '''
+    will hold the question set model
+    '''    
+    concepts = models.ManyToManyField(Concept, through='ConceptScore')
+    sections = models.ManyToManyField(Section, through='SectionScore')    
+        
+    
+class ConceptScore(LtgModel): 
+    '''
+    will hold data regarding the concept for each question set attempt
+    '''
+    question_set_attempt = models.ForeignKey(QuestionSetAttempt)
+    concept = models.ForeignKey(Concept)
+    
+    
+class SectionScore(LtgModel): 
+    '''
+    will hold data regarding the section for each question set attempt
+    '''
+    question_set_attempt = models.ForeignKey(QuestionSetAttempt)
+    section = models.ForeignKey(Section)
+     
     
 class Attempt(LtgModel):
     '''
     will hold an attempt of a question by a user
     '''
-    user = models.ForeignKey(User,blank=False,null=False)
-    question = models.ForeignKey(Question,blank=False,null=False)
-    attempt = models.PositiveIntegerField(blank=False,null=False)
-    answer = models.PositiveSmallIntegerField(choices=ANSWER,blank=False,null=False)
+    user_profile = models.ForeignKey(UserProfile)
+    question = models.ForeignKey(Question)
+    attempt = models.PositiveIntegerField()
+    answer = models.PositiveSmallIntegerField(choices=ANSWER)
     duration = TimedeltaField()
     
     def __unicode__(self):
-        return "Attempt no.%d, on question no.%d, for user:%s" % (self.attempt, self.question.index, self.user.email)
+        return "Attempt no.%d, on question no.%d, for user:%s" % (self.attempt, self.question.index, self.user_profile.user.email)
 
     class Meta(LtgModel.Meta):
-        unique_together = (("user", "question","attempt"),)
+        unique_together = (("user_profile", "question","attempt"),)
         
 class ScoreTable(models.Model):
     '''
