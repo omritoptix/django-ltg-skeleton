@@ -15,3 +15,4 @@ raven>=3
 requests==1.2.3
 django-timedeltafield
 numpy
+django-tastypie-swagger

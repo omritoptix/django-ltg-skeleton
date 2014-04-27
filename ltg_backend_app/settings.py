@@ -147,6 +147,11 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
 )
 
+INSTALLED_APPS = INSTALLED_APPS + ('tastypie_swagger',)
+
+# configure tastypie swagger
+TASTYPIE_SWAGGER_API_MODULE = 'ltg_backend_app.urls.v1_api'
+
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
 # the site admins on every HTTP 500 error when DEBUG=False.
