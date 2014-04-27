@@ -22,6 +22,10 @@ from ltg_backend_app.ltg_api.anonymous_user import AnonymousUserResource
 from ltg_backend_app.ltg_api.user_profile import UserProfileResource
 from ltg_backend_app.ltg_api.anonymous_user_profile import AnonymousUserProfileResource
 from ltg_backend_app.ltg_api.question import QuestionResource
+from ltg_backend_app.ltg_api.section import SectionResource
+from ltg_backend_app.ltg_api.question_set_attempt import QuestionSetAttemptResource
+from ltg_backend_app.ltg_api.concept import ConceptResource
+from ltg_backend_app.ltg_api.Attempt import AttemptResource
 # from ltg_backend_app.ltg_api.api import *
 
 #===============================================================================
@@ -40,6 +44,10 @@ v1_api.register(AnonymousUserResource())
 v1_api.register(UserProfileResource())
 v1_api.register(AnonymousUserProfileResource())
 v1_api.register(QuestionResource())
+v1_api.register(QuestionSetAttemptResource())
+v1_api.register(SectionResource())
+v1_api.register(ConceptResource())
+v1_api.register(AttemptResource())
 
 #register urls
 urlpatterns = patterns('',
@@ -53,6 +61,8 @@ urlpatterns = patterns('',
     (r'^grappelli/', include('grappelli.urls')),
     
     ('^$', ltg_backend_app.views.homepage),
+    
+    url(r'api/doc/', include('tastypie_swagger.urls', namespace='tastypie_swagger')),
     
     
 )
