@@ -116,6 +116,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'ltg_backend_app.middlewares.NonHtmlDebugToolbarMiddleware.NonHtmlDebugToolbarMiddleware',
 #     'ticketz_backend_app.exception_middleware.ProcessExceptionMiddleware',
 #     'ticketz_backend_app.jsonp_middleware.JsonpMiddleware',
     # Uncomment the next line for simple clickjacking protection:
@@ -148,6 +149,7 @@ INSTALLED_APPS = (
 )
 
 INSTALLED_APPS = INSTALLED_APPS + ('tastypie_swagger',)
+INSTALLED_APPS = INSTALLED_APPS + ('debug_toolbar',)
 
 # configure tastypie swagger
 TASTYPIE_SWAGGER_API_MODULE = 'ltg_backend_app.urls.v1_api'
