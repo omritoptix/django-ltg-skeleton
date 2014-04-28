@@ -21,6 +21,7 @@ from django.utils.timezone import utc
 from functools import wraps
 from timedelta.fields import TimedeltaField
 import numpy
+from django.utils.functional import cached_property
 
 #===============================================================================
 # end imports
@@ -132,24 +133,26 @@ class Question(LtgModel):
     def __unicode__(self):
         return str(self.index)
     
-    @property
+    @cached_property
     def time_statistics(self):
         '''
         iterate over all attempts for a question and calc
-        the average and std time.
+        the mean and std time.
         @return time_statistics list : list containing dicts with statistics for each attempt
         '''
         # init params
         time_statistics = []
         attempt_num = 1
         is_attempt_valid = True
+        # get all the attempts for the current questions
+        question_attempt_qs = Attempt.objects.filter(question_id = self.id)
         # loop while there is an attempt for the question
         while (is_attempt_valid):
             # it attempt exists for the question, iterate over all attempts for the question and clac the statistics
-            if Attempt.objects.filter(question_id = self.id,attempt = attempt_num).exists():
+            if question_attempt_qs.filter(attempt = attempt_num).exists():
                 # will hold the times for each attempt
                 durations_per_attempt = []
-                for duration_per_attempt in Attempt.objects.filter(question_id=self.id,attempt=attempt_num).values_list('duration',flat=True):
+                for duration_per_attempt in question_attempt_qs.filter(attempt=attempt_num).values_list('duration',flat=True):
                     durations_per_attempt.append(duration_per_attempt.total_seconds())
                 # calc time statistics per attempt 
                 attempt = {}
@@ -165,7 +168,7 @@ class Question(LtgModel):
         
         return time_statistics
     
-    @property
+    @cached_property
     def percentage_right(self):
         ''' 
         calc percentage of people who got this question right
@@ -177,7 +180,7 @@ class Question(LtgModel):
         right_answers = Attempt.objects.filter(question_id=self.id,attempt=1,answer = self.answer).count()
         return ((float(right_answers)/total_answers) * 100)
     
-    @property
+    @cached_property
     def wrong_answers(self):
         '''
         iterate over all the first attempts for each question and calc
@@ -204,7 +207,7 @@ class Question(LtgModel):
         
         return wrong_ans
     
-    @property
+    @cached_property
     def score(self):
         '''
         get percentage , turn it to percentile, and convert it to the question score. 
@@ -237,7 +240,7 @@ class Concept(LtgModel):
     def __unicode__(self):
         return self.title
     
-    @property
+    @cached_property
     def statistics(self):
         concept_scores = ConceptScore.objects.filter(concept_id = self.id).values_list('score')
         mean = numpy.mean(concept_scores)
@@ -254,7 +257,7 @@ class Section(LtgModel):
     def __unicode__(self):
         return self.title
     
-    @property
+    @cached_property
     def statistics(self):
         section_scores = SectionScore.objects.filter(section_id = self.id).values_list('score')
         mean = numpy.mean(section_scores)
@@ -273,6 +276,7 @@ class ConceptScore(LtgModel):
     '''
     will hold data regarding the concept for each question set attempt
     '''
+    score = models.PositiveSmallIntegerField()
     question_set_attempt = models.ForeignKey(QuestionSetAttempt)
     concept = models.ForeignKey(Concept)
     
@@ -281,6 +285,7 @@ class SectionScore(LtgModel):
     '''
     will hold data regarding the section for each question set attempt
     '''
+    score = models.PositiveSmallIntegerField()
     question_set_attempt = models.ForeignKey(QuestionSetAttempt)
     section = models.ForeignKey(Section)
      
@@ -300,6 +305,7 @@ class Attempt(LtgModel):
 
     class Meta(LtgModel.Meta):
         unique_together = (("user_profile", "question","attempt"),)
+        index_together = [["question", "attempt"],]
         
 class ScoreTable(models.Model):
     '''
