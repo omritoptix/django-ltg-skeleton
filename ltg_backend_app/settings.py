@@ -109,7 +109,7 @@ TEMPLATE_LOADERS = (
 
 
 MIDDLEWARE_CLASSES = (
-    'ltg_backend_app.crossdomain_middleware.XsSharing',
+#     'ltg_backend_app.middlewares.crossdomain_middleware.XsSharing',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     #'django.middleware.csrf.CsrfViewMiddleware',
@@ -147,9 +147,6 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
-
-INSTALLED_APPS = INSTALLED_APPS + ('tastypie_swagger',)
-INSTALLED_APPS = INSTALLED_APPS + ('debug_toolbar',)
 
 # configure tastypie swagger
 TASTYPIE_SWAGGER_API_MODULE = 'ltg_backend_app.urls.v1_api'
@@ -213,10 +210,14 @@ DATABASES['default'] =  dj_database_url.config()
 # Honor the 'X-Forwarded-Proto' header for request.is_secure()
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 INSTALLED_APPS = INSTALLED_APPS + ('gunicorn',)
-INSTALLED_APPS = INSTALLED_APPS + ('south',)
+INSTALLED_APPS = INSTALLED_APPS + ('south',)    
 INSTALLED_APPS = INSTALLED_APPS + ('ltg_backend_app',)
 INSTALLED_APPS = INSTALLED_APPS + ('tastypie',)
 INSTALLED_APPS = INSTALLED_APPS + ('raven.contrib.django.raven_compat',)
+INSTALLED_APPS = INSTALLED_APPS + ('tastypie_swagger',)
+# removed since caused import problems - return only when debugging and remove after
+# INSTALLED_APPS = INSTALLED_APPS + ('debug_toolbar',)
+INSTALLED_APPS = INSTALLED_APPS + ('fixture_magic',)
 # INSTALLED_APPS = INSTALLED_APPS + ('django_facebook',)
 
 #s3 storage
