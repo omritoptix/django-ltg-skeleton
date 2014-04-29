@@ -301,7 +301,8 @@ class Attempt(LtgModel):
     duration = TimedeltaField()
     
     def __unicode__(self):
-        return "Attempt no.%d, on question no.%d, for user:%s" % (self.attempt, self.question.index, self.user_profile.user.email)
+        if (self.question and self.user_profile):
+            return "Attempt no.%d, on question no.%d, for user:%s" % (self.attempt, self.question.index, self.user_profile.user.email)
 
     class Meta(LtgModel.Meta):
         unique_together = (("user_profile", "question","attempt"),)
