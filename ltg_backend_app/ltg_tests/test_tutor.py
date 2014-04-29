@@ -1,5 +1,5 @@
 '''
-will hold our tutor resource tests
+will hold our tutor tests
 Created on April 22, 2014
 
 @author:Omri Dagan
@@ -17,10 +17,10 @@ from tastypie.test import ResourceTestCase
 #===============================================================================
 
 #===============================================================================
-# begin test case
+# begin tutor test 
 #===============================================================================
 
-class Tutor(ResourceTestCase):
+class TutorTest(ResourceTestCase):
     
     def test_get_tutor(self):
         '''
@@ -41,5 +41,5 @@ class Tutor(ResourceTestCase):
         self.assertTrue(len(self.deserialize(resp)['objects'][0]['first_name']))
         
 #===============================================================================
-# end test case
+# end tutor test
 #===============================================================================

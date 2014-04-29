@@ -1,5 +1,5 @@
 '''
-will hold our question resource tests
+will hold our question tests
 Created on April 22, 2014
 
 @author:Omri Dagan
@@ -19,10 +19,10 @@ from ltg_backend_app.models import Question , ScoreTable
 #===============================================================================
 
 #===============================================================================
-# begin question resource
+# begin question
 #===============================================================================
 
-class Question(ResourceTestCase):
+class QuestionTest(ResourceTestCase):
     
     fixtures = ['ltg_backend_app']
     
@@ -42,5 +42,5 @@ class Question(ResourceTestCase):
         self.assertTrue(len(self.deserialize(resp)['objects']) > 0)
         
 #===============================================================================
-# end question resource
+# end question
 #===============================================================================
