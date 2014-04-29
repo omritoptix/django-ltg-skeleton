@@ -15,8 +15,8 @@ from tastypie import fields
 from ltg_backend_app.models import Tutor
 from tastypie.authentication import Authentication
 from ltg_backend_app.ltg_api.hubspot_client import HubSpotClient
-import settings
 from tastypie.bundle import Bundle
+from ltg_backend_app import settings
 
 #===============================================================================
 # end imports
