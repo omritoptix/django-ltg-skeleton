@@ -11,7 +11,7 @@ Created on April 22, 2014
 # begin imports
 #===============================================================================
 
-from ltg_backend_app.ltg_api.base import LtgResource, is_send_grid
+
 from tastypie.authentication import Authentication
 from django.conf.urls import url
 from tastypie.utils.urls import trailing_slash
@@ -20,8 +20,6 @@ from django.contrib.auth import authenticate, login
 from tastypie.http import HttpForbidden, HttpUnauthorized, HttpCreated,\
     HttpApplicationError, HttpAccepted
 from ltg_backend_app.models import UserProfile
-from ltg_backend_app.ltg_api.anonymous_user_profile import AnonymousUserProfileResource
-from ltg_backend_app.ltg_api.user_profile import UserProfileResource
 from ltg_backend_app.ltg_api.user import UserResource
 from ltg_backend_app.ltg_api.authentication import LtgApiKeyAuthentication
 import settings
@@ -31,7 +29,10 @@ from django.utils.html import strip_tags
 from django.core.mail.message import EmailMultiAlternatives
 from smtplib import SMTPSenderRefused
 from tastypie.models import ApiKey
+from ltg_backend_app.ltg_api.user_profile import UserProfileResource
 from ltg_backend_app.ltg_api.anonymous_user import AnonymousUserResource
+from ltg_backend_app.ltg_api.anonymous_user_profile import AnonymousUserProfileResource
+from ltg_backend_app.ltg_api.base import LtgResource, is_send_grid
 
 #===============================================================================
 # end imports
@@ -191,9 +192,9 @@ class UtilitiesResource(LtgResource):
             post['user'] = user_resource.get_resource_uri(user)
             # create/update user profile from user resource
             if (new_user):
-                user_profile = user_profile_resource.obj_create(bundle=user_profile_resource.build_bundle(data=post))
+                user_profile = user_profile_resource.obj_create(user_profile_resource.build_bundle(data=post))
             else:
-                user_profile = user_profile_resource.obj_update(bundle=user_profile_resource.build_bundle(data=post))
+                user_profile = user_profile_resource.obj_update(user_profile_resource.build_bundle(obj=existing_user.profile,data=post))
             
         except Exception as e:
             user.obj.delete()

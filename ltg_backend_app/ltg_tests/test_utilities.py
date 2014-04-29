@@ -1,5 +1,5 @@
 '''
-will hold our utilities resource tests
+will hold our utilities tests
 Created on April 22, 2014
 
 @authors: Yariv Katz & Omri Dagan
@@ -14,16 +14,17 @@ Created on April 22, 2014
 from tastypie.test import ResourceTestCase
 from django.contrib.auth.models import User
 from ltg_backend_app.models import UserProfile
+import pdb
 
 #===============================================================================
 # end import
 #===============================================================================
 
 #===============================================================================
-# begin test case
+# begin utilities test
 #===============================================================================
 
-class UtilitiesRegister(ResourceTestCase):
+class UtilitiesRegisterTest(ResourceTestCase):
     '''
     will test the 'register' and 'skip-register' methods of the utilities resouce.
     '''
@@ -141,7 +142,7 @@ class UtilitiesRegister(ResourceTestCase):
         # assert email was updated
         self.assertEqual(registered_user.email,'ywarezk@gmail.com')
         
-class UtilitiesLogin(ResourceTestCase):
+class UtilitiesLoginTest(ResourceTestCase):
     
     def setUp(self):
         '''
@@ -151,7 +152,7 @@ class UtilitiesLogin(ResourceTestCase):
         user.save()
         user_profile = UserProfile.objects.create(uuid='12345678',user=user)
         user_profile.save()
-        return super(UtilitiesLogin,self).setUp()
+        return super(UtilitiesLoginTest,self).setUp()
         
     def test_login(self):
         '''
@@ -181,5 +182,5 @@ class UtilitiesLogin(ResourceTestCase):
         self.assertHttpUnauthorized(resp)
         
 #===============================================================================
-# end test case
+# end utilities test
 #===============================================================================
