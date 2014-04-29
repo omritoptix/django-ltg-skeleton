@@ -9,7 +9,6 @@ django-timedeltafield==0.7.1
 gunicorn==18.0
 numpy==1.8.1
 psycopg2==2.5.2
-pydot==1.0.28
 pyparsing==2.0.2
 python-dateutil==2.2
 python-mimeparse==0.1.4
