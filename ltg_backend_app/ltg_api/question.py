@@ -35,6 +35,9 @@ class QuestionResource(LtgResource):
         queryset = Question.objects.all()
         authentication = Authentication()
         allowed_methods = ['get']
+        
+    def dehydrate_answer(self, bundle):
+        return bundle.obj.get_answer_display()
     
 #===============================================================================
 # end question resource
