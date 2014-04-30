@@ -34,7 +34,7 @@ class UserProfileResource(LtgResource):
     '''
     user = fields.ToOneField(UserResource,'user')
     class Meta:
-        allowed_methods = ['post']
+        allowed_methods = []
         include_resource_uri = True
         always_return_data = True
         validation = FormValidation(form_class=UserProfileForm)

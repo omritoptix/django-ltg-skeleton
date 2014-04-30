@@ -34,7 +34,7 @@ class UserResource(ModelResource):
     class Meta:
         resource_name = 'user'
         excludes = ['password']
-        allowed_methods = ['post']
+        allowed_methods = []
         include_resource_uri = False
         always_return_data = True
         validation = FormValidation(form_class=UserForm)
