@@ -215,17 +215,18 @@ INSTALLED_APPS = INSTALLED_APPS + ('ltg_backend_app',)
 INSTALLED_APPS = INSTALLED_APPS + ('tastypie',)
 INSTALLED_APPS = INSTALLED_APPS + ('raven.contrib.django.raven_compat',)
 INSTALLED_APPS = INSTALLED_APPS + ('tastypie_swagger',)
+INSTALLED_APPS += ('storages',)
 # removed since caused import problems - return only when debugging and remove after
 # INSTALLED_APPS = INSTALLED_APPS + ('debug_toolbar',)
 INSTALLED_APPS = INSTALLED_APPS + ('fixture_magic',)
 # INSTALLED_APPS = INSTALLED_APPS + ('django_facebook',)
 
 #s3 storage
-# DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-# AWS_ACCESS_KEY_ID = os.environ.get('TICKETZ_ENV_AWS_ACCESS_KEY_ID', None)
-# AWS_SECRET_ACCESS_KEY = os.environ.get('TICKETZ_ENV_AWS_SECRET_ACCESS_KEY', None)
-# AWS_STORAGE_BUCKET_NAME = os.environ.get('TICKETZ_ENV_AWS_STORAGE_BUCKET_NAME', None)
-# STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID', None)
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY', None)
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', None)
+STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 
 #tell django about the user profile
 # AUTH_PROFILE_MODULE = "ticketz_backend_app.UserProfile"
