@@ -308,7 +308,10 @@ class QuestionSetAttempt(LtgModel):
     will hold the question set model
     '''    
     concepts = models.ManyToManyField(Concept, through='ConceptScore')
-    sections = models.ManyToManyField(Section, through='SectionScore')    
+    sections = models.ManyToManyField(Section, through='SectionScore')
+    
+    def __unicode__(self):
+        return "Question Set Attempt with id:%d" % self.id    
         
     
 class ConceptScore(LtgModel): 
@@ -319,6 +322,9 @@ class ConceptScore(LtgModel):
     question_set_attempt = models.ForeignKey(QuestionSetAttempt)
     concept = models.ForeignKey(Concept)
     
+    def __unicode__(self):
+        return "concept:%s with score:%d for QSA with id:%d" % (self.concept.title, self.score, self.question_set_attempt.id)
+    
     
 class SectionScore(LtgModel): 
     '''
@@ -327,6 +333,9 @@ class SectionScore(LtgModel):
     score = models.PositiveSmallIntegerField()
     question_set_attempt = models.ForeignKey(QuestionSetAttempt)
     section = models.ForeignKey(Section)
+    
+    def __unicode__(self):
+        return "section:%s with score:%d for QSA with id:%d" % (self.section.title, self.score, self.question_set_attempt.id)
      
     
 class Attempt(LtgModel):
@@ -354,6 +363,9 @@ class ScoreTable(models.Model):
     '''
     percentile = models.DecimalField(max_digits=5,decimal_places=2)
     score = models.PositiveSmallIntegerField()
+    
+    def __unicode__(self):
+        return "percentile:%.2f , score:%d" % (self.percentile,self.score)
         
 #===============================================================================
 # end tables - models

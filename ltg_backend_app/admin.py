@@ -30,8 +30,31 @@ class UserProfileAdmin(admin.ModelAdmin):
     
     def get_email(self, user_profile):
         return user_profile.user.email
-    get_email.short_description = "Email"    
+    get_email.short_description = "Email"
+    
+class QuestionAdmin(admin.ModelAdmin):
+    pass    
 
+class AttemptAdmin(admin.ModelAdmin):
+    pass
+
+class ConceptAdmin(admin.ModelAdmin):
+    pass
+
+class SectionAdmin(admin.ModelAdmin):
+    pass
+
+class QuestionSetAttemptAdmin(admin.ModelAdmin):
+    pass
+
+class ConceptScoreAdmin(admin.ModelAdmin):
+    pass
+
+class SectionScoreAdmin(admin.ModelAdmin):
+    pass
+
+class ScoreTableAdmin(admin.ModelAdmin):
+    pass
 
 #===============================================================================
 # end admin models
@@ -42,6 +65,14 @@ class UserProfileAdmin(admin.ModelAdmin):
 #===============================================================================
 
 admin.site.register(UserProfile, UserProfileAdmin)
+admin.site.register(Question, QuestionAdmin)
+admin.site.register(Attempt, AttemptAdmin)
+admin.site.register(Concept, ConceptAdmin)
+admin.site.register(Section, SectionAdmin)
+admin.site.register(QuestionSetAttempt, QuestionSetAttemptAdmin)
+admin.site.register(SectionScore, SectionScoreAdmin)
+admin.site.register(ConceptScore, ConceptScoreAdmin)
+admin.site.register(ScoreTable, ScoreTableAdmin)
 
 #===============================================================================
 # end admin site registration
