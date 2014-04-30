@@ -39,6 +39,11 @@ ANSWER = (
     (4,  'E'),
 )
 
+# max attempts for a question to calc statistics for
+MAX_ALGORITHM_ATTEMPTS = 5
+# percentage right to return when no one answered this question yet
+QUESTION_PERCENTAGE_NO_ANSWERS = 100.0
+
 #===============================================================================
 # end constants
 #===============================================================================
@@ -144,11 +149,11 @@ class Question(LtgModel):
         time_statistics = []
         attempt_num = 1
         is_attempt_valid = True
-        # get all the attempts for the current questions
+        # query set to hold all the attempts for the current question (query set not evaluated yet)
         question_attempt_qs = Attempt.objects.filter(question_id = self.id)
-        # loop while there is an attempt for the question
-        while (is_attempt_valid):
-            # it attempt exists for the question, iterate over all attempts for the question and clac the statistics
+        # loop while there is an attempt for the question or attempt num is up to 5
+        while (is_attempt_valid and attempt_num <= MAX_ALGORITHM_ATTEMPTS):
+            # if attempt exists for the question, iterate over all attempts for the question and clac the statistics
             if question_attempt_qs.filter(attempt = attempt_num).exists():
                 # will hold the times for each attempt
                 durations_per_attempt = []
@@ -169,51 +174,85 @@ class Question(LtgModel):
         return time_statistics
     
     @cached_property
-    def percentage_right(self):
+    def percentage_score_statistics(self):
         ''' 
-        calc percentage of people who got this question right
-        @return float: percentage of people which answered right.
-        '''
-        total_answers = Attempt.objects.filter(question_id=self.id,attempt=1).count()
-        if (total_answers == 0):
-            return 100.0
-        right_answers = Attempt.objects.filter(question_id=self.id,attempt=1,answer = self.answer).count()
-        return ((float(right_answers)/total_answers) * 100)
-    
-    @cached_property
-    def wrong_answers(self):
-        '''
-        iterate over all the first attempts for each question and calc
-        the wrong answers percetange 
-        @return: dictionary with answers as keys and percentage of wrong answers as values 
+        calc score and statistics for each attempt of the question
+        @return list: each object in the list will contain a dict with values:
+        attempt : int ,
+        percentage_right : float, 
+        wrong_answers_percentage : dict which contains percentage for each wrong answer, 
+        score : int
         '''
         # init params
-        wrong_ans = {}
-        # it attempt exists for the question, iterate over all attempts for the question and calc the statistics
-        if Attempt.objects.filter(question_id = self.id,attempt = 1).exists():
-            # will hold the number of wrong answers for each option
-            wrong_ans = {'A':0,'B':0,'C':0,'D':0,'E':0}
-            for attempt in Attempt.objects.filter(question_id=self.id,attempt=1).exclude(answer=self.answer):
-                    wrong_ans[attempt.get_answer_display()] += 1
-            # delete the right answer key
-            del wrong_ans[self.get_answer_display()]
-            # total wrong answers
-            total_wrong_ans = Attempt.objects.filter(question_id=self,attempt=1).exclude(answer=self.answer).count()
-            if (total_wrong_ans == 0):
-                return wrong_ans
-            # calc wrong answers percentage per answer
-            for wrong_ans_key in wrong_ans.keys():
-                wrong_ans[wrong_ans_key] = (float(wrong_ans[wrong_ans_key])/total_wrong_ans) * 100
+        percentage_score_statistics = []
+        attempt_num = 1
+        is_attempt_valid = True
+        # query set to for all the attempts for the current question (query set not evaluated yet)
+        question_attempt_qs = Attempt.objects.filter(question_id = self.id)
+        # loop while there is an attempt for the question or attempt num is up to 5
+        while (is_attempt_valid and attempt_num <= MAX_ALGORITHM_ATTEMPTS):   
+            total_answers = question_attempt_qs.filter(attempt=attempt_num).count()
+            # if there were no answers for the question at this attempt exit the loop
+            if (total_answers == 0):
+                is_attempt_valid = False
+            # if there were attempts for the question, calc their score and percentage statistics for this attempt
+            else:
+                # clac percentage right
+                right_answers = question_attempt_qs.filter(attempt=attempt_num,answer = self.answer).count()
+                percentage_right_per_attempt =  ((float(right_answers)/total_answers) * 100)
+                # calc percentage wrong per answer
+                total_wrong_answers = total_answers - right_answers
+                wrong_answers_percentage = self._wrong_answers_percentage(total_wrong_answers,attempt_num)
+                # calc score for the attempt
+                score = self._score(percentage_right_per_attempt)
+                # populate our attempt dict
+                attempt = {}
+                attempt['attempt'] = attempt_num
+                attempt['percentage_right'] = percentage_right_per_attempt
+                attempt['wrong_answers_percentage'] = wrong_answers_percentage
+                attempt['score'] = score
+                # append results to the statistics list
+                percentage_score_statistics.append(attempt)
+                # update attempt number
+                attempt_num += 1
         
-        return wrong_ans
+        return percentage_score_statistics
     
-    @cached_property
-    def score(self):
+    def _wrong_answers_percentage(self, total_wrong_answers, attempt):
         '''
-        get percentage , turn it to percentile, and convert it to the question score. 
+        will return dictionary with percentage per wrong answer
+        @param total_wrong_answers: total wrong answers for the question
+        @param attempt : the attempt we're calculation the statistics for
+        @return dict: a dictionary containing the percentage of each wrong answer
+        '''
+        # dictionary for the wrong answers percentage
+        wrong_answers_percentage = {}
+        # populate wrong answers list
+        wrong_answers = []
+        for answer in ANSWER:
+            if answer[0] != self.answer:
+                wrong_answers.append(answer)
+        # if there are on wrong answer for the question return dict will all 0 
+        if (total_wrong_answers == 0):
+            for wrong_answer in wrong_answers:
+                wrong_answers_percentage[wrong_answer[1]] = 0
+        # if there are calc it
+        else:
+            # query set for specific attempt and question
+            question_attempt_qs = Attempt.objects.filter(question_id = self.id, attempt = attempt)
+            # calc wrong answers percentage
+            for wrong_answer in wrong_answers:
+                num_wrong_answers = question_attempt_qs.filter(answer = wrong_answer[0]).count()
+                wrong_answers_percentage[wrong_answer[1]] = (float(num_wrong_answers)/total_wrong_answers) * 100
+            
+        return wrong_answers_percentage
+    
+    def _score(self,percentage):
+        '''
+        get percentage , turn it to percentile, and convert it to the question score.
+        @param percentage : the percentage to calc the score for 
         @return: int - question score
         '''
-        percentage = self.percentage_right
         # get percentile
         percentile = 100 - percentage
         # get percentile and score edges for the interpolation

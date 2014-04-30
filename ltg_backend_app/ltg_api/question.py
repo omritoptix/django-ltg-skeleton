@@ -28,18 +28,13 @@ class QuestionResource(LtgResource):
     '''
     resource for the question model
     '''
-    percentage_right = fields.DecimalField(attribute='percentage_right')
-    wrong_answers = fields.DictField(attribute='wrong_answers')
-    score = fields.IntegerField(attribute='score')
+    percentage_score_statistics = fields.ListField(attribute='percentage_score_statistics')
     time_statistics = fields.ListField(attribute='time_statistics')
     
     class Meta(LtgResource.Meta):
         queryset = Question.objects.all()
         authentication = Authentication()
         allowed_methods = ['get']
-        
-    def dehydrate_percentage_right(self, bundle):
-        return float(format(bundle.data['percentage_right'],'.2f'))
     
 #===============================================================================
 # end question resource
