@@ -18,9 +18,9 @@ from tastypie.authentication import Authentication
 from tastypie.authorization import Authorization
 from ltg_backend_app.ltg_api.question import QuestionResource
 from ltg_backend_app.ltg_api.user_profile import UserProfileResource
-from ltg_api.authentication import LtgApiKeyAuthentication
 from tastypie.exceptions import ImmediateHttpResponse
 from django.db.models.aggregates import Max
+from ltg_backend_app.ltg_api.authentication import LtgApiKeyAuthentication
 
 #===============================================================================
 # end imports
