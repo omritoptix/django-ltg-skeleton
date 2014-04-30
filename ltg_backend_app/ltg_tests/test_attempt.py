@@ -39,18 +39,18 @@ class AttemptTest(ResourceTestCase):
         2. post without credentails failes
         3. post with invalid question id fails  
         '''
-        # get question uri for the attempt (for some reason 'question_uri' returns empty, so had to hardcode the question uri)
-        question = Question.objects.first()
-        question_uri = QuestionResource().get_resource_uri(question)
+        # get question uri for the attempt 
+        question_id = Question.objects.first().id
+        question_uri = '/api/v1/question/%d/' % question_id
         # get the user credentials for the attempt
         user = User.objects.first()
         api_key = ApiKey.objects.get(user = user.id)
         # post a new attempt
-        resp = self.api_client.post(uri='/api/v1/attempt/', format='json', data={'question':'/api/v1/question/1/','username':user.username,'api_key':api_key.key,'answer':2,'duration':'1min,10sec'})
+        resp = self.api_client.post(uri='/api/v1/attempt/', format='json', data={'question':question_uri,'username':user.username,'api_key':api_key.key,'answer':2,'duration':'1min,10sec'})
         self.assertHttpCreated(resp)
         # check new attempt was created with correct values
         attempt = Attempt.objects.latest('creation_date')
-        self.assertEqual(attempt.question_id,question.id)
+        self.assertEqual(attempt.question_id,question_id)
         self.assertEqual(attempt.user_profile_id,user.profile.id)
         self.assertEqual(attempt.answer, 2)
         
