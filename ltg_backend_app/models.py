@@ -126,6 +126,52 @@ class Tutor(object):
         self.tutor_groups = kwargs.get('tutor_groups',None)
         self.country = kwargs.get('country',None)
         
+class Concept(LtgModel):
+    '''
+    will hold the concept model
+    '''
+    title = models.CharField(unique=True,max_length=200)
+    
+    def __unicode__(self):
+        return self.title
+    
+    def natural_key(self):
+        return self.title
+    
+    @cached_property
+    def statistics(self):
+        concept_scores = ConceptScore.objects.filter(concept_id = self.id).values_list('score')
+        mean = numpy.mean(concept_scores)
+        std = numpy.std(concept_scores)
+        return {'mean':mean,'std':std}
+    
+class ConceptManager(models.Manager):
+    def get_by_natural_key(self, title):
+        return self.get(title=title)
+    
+class Section(LtgModel):
+    '''
+    will hold the section model
+    '''
+    title = models.CharField(unique=True,max_length=200)
+    
+    def __unicode__(self):
+        return self.title
+    
+    def natural_key(self):
+        return self.title
+    
+    @cached_property
+    def statistics(self):
+        section_scores = SectionScore.objects.filter(section_id = self.id).values_list('score')
+        mean = numpy.mean(section_scores)
+        std = numpy.std(section_scores)
+        return {'mean':mean,'std':std}
+    
+class SectionManager(models.Manager):
+    def get_by_natural_key(self, title):
+        return self.get(title=title)
+        
         
 class Question(LtgModel):
     '''
@@ -134,6 +180,8 @@ class Question(LtgModel):
     index = models.IntegerField(unique=True)
     answer = models.PositiveSmallIntegerField(choices=ANSWER)
     attempts = models.ManyToManyField(UserProfile, through='Attempt')
+    concepts = models.ManyToManyField(Concept)
+    sections = models.ManyToManyField(Section)
     
     def __unicode__(self):
         return str(self.index)
@@ -269,39 +317,7 @@ class Question(LtgModel):
         # round the score 
         return int(round(question_score))
     
-class Concept(LtgModel):
-    '''
-    will hold the concept model
-    '''
-    title = models.CharField(unique=True,max_length=200)
-    questions = models.ManyToManyField(Question)
-    
-    def __unicode__(self):
-        return self.title
-    
-    @cached_property
-    def statistics(self):
-        concept_scores = ConceptScore.objects.filter(concept_id = self.id).values_list('score')
-        mean = numpy.mean(concept_scores)
-        std = numpy.std(concept_scores)
-        return {'mean':mean,'std':std}
-    
-class Section(LtgModel):
-    '''
-    will hold the section model
-    '''
-    title = models.CharField(unique=True,max_length=200)
-    questions = models.ManyToManyField(Question)
-    
-    def __unicode__(self):
-        return self.title
-    
-    @cached_property
-    def statistics(self):
-        section_scores = SectionScore.objects.filter(section_id = self.id).values_list('score')
-        mean = numpy.mean(section_scores)
-        std = numpy.std(section_scores)
-        return {'mean':mean,'std':std}
+
     
 class QuestionSetAttempt(LtgModel):
     '''
@@ -309,9 +325,10 @@ class QuestionSetAttempt(LtgModel):
     '''    
     concepts = models.ManyToManyField(Concept, through='ConceptScore')
     sections = models.ManyToManyField(Section, through='SectionScore')
+    user_profile = models.ForeignKey(UserProfile)
     
     def __unicode__(self):
-        return "Question Set Attempt with id:%d" % self.id    
+        return "Question Set Attempt with id:%d for user with email:%s" % (self.id,self.user_profile.user.email)     
         
     
 class ConceptScore(LtgModel): 
