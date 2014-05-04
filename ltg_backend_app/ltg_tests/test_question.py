@@ -23,8 +23,8 @@ from ltg_backend_app.models import Question , ScoreTable
 #===============================================================================
 
 class QuestionTest(ResourceTestCase):
-    
-    fixtures = ['ltg_backend_app']
+
+    fixtures=['initial_data','questions']
     
     def test_get_questions(self):
         '''
@@ -32,7 +32,8 @@ class QuestionTest(ResourceTestCase):
         1. get a single question
         2. get a list of questions 
         '''
-        resp = self.api_client.get(uri='/api/v1/question/1/', format='json')
+        question_uri = '/api/v1/question/%d/' % (Question.objects.first().id)
+        resp = self.api_client.get(uri=question_uri, format='json')
         self.assertHttpOK(resp)
         self.assertTrue(len(self.deserialize(resp)) > 0)
         

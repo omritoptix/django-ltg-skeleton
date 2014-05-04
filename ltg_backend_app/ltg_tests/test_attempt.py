@@ -30,7 +30,7 @@ from tastypie.models import ApiKey
 
 class AttemptTest(ResourceTestCase):
     
-    fixtures = ['ltg_backend_app']
+    fixtures = ['users_auth','initial_data','questions']
     
     def test_post_attempt(self):
         '''
@@ -43,7 +43,7 @@ class AttemptTest(ResourceTestCase):
         question_id = Question.objects.first().id
         question_uri = '/api/v1/question/%d/' % question_id
         # get the user credentials for the attempt
-        user = User.objects.first()
+        user = User.objects.get(username='yariv')
         api_key = ApiKey.objects.get(user = user.id)
         # post a new attempt
         resp = self.api_client.post(uri='/api/v1/attempt/', format='json', data={'question':question_uri,'username':user.username,'api_key':api_key.key,'answer':2,'duration':'1min,10sec'})
@@ -54,8 +54,8 @@ class AttemptTest(ResourceTestCase):
         self.assertEqual(attempt.user_profile_id,user.profile.id)
         self.assertEqual(attempt.answer, 2)
         
-        # post without credentails failes
-        resp = self.api_client.post(uri='/api/v1/attempt/', format='json', data={'question':'/api/v1/question/1/','answer':2,'duration':'1min,10sec'})
+        # post without credentials failes
+        resp = self.api_client.post(uri='/api/v1/attempt/', format='json', data={'question':question_uri,'answer':2,'duration':'1min,10sec'})
         self.assertHttpUnauthorized(resp)
         
         # post with invalid question id fails

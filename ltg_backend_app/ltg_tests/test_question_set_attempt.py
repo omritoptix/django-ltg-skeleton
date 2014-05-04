@@ -13,7 +13,7 @@ Created on April 28, 2014
 
 from tastypie.test import ResourceTestCase
 from ltg_backend_app.models import QuestionSetAttempt, SectionScore,\
-    ConceptScore, Concept, Section
+    ConceptScore, Concept, Section, UserProfile
 
 
 #===============================================================================
@@ -26,9 +26,11 @@ from ltg_backend_app.models import QuestionSetAttempt, SectionScore,\
 
 class QuestionSetAttemptTest(ResourceTestCase):
     
+    fixtures = ['users_auth']
+    
     def setUp(self):
         '''
-        create concept and section
+        create concept, section
         '''
         Concept.objects.bulk_create([Concept(title="Concept1"),Concept(title="Concept2")])
         Section.objects.bulk_create([Section(title="Section1"),Section(title="Section2")])
@@ -43,8 +45,11 @@ class QuestionSetAttemptTest(ResourceTestCase):
         concept_id_2 = Concept.objects.get(title='Concept2').id
         section_id_1 = Section.objects.get(title='Section1').id
         section_id_2 = Section.objects.get(title='Section2').id
+        # get the user profile for the QSA
+        user_profile = UserProfile.objects.first()
+        user_profile_uri= '/api/v1/userprofile/' + str(user_profile.id) + '/'
         # make the post request
-        resp = self.api_client.post(uri='/api/v1/questionsetattempt/', format='json',data = {'concepts':[{'id':concept_id_1,'score':550},{'id':concept_id_2,'score':560}], 'sections':[{'id':section_id_1,'score':450},{'id':section_id_2,'score':470}]})
+        resp = self.api_client.post(uri='/api/v1/questionsetattempt/', format='json',data = {'user_profile':user_profile_uri, 'concepts':[{'id':concept_id_1,'score':550},{'id':concept_id_2,'score':560}], 'sections':[{'id':section_id_1,'score':450},{'id':section_id_2,'score':470}]})
         self.assertHttpCreated(resp)
         # assert score for each concept and section was created
         self.assertTrue(ConceptScore.objects.filter(concept_id = concept_id_1, score = 550).exists())

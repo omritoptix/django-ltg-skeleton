@@ -28,7 +28,7 @@ class UtilitiesRegisterTest(ResourceTestCase):
     '''
     will test the 'register' and 'skip-register' methods of the utilities resouce.
     '''
-    fixtures = ['ltg_backend_app']
+    fixtures = ['users_auth']
     
     def test_register(self):
         '''

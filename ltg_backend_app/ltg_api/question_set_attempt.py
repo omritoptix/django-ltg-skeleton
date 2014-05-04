@@ -19,7 +19,7 @@ from tastypie.authentication import Authentication
 from ltg_backend_app.ltg_api.section import SectionResource
 from tastypie.authorization import Authorization
 from ltg_backend_app.ltg_api.concept import ConceptResource
-
+from ltg_backend_app.ltg_api.user_profile import UserProfileResource
 #===============================================================================
 # end imports
 #===============================================================================
@@ -34,6 +34,7 @@ class QuestionSetAttemptResource(LtgResource):
     '''
     sections = fields.ManyToManyField(SectionResource,attribute='sections',null=True)
     concepts = fields.ManyToManyField(ConceptResource,attribute='concepts',null=True)
+    user_profile = fields.ForeignKey(UserProfileResource,attribute='user_profile')
     
     class Meta(LtgResource.Meta):
         queryset = QuestionSetAttempt.objects.all()

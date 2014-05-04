@@ -1,0 +1,20 @@
+[
+{
+    "pk": 1, 
+    "model": "ltg_backend_app.question", 
+    "fields": {
+        "index": 1, 
+        "modified_data": "2014-05-04T10:16:31.123Z", 
+        "creation_date": "2014-05-04T10:16:31Z", 
+        "concepts": [
+            4, 
+            7
+        ], 
+        "answer": 1, 
+        "sections": [
+            6, 
+            7
+        ]
+    }
+}
+]

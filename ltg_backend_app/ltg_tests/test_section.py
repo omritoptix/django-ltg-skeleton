@@ -12,10 +12,10 @@ Created on April 28, 2014
 #===============================================================================
 
 from tastypie.test import ResourceTestCase
-from ltg_backend_app.models import Section, QuestionSetAttempt, SectionScore
+from ltg_backend_app.models import Section, QuestionSetAttempt, SectionScore,\
+    UserProfile
 from django.contrib.auth.models import User
 from tastypie.models import ApiKey
-from ltg_api.section import SectionResource
 
 #===============================================================================
 # end imports
@@ -27,13 +27,15 @@ from ltg_api.section import SectionResource
 
 class SectionTest(ResourceTestCase):
     
+    fixtures = ['users_auth']
+    
     def setUp(self):
         '''
         create section and section score and user
         '''
         # create section and section score
         section = Section.objects.create(title="Section1")
-        question_set_attempt = QuestionSetAttempt.objects.create()
+        question_set_attempt = QuestionSetAttempt.objects.create(user_profile = UserProfile.objects.first())
         SectionScore.objects.create(section=section , score=400, question_set_attempt=question_set_attempt)                             
         return super(SectionTest,self).setUp()
     
