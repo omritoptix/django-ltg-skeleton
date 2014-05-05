@@ -21,6 +21,7 @@ from ltg_backend_app.ltg_api.user_profile import UserProfileResource
 from tastypie.exceptions import ImmediateHttpResponse
 from django.db.models.aggregates import Max
 from ltg_backend_app.ltg_api.authentication import LtgApiKeyAuthentication
+from tastypie.constants import ALL_WITH_RELATIONS, ALL
 
 #===============================================================================
 # end imports
@@ -41,7 +42,13 @@ class AttemptResource(LtgResource):
         queryset = Attempt.objects.all()
         authentication = LtgApiKeyAuthentication()
         authorization = Authorization()
-        allowed_methods = ['post']
+        allowed_methods = ['post','get']
+        filtering = {
+            'user_profile' : ALL_WITH_RELATIONS,
+            'question' : ALL_WITH_RELATIONS,
+            'attempt' : ALL,
+        }
+        ordering = ['question','attempt',]
         
     def hydrate_attempt(self, bundle):
         # get the attempt's user profile
