@@ -14,7 +14,6 @@ Created on April 27, 2014
 from ltg_backend_app.ltg_api.base import LtgResource
 from tastypie import fields, http
 from ltg_backend_app.models import Attempt, Question
-from tastypie.authentication import Authentication
 from tastypie.authorization import Authorization
 from ltg_backend_app.ltg_api.question import QuestionResource
 from ltg_backend_app.ltg_api.user_profile import UserProfileResource
