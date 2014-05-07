@@ -271,7 +271,7 @@ class Question(LtgModel):
         attempt_num = 1
         is_attempt_valid = True
         # query set to for all the attempts for the current question (query set not evaluated yet)
-        question_attempt_qs = Attempt.objects.filter(question_id = self.id)
+        question_attempt_qs = Attempt.objects.filter(question_id = self.id, duration__gt = 5)
         # loop while there is an attempt for the question or attempt num is up to 5
         while (is_attempt_valid and attempt_num <= MAX_ALGORITHM_ATTEMPTS):   
             total_answers = question_attempt_qs.filter(attempt=attempt_num).count()
@@ -280,7 +280,7 @@ class Question(LtgModel):
                 is_attempt_valid = False
             # if there were attempts for the question, calc their score and percentage statistics for this attempt
             else:
-                # clac percentage right
+                # clac percentage right - take into account only duration > 5sec
                 right_answers = question_attempt_qs.filter(attempt=attempt_num,answer = self.answer).count()
                 percentage_right_per_attempt =  ((float(right_answers)/total_answers) * 100)
                 # calc percentage wrong per answer
@@ -315,14 +315,14 @@ class Question(LtgModel):
         for answer in ANSWER:
             if answer[0] != self.answer:
                 wrong_answers.append(answer)
-        # if there are on wrong answer for the question return dict will all 0 
+        # if there are on wrong answer for the question return dict with all 0 
         if (total_wrong_answers == 0):
             for wrong_answer in wrong_answers:
                 wrong_answers_percentage[wrong_answer[1]] = 0
         # if there are calc it
         else:
             # query set for specific attempt and question
-            question_attempt_qs = Attempt.objects.filter(question_id = self.id, attempt = attempt)
+            question_attempt_qs = Attempt.objects.filter(question_id = self.id, attempt = attempt,duration__gt = 5)
             # calc wrong answers percentage
             for wrong_answer in wrong_answers:
                 num_wrong_answers = question_attempt_qs.filter(answer = wrong_answer[0]).count()
