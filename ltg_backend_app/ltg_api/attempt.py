@@ -74,6 +74,15 @@ class AttemptResource(LtgResource):
         
         return bundle
     
+    def dehydrate(self,bundle):
+        # add the question index
+        question_id = AttemptResource().get_pk_from_uri(bundle.data['question'])
+        bundle.data['question_index'] = Question.objects.get(id=question_id).index
+        
+        return bundle
+        
+        
+    
 #===============================================================================
 # end attempt resource
 #===============================================================================
