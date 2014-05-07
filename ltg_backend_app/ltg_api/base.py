@@ -38,6 +38,7 @@ class LtgResource(ModelResource):
     class Meta:
         allowed_methods = ['get']
         always_return_data = True
+        ordering = ['creation_date','modified_date']
         
     @staticmethod
     def get_pk_from_uri(uri):

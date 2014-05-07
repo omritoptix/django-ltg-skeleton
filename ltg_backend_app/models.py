@@ -80,8 +80,50 @@ class LtgModel(models.Model):
 #===============================================================================
 # begin tables - models
 #===============================================================================
-    
 
+class Concept(LtgModel):
+    '''
+    will hold the concept model
+    '''
+    title = models.CharField(unique=True,max_length=200)
+    
+    def __unicode__(self):
+        return self.title
+    
+    def natural_key(self):
+        return self.title
+    
+    @cached_property
+    def statistics(self):
+        concept_scores = UserConceptScore.objects.filter(concept_id = self.id).values_list('score')
+        mean = numpy.mean(concept_scores)
+        std = numpy.std(concept_scores)
+        return {'mean':mean,'std':std}
+    
+class ConceptManager(models.Manager):
+    def get_by_natural_key(self, title):
+        return self.get(title=title)
+    
+class Section(LtgModel):
+    '''
+    will hold the section model
+    '''
+    title = models.CharField(unique=True,max_length=200)
+    
+    def __unicode__(self):
+        return self.title
+    
+    def natural_key(self):
+        return self.title
+    
+    @cached_property
+    def statistics(self):
+        section_scores = UserSectionScore.objects.filter(section_id = self.id).values_list('score')
+        mean = numpy.mean(section_scores)
+        std = numpy.std(section_scores)
+        return {'mean':mean,'std':std}
+    
+    
 class UserProfile(LtgModel):
     '''
     will hold the user profile model
@@ -107,7 +149,41 @@ class UserProfile(LtgModel):
         
         return owner
     
+class Score(LtgModel):
+    '''
+    will be used as abstract class for the other score models
+    '''
+    score = models.PositiveSmallIntegerField()
+    user_profile = models.ForeignKey(UserProfile)
+    date = models.DateTimeField()
     
+    class Meta:
+        abstract = True
+    
+class UserScore(Score):
+    '''
+    will hold user scores history
+    '''
+     
+class UserConceptScore(Score):
+    '''
+    will hold user concept scores history for user
+    '''
+    concept = models.ForeignKey(Concept)
+    
+    def __unicode__(self):
+        return "concept:%s with score:%d for user:%s" % (self.concept.title, self.score, self.user_profile.user.email)
+    
+class UserSectionScore(Score):
+    '''
+    will hold user section scores history for user
+    '''
+    section = models.ForeignKey(Section)
+    
+    def __unicode__(self):
+        return "section:%s with score:%d for user:%s" % (self.section.title, self.score, self.user_profile.user.email)
+   
+
 class Tutor(object):
     '''
     will hold the tutor object
@@ -125,48 +201,7 @@ class Tutor(object):
         self.tutor_speciality = kwargs.get('tutor_speciality',None)
         self.tutor_groups = kwargs.get('tutor_groups',None)
         self.country = kwargs.get('country',None)
-        
-class Concept(LtgModel):
-    '''
-    will hold the concept model
-    '''
-    title = models.CharField(unique=True,max_length=200)
     
-    def __unicode__(self):
-        return self.title
-    
-    def natural_key(self):
-        return self.title
-    
-    @cached_property
-    def statistics(self):
-        concept_scores = ConceptScore.objects.filter(concept_id = self.id).values_list('score')
-        mean = numpy.mean(concept_scores)
-        std = numpy.std(concept_scores)
-        return {'mean':mean,'std':std}
-    
-class ConceptManager(models.Manager):
-    def get_by_natural_key(self, title):
-        return self.get(title=title)
-    
-class Section(LtgModel):
-    '''
-    will hold the section model
-    '''
-    title = models.CharField(unique=True,max_length=200)
-    
-    def __unicode__(self):
-        return self.title
-    
-    def natural_key(self):
-        return self.title
-    
-    @cached_property
-    def statistics(self):
-        section_scores = SectionScore.objects.filter(section_id = self.id).values_list('score')
-        mean = numpy.mean(section_scores)
-        std = numpy.std(section_scores)
-        return {'mean':mean,'std':std}
     
 class SectionManager(models.Manager):
     def get_by_natural_key(self, title):
@@ -316,43 +351,6 @@ class Question(LtgModel):
         question_score = numpy.interp(percentile, percentile_data_points, score_data_points)
         # round the score 
         return int(round(question_score))
-    
-
-    
-class QuestionSetAttempt(LtgModel):
-    '''
-    will hold the question set model
-    '''    
-    concepts = models.ManyToManyField(Concept, through='ConceptScore')
-    sections = models.ManyToManyField(Section, through='SectionScore')
-    user_profile = models.ForeignKey(UserProfile)
-    
-    def __unicode__(self):
-        return "Question Set Attempt with id:%d for user with email:%s" % (self.id,self.user_profile.user.email)     
-        
-    
-class ConceptScore(LtgModel): 
-    '''
-    will hold data regarding the concept for each question set attempt
-    '''
-    score = models.PositiveSmallIntegerField()
-    question_set_attempt = models.ForeignKey(QuestionSetAttempt)
-    concept = models.ForeignKey(Concept)
-    
-    def __unicode__(self):
-        return "concept:%s with score:%d for QSA with id:%d" % (self.concept.title, self.score, self.question_set_attempt.id)
-    
-    
-class SectionScore(LtgModel): 
-    '''
-    will hold data regarding the section for each question set attempt
-    '''
-    score = models.PositiveSmallIntegerField()
-    question_set_attempt = models.ForeignKey(QuestionSetAttempt)
-    section = models.ForeignKey(Section)
-    
-    def __unicode__(self):
-        return "section:%s with score:%d for QSA with id:%d" % (self.section.title, self.score, self.question_set_attempt.id)
      
     
 class Attempt(LtgModel):

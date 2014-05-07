@@ -1,7 +1,7 @@
 '''
-will hold our user profile resource
-Created on April 22, 2014
- 
+will be used to create a user total score for a specified date 
+Created on May 7th, 2014
+
 @author: Omri Dagan
 @version: 1.0
 @copyright: LTG
@@ -13,41 +13,42 @@ Created on April 22, 2014
 
 from ltg_backend_app.ltg_api.base import LtgResource
 from tastypie import fields
-from ltg_backend_app.ltg_api.user import UserResource
 from tastypie.validation import FormValidation
-from ltg_backend_app.forms import UserProfileForm
-from tastypie.authentication import Authentication
 from tastypie.authorization import Authorization
-from ltg_backend_app.models import UserProfile, UserSectionScore,\
-    UserConceptScore
-from ltg_backend_app.ltg_api.concept import ConceptResource
-from ltg_backend_app.ltg_api.section import SectionResource
+from ltg_backend_app.models import UserConceptScore, UserScore
 from ltg_backend_app.ltg_api.authentication import LtgApiKeyAuthentication
+from ltg_backend_app.ltg_api.user_profile import UserProfileResource
 
 #===============================================================================
 # end imports
 #===============================================================================
 
 #===============================================================================
-# begin user profile resource
+# begin user score resource
 #===============================================================================
 
-class UserProfileResource(LtgResource):
+class UserScoreResource(LtgResource):
     '''
-    resource for our user profile model
+    resource for our user concept score model
     '''
-    user = fields.ToOneField(UserResource,'user')
+    user_profile = fields.ToOneField(UserProfileResource,attribute='user_profile')
     
     class Meta(LtgResource.Meta):
-        allowed_methods = ['post','get']
+        allowed_methods = ['post']
         include_resource_uri = True
         always_return_data = True
-        validation = FormValidation(form_class=UserProfileForm)
+#         validation = FormValidation(form_class=UserProfileForm)
         authentication = LtgApiKeyAuthentication()
         authorization = Authorization()
-        queryset = UserProfile.objects.all()
+        queryset = UserScore.objects.all()
         
-
+    def hydrate_user_profile(self, bundle):
+        # set the user profile to the requesting user profile
+        user_profile_uri = UserProfileResource().get_resource_uri(bundle.request.user.profile)
+        bundle.data['user_profile'] = user_profile_uri
+        
+        return bundle
+    
 #===============================================================================
-# end user profile resource
+# end user score resource
 #===============================================================================

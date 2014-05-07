@@ -69,9 +69,6 @@ admin.site.register(Question, QuestionAdmin)
 admin.site.register(Attempt, AttemptAdmin)
 admin.site.register(Concept, ConceptAdmin)
 admin.site.register(Section, SectionAdmin)
-admin.site.register(QuestionSetAttempt, QuestionSetAttemptAdmin)
-admin.site.register(SectionScore, SectionScoreAdmin)
-admin.site.register(ConceptScore, ConceptScoreAdmin)
 admin.site.register(ScoreTable, ScoreTableAdmin)
 
 #===============================================================================

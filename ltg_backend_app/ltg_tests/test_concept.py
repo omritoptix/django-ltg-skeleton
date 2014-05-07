@@ -12,8 +12,8 @@ Created on April 28, 2014
 #===============================================================================
 
 from tastypie.test import ResourceTestCase
-from ltg_backend_app.models import Concept, ConceptScore, QuestionSetAttempt,\
-    UserProfile
+from ltg_backend_app.models import Concept,UserProfile, UserConceptScore
+import datetime
 
 #===============================================================================
 # end imports
@@ -32,8 +32,7 @@ class ConceptTest(ResourceTestCase):
         create concept and concept score
         '''
         concept = Concept.objects.create(title="Concept1")
-        question_set_attempt = QuestionSetAttempt.objects.create(user_profile = UserProfile.objects.first())
-        ConceptScore.objects.create(concept=concept , score=300, question_set_attempt=question_set_attempt)                             
+        UserConceptScore.objects.create(user_profile = UserProfile.objects.first(),concept = concept, score = 300,date = datetime.datetime.now())     
         return super(ConceptTest,self).setUp()
     
     def test_get_concepts(self):
