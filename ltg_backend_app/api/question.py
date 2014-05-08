@@ -1,5 +1,5 @@
 '''
-will hold our anonymous user profile resource
+will hold our question resource
 Created on April 22, 2014
  
 @author: Omri Dagan
@@ -11,29 +11,34 @@ Created on April 22, 2014
 # begin imports
 #===============================================================================
 
-from ltg_backend_app.ltg_api.user_profile import UserProfileResource
-from tastypie.validation import FormValidation
-from ltg_backend_app.forms import AnonymousUserProfileForm
+from ltg_backend_app.api.base import LtgResource
+from tastypie import fields
+from ltg_backend_app.models import Question
+from tastypie.authentication import Authentication
 
 #===============================================================================
 # end imports
 #===============================================================================
 
 #===============================================================================
-# begin anonymous user profile resource
+# begin question resource
 #===============================================================================
 
-class AnonymousUserProfileResource(UserProfileResource):
+class QuestionResource(LtgResource):
     '''
-    resource for anonymous user profile creation
-    '''  
-    class Meta(UserProfileResource.Meta):
-        validation = FormValidation(form_class=AnonymousUserProfileForm)
+    resource for the question model
+    '''
+    percentage_score_statistics = fields.ListField(attribute='percentage_score_statistics')
+    time_statistics = fields.ListField(attribute='time_statistics')
+    
+    class Meta(LtgResource.Meta):
+        queryset = Question.objects.all()
+        authentication = Authentication()
+        allowed_methods = ['get']
         
-    def hydrate(self,bundle):
-        bundle.obj.is_anonymous = True
-        return super(AnonymousUserProfileResource,self).hydrate(bundle)
+    def dehydrate_answer(self, bundle):
+        return bundle.obj.get_answer_display()
     
 #===============================================================================
-# end anonymous user profile resource
+# end question resource
 #===============================================================================

@@ -11,15 +11,15 @@ Created on May 7th, 2014
 # begin imports
 #===============================================================================
 
-from ltg_backend_app.ltg_api.base import LtgResource
+from ltg_backend_app.api.base import LtgResource
 from tastypie import fields
 from tastypie.validation import FormValidation
 from tastypie.authorization import Authorization
 from ltg_backend_app.models import UserConceptScore
-from ltg_backend_app.ltg_api.concept import ConceptResource
-from ltg_backend_app.ltg_api.authentication import LtgApiKeyAuthentication
-from ltg_backend_app.ltg_api.user_profile import UserProfileResource
-from ltg_backend_app.ltg_api.user_score import UserScoreResource
+from ltg_backend_app.api.concept import ConceptResource
+from ltg_backend_app.api.authentication import LtgApiKeyAuthentication
+from ltg_backend_app.api.user_profile import UserProfileResource
+from ltg_backend_app.api.user_score import UserScoreResource
 
 #===============================================================================
 # end imports

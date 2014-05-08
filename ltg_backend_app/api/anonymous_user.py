@@ -10,7 +10,7 @@ Created on April 22, 2014
 # begin imports
 #===============================================================================
 
-from ltg_backend_app.ltg_api.user import UserResource
+from ltg_backend_app.api.user import UserResource
 from tastypie.validation import FormValidation
 from ltg_backend_app.forms import AnonymousUserCreateForm
 import uuid

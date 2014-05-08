@@ -13,7 +13,7 @@ Created on April 22, 2014
 
 from tastypie.authorization import DjangoAuthorization
 from tastypie.exceptions import Unauthorized
-from ltg_backend_app.ltg_api.authentication import LtgApiKeyAuthentication
+from ltg_backend_app.api.authentication import LtgApiKeyAuthentication
 
 #===============================================================================
 # end imports

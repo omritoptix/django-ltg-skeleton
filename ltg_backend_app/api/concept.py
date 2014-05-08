@@ -1,6 +1,6 @@
 '''
 will hold our section resource
-Created on April 24, 2014
+Created on April 27, 2014
  
 @author: Omri Dagan
 @version: 1.0
@@ -11,9 +11,9 @@ Created on April 24, 2014
 # begin imports
 #===============================================================================
 
-from ltg_backend_app.ltg_api.base import LtgResource
+from ltg_backend_app.api.base import LtgResource
 from tastypie import fields
-from ltg_backend_app.models import Section
+from ltg_backend_app.models import Concept
 from tastypie.authentication import Authentication
 from tastypie.authorization import Authorization
 from tastypie.validation import FormValidation
@@ -23,21 +23,21 @@ from tastypie.validation import FormValidation
 #===============================================================================
 
 #===============================================================================
-# begin section resource
+# begin concept resource
 #===============================================================================
 
-class SectionResource(LtgResource):
+class ConceptResource(LtgResource):
     '''
-    resource for the Section model
+    resource for the concept model
     '''
     statistics = fields.DictField(attribute='statistics')
     
     class Meta(LtgResource.Meta):
-        queryset = Section.objects.all()
+        queryset = Concept.objects.all()
         authentication = Authentication()
         authorization = Authorization()
         allowed_methods = ['get']
     
 #===============================================================================
-# end section resource
+# end concept resource
 #===============================================================================

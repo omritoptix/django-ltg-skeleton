@@ -1,6 +1,6 @@
 '''
-will hold our question resource
-Created on April 22, 2014
+will hold our section resource
+Created on April 24, 2014
  
 @author: Omri Dagan
 @version: 1.0
@@ -11,34 +11,33 @@ Created on April 22, 2014
 # begin imports
 #===============================================================================
 
-from ltg_backend_app.ltg_api.base import LtgResource
+from ltg_backend_app.api.base import LtgResource
 from tastypie import fields
-from ltg_backend_app.models import Question
+from ltg_backend_app.models import Section
 from tastypie.authentication import Authentication
+from tastypie.authorization import Authorization
+from tastypie.validation import FormValidation
 
 #===============================================================================
 # end imports
 #===============================================================================
 
 #===============================================================================
-# begin question resource
+# begin section resource
 #===============================================================================
 
-class QuestionResource(LtgResource):
+class SectionResource(LtgResource):
     '''
-    resource for the question model
+    resource for the Section model
     '''
-    percentage_score_statistics = fields.ListField(attribute='percentage_score_statistics')
-    time_statistics = fields.ListField(attribute='time_statistics')
+    statistics = fields.DictField(attribute='statistics')
     
     class Meta(LtgResource.Meta):
-        queryset = Question.objects.all()
+        queryset = Section.objects.all()
         authentication = Authentication()
+        authorization = Authorization()
         allowed_methods = ['get']
-        
-    def dehydrate_answer(self, bundle):
-        return bundle.obj.get_answer_display()
     
 #===============================================================================
-# end question resource
+# end section resource
 #===============================================================================

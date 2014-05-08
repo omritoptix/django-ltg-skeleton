@@ -1,5 +1,5 @@
 '''
-will be used to create a user section score 
+will be used to create a user total score for a specified date 
 Created on May 7th, 2014
 
 @author: Omri Dagan
@@ -11,30 +11,27 @@ Created on May 7th, 2014
 # begin imports
 #===============================================================================
 
-from ltg_backend_app.ltg_api.base import LtgResource
+from ltg_backend_app.api.base import LtgResource
 from tastypie import fields
 from tastypie.validation import FormValidation
 from tastypie.authorization import Authorization
-from ltg_backend_app.models import UserConceptScore, UserSectionScore
-from ltg_backend_app.ltg_api.authentication import LtgApiKeyAuthentication
-from ltg_backend_app.ltg_api.user_profile import UserProfileResource
-from ltg_backend_app.ltg_api.section import SectionResource
-from ltg_backend_app.ltg_api.user_score import UserScoreResource
+from ltg_backend_app.models import UserConceptScore, UserScore
+from ltg_backend_app.api.authentication import LtgApiKeyAuthentication
+from ltg_backend_app.api.user_profile import UserProfileResource
 
 #===============================================================================
 # end imports
 #===============================================================================
 
 #===============================================================================
-# begin user section score resource
+# begin user score resource
 #===============================================================================
 
-class UserSectionScoreResource(UserScoreResource):
+class UserScoreResource(LtgResource):
     '''
-    resource for our user section score model
+    resource for our user concept score model
     '''
     user_profile = fields.ToOneField(UserProfileResource,attribute='user_profile')
-    section = fields.ToOneField(SectionResource,attribute='section')
     
     class Meta(LtgResource.Meta):
         allowed_methods = ['post']
@@ -43,8 +40,15 @@ class UserSectionScoreResource(UserScoreResource):
 #         validation = FormValidation(form_class=UserProfileForm)
         authentication = LtgApiKeyAuthentication()
         authorization = Authorization()
-        queryset = UserSectionScore.objects.all()
+        queryset = UserScore.objects.all()
+        
+    def hydrate_user_profile(self, bundle):
+        # set the user profile to the requesting user profile
+        user_profile_uri = UserProfileResource().get_resource_uri(bundle.request.user.profile)
+        bundle.data['user_profile'] = user_profile_uri
+        
+        return bundle
     
 #===============================================================================
-# end user section score resource
+# end user score resource
 #===============================================================================

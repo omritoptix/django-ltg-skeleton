@@ -15,13 +15,13 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from tastypie.api import Api
 import ltg_backend_app.views
-from ltg_backend_app.ltg_api.utilities import UtilitiesResource
-from ltg_backend_app.ltg_api.tutor import TutorResource
-from ltg_backend_app.ltg_api.user import UserResource
-from ltg_backend_app.ltg_api.anonymous_user import AnonymousUserResource
-from ltg_backend_app.ltg_api.user_profile import UserProfileResource
-from ltg_backend_app.ltg_api.anonymous_user_profile import AnonymousUserProfileResource
-from ltg_backend_app.ltg_api.question import QuestionResource
+from ltg_backend_app.api.utilities import UtilitiesResource
+from ltg_backend_app.api.tutor import TutorResource
+from ltg_backend_app.api.user import UserResource
+from ltg_backend_app.api.anonymous_user import AnonymousUserResource
+from ltg_backend_app.api.user_profile import UserProfileResource
+from ltg_backend_app.api.anonymous_user_profile import AnonymousUserProfileResource
+from ltg_backend_app.api.question import QuestionResource
 from ltg_backend_app.ltg_api.section import SectionResource
 from ltg_backend_app.ltg_api.concept import ConceptResource
 from ltg_backend_app.ltg_api.attempt import AttemptResource

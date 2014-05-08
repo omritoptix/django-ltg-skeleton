@@ -13,10 +13,6 @@ Created on April 28, 2014
 
 from tastypie.test import ResourceTestCase
 from ltg_backend_app.models import UserProfile, Question, Attempt
-from ltg_backend_app.ltg_api.user_profile import UserProfileResource
-from ltg_backend_app.ltg_api.question import QuestionResource
-import pdb
-from ltg_backend_app.ltg_api.anonymous_user_profile import AnonymousUserProfileResource
 from django.contrib.auth.models import User
 from tastypie.models import ApiKey
 

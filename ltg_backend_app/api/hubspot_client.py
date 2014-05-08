@@ -70,7 +70,7 @@ class HubSpotClient(object):
         @return str: a prefixed message
         '''
         exception_message = "HubSpot api client Exception: " + message
-        logger.error(exception_message)
+        logger.exception(exception_message)
         return exception_message
     
     def _request_handler(self,url):

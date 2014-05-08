@@ -1,6 +1,6 @@
 '''
-will hold our section resource
-Created on April 27, 2014
+will hold our anonymous user profile resource
+Created on April 22, 2014
  
 @author: Omri Dagan
 @version: 1.0
@@ -11,33 +11,29 @@ Created on April 27, 2014
 # begin imports
 #===============================================================================
 
-from ltg_backend_app.ltg_api.base import LtgResource
-from tastypie import fields
-from ltg_backend_app.models import Concept
-from tastypie.authentication import Authentication
-from tastypie.authorization import Authorization
+from ltg_backend_app.api.user_profile import UserProfileResource
 from tastypie.validation import FormValidation
+from ltg_backend_app.forms import AnonymousUserProfileForm
 
 #===============================================================================
 # end imports
 #===============================================================================
 
 #===============================================================================
-# begin concept resource
+# begin anonymous user profile resource
 #===============================================================================
 
-class ConceptResource(LtgResource):
+class AnonymousUserProfileResource(UserProfileResource):
     '''
-    resource for the concept model
-    '''
-    statistics = fields.DictField(attribute='statistics')
-    
-    class Meta(LtgResource.Meta):
-        queryset = Concept.objects.all()
-        authentication = Authentication()
-        authorization = Authorization()
-        allowed_methods = ['get']
+    resource for anonymous user profile creation
+    '''  
+    class Meta(UserProfileResource.Meta):
+        validation = FormValidation(form_class=AnonymousUserProfileForm)
+        
+    def hydrate(self,bundle):
+        bundle.obj.is_anonymous = True
+        return super(AnonymousUserProfileResource,self).hydrate(bundle)
     
 #===============================================================================
-# end concept resource
+# end anonymous user profile resource
 #===============================================================================

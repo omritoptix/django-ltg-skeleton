@@ -20,18 +20,18 @@ from django.contrib.auth import authenticate, login
 from tastypie.http import HttpForbidden, HttpUnauthorized, HttpCreated,\
     HttpApplicationError, HttpAccepted
 from ltg_backend_app.models import UserProfile
-from ltg_backend_app.ltg_api.user import UserResource
-from ltg_backend_app.ltg_api.authentication import LtgApiKeyAuthentication
+from ltg_backend_app.api.user import UserResource
+from ltg_backend_app.api.authentication import LtgApiKeyAuthentication
 from django.template.loader import get_template
 from django.template.context import Context
 from django.utils.html import strip_tags
 from django.core.mail.message import EmailMultiAlternatives
 from smtplib import SMTPSenderRefused
 from tastypie.models import ApiKey
-from ltg_backend_app.ltg_api.user_profile import UserProfileResource
-from ltg_backend_app.ltg_api.anonymous_user import AnonymousUserResource
-from ltg_backend_app.ltg_api.anonymous_user_profile import AnonymousUserProfileResource
-from ltg_backend_app.ltg_api.base import LtgResource, is_send_grid
+from ltg_backend_app.api.user_profile import UserProfileResource
+from ltg_backend_app.api.anonymous_user import AnonymousUserResource
+from ltg_backend_app.api.anonymous_user_profile import AnonymousUserProfileResource
+from ltg_backend_app.api.base import LtgResource, is_send_grid
 from ltg_backend_app import settings
 
 #===============================================================================

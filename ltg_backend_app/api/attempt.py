@@ -11,15 +11,15 @@ Created on April 27, 2014
 # begin imports
 #===============================================================================
 
-from ltg_backend_app.ltg_api.base import LtgResource
+from ltg_backend_app.api.base import LtgResource
 from tastypie import fields, http
 from ltg_backend_app.models import Attempt, Question
 from tastypie.authorization import Authorization
-from ltg_backend_app.ltg_api.question import QuestionResource
-from ltg_backend_app.ltg_api.user_profile import UserProfileResource
+from ltg_backend_app.api.question import QuestionResource
+from ltg_backend_app.api.user_profile import UserProfileResource
 from tastypie.exceptions import ImmediateHttpResponse
 from django.db.models.aggregates import Max
-from ltg_backend_app.ltg_api.authentication import LtgApiKeyAuthentication
+from ltg_backend_app.api.authentication import LtgApiKeyAuthentication
 from tastypie.constants import ALL_WITH_RELATIONS, ALL
 
 #===============================================================================
