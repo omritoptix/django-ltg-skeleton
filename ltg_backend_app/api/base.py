@@ -62,6 +62,14 @@ class LtgResource(ModelResource):
             return 0
     
         return kwargs['pk']
+    
+    def obj_create(self, bundle, **kwargs):
+        # if the calling class an attr of 'user_profile', create the resource with the request.user as the user for the resource
+        if hasattr(self, 'user_profile'):
+            return super(LtgResource, self).obj_create(bundle, user_profile=bundle.request.user.profile)
+        else:
+            return super(LtgResource, self).obj_create(bundle)
+        return bundle
             
 #===============================================================================
 # end abstract base resources

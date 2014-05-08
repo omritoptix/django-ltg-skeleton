@@ -41,7 +41,6 @@ class UserConceptScoreResource(UserScoreResource):
         allowed_methods = ['post']
         include_resource_uri = True
         always_return_data = True
-#         validation = FormValidation(form_class=UserProfileForm)
         validation = ModelFormValidation(form_class=UserConceptScoreForm)
         authentication = LtgApiKeyAuthentication()
         authorization = Authorization()

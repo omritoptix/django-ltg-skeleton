@@ -44,12 +44,10 @@ class UserScoreResource(LtgResource):
         authorization = Authorization()
         queryset = UserScore.objects.all()
         
-    def hydrate_user_profile(self, bundle):
-        # set the user profile to the requesting user profile
-        user_profile_uri = UserProfileResource().get_resource_uri(bundle.request.user.profile)
-        bundle.data['user_profile'] = user_profile_uri
-        
-        return bundle
+#     def hydrate_user_profile(self, bundle):
+#         # set the user profile to the requesting user profile
+#         user_profile_uri = UserProfileResource().get_resource_uri(bundle.request.user.profile)
+#         bundle.data['user_profile'] = user_profile_uri
     
 #===============================================================================
 # end user score resource

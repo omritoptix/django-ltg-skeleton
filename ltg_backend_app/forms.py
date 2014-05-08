@@ -11,13 +11,11 @@ Created on April 7, 2014
 # begin imports
 #===============================================================================
 
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django import forms
 from django.forms.models import ModelForm
 from ltg_backend_app.models import UserProfile, UserConceptScore, Attempt,\
     UserScore, UserSectionScore, LtgModel
-from ltg_backend_app import settings
 
 #===============================================================================
 # end imports
@@ -101,26 +99,24 @@ class AttemptForm(LtgModelForm):
 class UserScoreForm(LtgModelForm):
     '''
     class for creating user score
+    
+    - didn't assign it to a specific model since causes trouble with the tastypie obj_create and the foreign keys (i.e user_profile).
+    
+    - date added as char field since django doesn't support iso-8601 date format , which is what tastypie receives, and thus
+    raises an error of the date not being valid.
     '''
-    # added as char field since django doesn't support iso-8601 date format , which is what tastypie receives, and thus
-    # raises an error of the date not being valid.
-    date = forms.CharField()
-    class Meta:
-        model = UserScore
+    date = forms.CharField(required=True)
         
 class UserSectionScoreForm(UserScoreForm):
     '''
     class for creating user section score
     '''
-    class Meta:
-        model = UserSectionScore
         
 class UserConceptScoreForm(UserScoreForm):
     '''
     form for creating user concept score
     ''' 
-    class Meta:
-        model = UserConceptScore
+
 #===============================================================================
 # end forms
 #===============================================================================
