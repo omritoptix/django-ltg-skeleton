@@ -18,6 +18,7 @@ from django.core.urlresolvers import get_script_prefix, resolve
 import os
 import logging
 from tastypie.resources import ModelResource
+from ltg_backend_app.third_party_subclasses.tastypie_subclasses import MyDateSerializer
 
 #===============================================================================
 # end imports
@@ -39,6 +40,7 @@ class LtgResource(ModelResource):
         allowed_methods = ['get']
         always_return_data = True
         ordering = ['creation_date','modified_date']
+        serializer = MyDateSerializer()
         
     @staticmethod
     def get_pk_from_uri(uri):

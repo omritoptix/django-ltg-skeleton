@@ -16,12 +16,8 @@ from tastypie import fields
 from ltg_backend_app.api.user import UserResource
 from tastypie.validation import FormValidation
 from ltg_backend_app.forms import UserProfileForm
-from tastypie.authentication import Authentication
 from tastypie.authorization import Authorization
-from ltg_backend_app.models import UserProfile, UserSectionScore,\
-    UserConceptScore
-from ltg_backend_app.api.concept import ConceptResource
-from ltg_backend_app.api.section import SectionResource
+from ltg_backend_app.models import UserProfile
 from ltg_backend_app.api.authentication import LtgApiKeyAuthentication
 
 #===============================================================================

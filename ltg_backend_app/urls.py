@@ -22,13 +22,13 @@ from ltg_backend_app.api.anonymous_user import AnonymousUserResource
 from ltg_backend_app.api.user_profile import UserProfileResource
 from ltg_backend_app.api.anonymous_user_profile import AnonymousUserProfileResource
 from ltg_backend_app.api.question import QuestionResource
-from ltg_backend_app.ltg_api.section import SectionResource
-from ltg_backend_app.ltg_api.concept import ConceptResource
-from ltg_backend_app.ltg_api.attempt import AttemptResource
-from ltg_backend_app.ltg_api.user_concept_score import UserConceptScoreResource
-from ltg_backend_app.ltg_api.user_section_score import UserSectionScoreResource
-from ltg_backend_app.ltg_api.user_score import UserScoreResource
-# from ltg_backend_app.ltg_api.api import *
+from ltg_backend_app.api.section import SectionResource
+from ltg_backend_app.api.concept import ConceptResource
+from ltg_backend_app.api.attempt import AttemptResource
+from ltg_backend_app.api.user_concept_score import UserConceptScoreResource
+from ltg_backend_app.api.user_section_score import UserSectionScoreResource
+from ltg_backend_app.api.user_score import UserScoreResource
+# from ltg_backend_app.api.api import *
 
 #===============================================================================
 # end imports

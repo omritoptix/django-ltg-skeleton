@@ -16,7 +16,6 @@ from tastypie import fields
 from ltg_backend_app.models import Concept
 from tastypie.authentication import Authentication
 from tastypie.authorization import Authorization
-from tastypie.validation import FormValidation
 
 #===============================================================================
 # end imports

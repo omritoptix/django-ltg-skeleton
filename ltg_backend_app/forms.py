@@ -15,7 +15,9 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django import forms
 from django.forms.models import ModelForm
-from ltg_backend_app.models import UserProfile
+from ltg_backend_app.models import UserProfile, UserConceptScore, Attempt,\
+    UserScore, UserSectionScore, LtgModel
+from ltg_backend_app import settings
 
 #===============================================================================
 # end imports
@@ -24,6 +26,15 @@ from ltg_backend_app.models import UserProfile
 #===============================================================================
 # begin forms
 #===============================================================================
+
+class LtgModelForm(ModelForm):
+    '''
+    all custom models will inherit from this form
+    '''
+    creation_date = forms.DateTimeField(required=False)
+    
+    class Meta:
+        model = LtgModel
 
 class UserForm(ModelForm):
     '''
@@ -79,6 +90,37 @@ class AnonymousUserProfileForm(UserProfileForm):
     ''' 
     class Meta(UserProfileForm.Meta):
         model = UserProfile
+        
+class AttemptForm(LtgModelForm):
+    '''
+    form for creating attempt
+    '''
+    class Meta:
+        model = Attempt
+        
+class UserScoreForm(LtgModelForm):
+    '''
+    class for creating user score
+    '''
+    # added as char field since django doesn't support iso-8601 date format , which is what tastypie receives, and thus
+    # raises an error of the date not being valid.
+    date = forms.CharField()
+    class Meta:
+        model = UserScore
+        
+class UserSectionScoreForm(UserScoreForm):
+    '''
+    class for creating user section score
+    '''
+    class Meta:
+        model = UserSectionScore
+        
+class UserConceptScoreForm(UserScoreForm):
+    '''
+    form for creating user concept score
+    ''' 
+    class Meta:
+        model = UserConceptScore
 #===============================================================================
 # end forms
 #===============================================================================

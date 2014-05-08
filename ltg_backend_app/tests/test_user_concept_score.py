@@ -39,6 +39,7 @@ class UserConceptScoreTest(ResourceTestCase):
         concept1_uri = '/api/v1/concept/%d/' % concept1_id
         # make the post request
         resp = self.api_client.post(uri='/api/v1/userconceptscore/', format='json',data = {'concept':concept1_uri,'score':666, 'username':user.username,'api_key':user.api_key.key,'date':'2014-11-12T15:02:10'})
+        print resp
         self.assertHttpCreated(resp)
         # get the user profile we created the score for
         user_profile = user.profile

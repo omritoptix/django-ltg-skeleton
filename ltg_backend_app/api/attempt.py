@@ -21,6 +21,8 @@ from tastypie.exceptions import ImmediateHttpResponse
 from django.db.models.aggregates import Max
 from ltg_backend_app.api.authentication import LtgApiKeyAuthentication
 from tastypie.constants import ALL_WITH_RELATIONS, ALL
+from ltg_backend_app.forms import AttemptForm
+from ltg_backend_app.third_party_subclasses.tastypie_subclasses import ModelFormValidation
 
 #===============================================================================
 # end imports
@@ -42,6 +44,7 @@ class AttemptResource(LtgResource):
         authentication = LtgApiKeyAuthentication()
         authorization = Authorization()
         allowed_methods = ['post','get']
+        validation = ModelFormValidation(form_class=AttemptForm)
         filtering = {
             'user_profile' : ALL_WITH_RELATIONS,
             'question' : ALL_WITH_RELATIONS,
