@@ -54,6 +54,9 @@ class UserForm(ModelForm):
         model = User
         fields = ( "username", "email", "first_name", "last_name" )
         
+class ResetPasswordForm(forms.Form):
+    password = forms.CharField(max_length=16,min_length=8)
+    
 class AnonymousUserCreateForm(UserForm):
     '''
     form for creating anonymous user
@@ -117,6 +120,8 @@ class UserConceptScoreForm(UserScoreForm):
     '''
     form for creating user concept score
     ''' 
+    
+    
 
 #===============================================================================
 # end forms

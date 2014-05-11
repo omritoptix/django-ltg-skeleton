@@ -18,6 +18,42 @@
         }
     },
     {
+        "pk": 2, 
+        "model": "auth.user", 
+        "fields": {
+            "username": "omri", 
+            "first_name": "omri", 
+            "last_name": "dagan", 
+            "is_active": true, 
+            "is_superuser": false, 
+            "is_staff": true, 
+            "last_login": "2013-11-12T15:02:10.419Z", 
+            "groups": [], 
+            "user_permissions": [], 
+            "password": "pbkdf2_sha256$10000$BfwmjoRHreI7$BNNRza87A+VIzSE6I4AtoIDlAWr0lgIFyZ+ELqKMpxg=", 
+            "email": "omri@ltgexam.com", 
+            "date_joined": "2013-11-07T13:20:47.037Z"
+        }
+    },
+    {
+        "pk": 3, 
+        "model": "auth.user", 
+        "fields": {
+            "username": "chachi", 
+            "first_name": "tzachi", 
+            "last_name": "bokaris", 
+            "is_active": false, 
+            "is_superuser": false, 
+            "is_staff": true, 
+            "last_login": "2013-11-12T15:02:10.419Z", 
+            "groups": [], 
+            "user_permissions": [], 
+            "password": "pbkdf2_sha256$10000$BfwmjoRHreI7$BNNRza87A+VIzSE6I4AtoIDlAWr0lgIFyZ+ELqKMpxg=", 
+            "email": "tzachi@ltgexam.com", 
+            "date_joined": "2013-11-07T13:20:47.037Z"
+        }
+    },
+    {
     "pk": 1, 
     "model": "ltg_backend_app.userprofile", 
     "fields": {
@@ -28,11 +64,51 @@
         "creation_date": "2014-04-24T12:14:12Z"
     	}
 	},
-	    {
+	{
+    "pk": 2, 
+    "model": "ltg_backend_app.userprofile", 
+    "fields": {
+        "uuid": "f5861c66ab064a35b928bf7cd263d0", 
+        "user": 2, 
+        "modified_data": "2014-04-24T12:14:12.265Z", 
+        "is_anonymous": false, 
+        "creation_date": "2014-04-24T12:14:12Z"
+    	}
+	},
+	{
+    "pk": 3, 
+    "model": "ltg_backend_app.userprofile", 
+    "fields": {
+        "uuid": "f5861c56ab064a35b928bf7cd263d0", 
+        "user": 3, 
+        "modified_data": "2014-04-24T12:14:12.265Z", 
+        "is_anonymous": false, 
+        "creation_date": "2014-04-24T12:14:12Z"
+    	}
+	},
+	{
         "pk": 1, 
         "model": "tastypie.apikey", 
         "fields": {
             "user": 1, 
+            "key": "12345678", 
+            "created": "2013-11-11T16:29:54.453Z"
+        }
+    },
+    {
+        "pk": 2, 
+        "model": "tastypie.apikey", 
+        "fields": {
+            "user": 2, 
+            "key": "12345678", 
+            "created": "2013-11-11T16:29:54.453Z"
+        }
+    },
+    {
+        "pk": 3, 
+        "model": "tastypie.apikey", 
+        "fields": {
+            "user": 3, 
             "key": "12345678", 
             "created": "2013-11-11T16:29:54.453Z"
         }

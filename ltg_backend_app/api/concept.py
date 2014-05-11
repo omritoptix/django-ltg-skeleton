@@ -16,6 +16,7 @@ from tastypie import fields
 from ltg_backend_app.models import Concept
 from tastypie.authorization import Authorization
 from ltg_backend_app.api.authentication import LtgApiKeyAuthentication
+from tastypie.constants import ALL
 
 #===============================================================================
 # end imports
