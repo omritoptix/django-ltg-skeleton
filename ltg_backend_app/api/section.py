@@ -16,6 +16,7 @@ from tastypie import fields
 from ltg_backend_app.models import Section
 from tastypie.authorization import Authorization
 from ltg_backend_app.api.authentication import LtgApiKeyAuthentication
+from tastypie.constants import ALL
 
 #===============================================================================
 # end imports
@@ -36,6 +37,9 @@ class SectionResource(LtgResource):
         authentication = LtgApiKeyAuthentication()
         authorization = Authorization()
         allowed_methods = ['get']
+        filtering = {
+               'title' : ALL,
+           }
     
 #===============================================================================
 # end section resource

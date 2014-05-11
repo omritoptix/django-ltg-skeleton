@@ -36,6 +36,9 @@ class ConceptResource(LtgResource):
         authentication = LtgApiKeyAuthentication()
         authorization = Authorization()
         allowed_methods = ['get']
+        filtering = {
+               'title' : ALL,
+           }
     
 #===============================================================================
 # end concept resource
