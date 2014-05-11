@@ -14,12 +14,12 @@ Created on May 7th, 2014
 from ltg_backend_app.api.base import LtgResource
 from tastypie import fields
 from ltg_backend_app.forms import UserScoreForm
-from tastypie.authorization import Authorization
 from ltg_backend_app.models import UserScore
 from ltg_backend_app.api.authentication import LtgApiKeyAuthentication
 from ltg_backend_app.api.user_profile import UserProfileResource
 from ltg_backend_app.third_party_subclasses.tastypie_subclasses import ModelFormValidation
-
+from ltg_backend_app.api.authorization import UserObjectsOnlyAuthorization
+from tastypie.constants import ALL, ALL_WITH_RELATIONS
 
 #===============================================================================
 # end imports
@@ -36,19 +36,18 @@ class UserScoreResource(LtgResource):
     user_profile = fields.ToOneField(UserProfileResource,attribute='user_profile')
     
     class Meta(LtgResource.Meta):
-        allowed_methods = ['post']
+        allowed_methods = ['post','get']
         include_resource_uri = True
         always_return_data = True
         validation = ModelFormValidation(form_class=UserScoreForm)
         authentication = LtgApiKeyAuthentication()
-        authorization = Authorization()
-        queryset = UserScore.objects.all()
-        
-#     def hydrate_user_profile(self, bundle):
-#         # set the user profile to the requesting user profile
-#         user_profile_uri = UserProfileResource().get_resource_uri(bundle.request.user.profile)
-#         bundle.data['user_profile'] = user_profile_uri
-    
+        authorization = UserObjectsOnlyAuthorization()
+        queryset = UserScore.objects.all()      
+        filtering = {
+               'user_profile' : ALL_WITH_RELATIONS,
+               'date' : ALL,
+           }
+        ordering = ['date',]
 #===============================================================================
 # end user score resource
 #===============================================================================

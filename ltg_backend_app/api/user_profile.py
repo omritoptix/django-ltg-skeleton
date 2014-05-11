@@ -16,9 +16,10 @@ from tastypie import fields
 from ltg_backend_app.api.user import UserResource
 from tastypie.validation import FormValidation
 from ltg_backend_app.forms import UserProfileForm
-from tastypie.authorization import Authorization
 from ltg_backend_app.models import UserProfile
 from ltg_backend_app.api.authentication import LtgApiKeyAuthentication
+from ltg_backend_app.api.authorization import UserObjectsOnlyAuthorization
+from tastypie.authorization import Authorization
 
 #===============================================================================
 # end imports
@@ -35,11 +36,12 @@ class UserProfileResource(LtgResource):
     user = fields.ToOneField(UserResource,'user')
     
     class Meta(LtgResource.Meta):
-        allowed_methods = ['post','get']
+        allowed_methods = ['get']
         include_resource_uri = True
         always_return_data = True
         validation = FormValidation(form_class=UserProfileForm)
         authentication = LtgApiKeyAuthentication()
+        authorization = UserObjectsOnlyAuthorization()
         authorization = Authorization()
         queryset = UserProfile.objects.all()
         

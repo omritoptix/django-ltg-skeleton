@@ -93,8 +93,8 @@ class AttemptForm(LtgModelForm):
     '''
     form for creating attempt
     '''
-    class Meta:
-        model = Attempt
+    attempt = forms.IntegerField()
+    answer = forms.IntegerField(max_value=4)
         
 class UserScoreForm(LtgModelForm):
     '''

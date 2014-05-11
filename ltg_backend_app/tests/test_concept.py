@@ -14,6 +14,7 @@ Created on April 28, 2014
 from tastypie.test import ResourceTestCase
 from ltg_backend_app.models import Concept,UserProfile, UserConceptScore
 import datetime
+from django.contrib.auth.models import User
 
 #===============================================================================
 # end imports
@@ -43,14 +44,16 @@ class ConceptTest(ResourceTestCase):
         '''
         
         # get a single concept
+        user = User.objects.first()
+        auth_data = {'username':user.username,'api_key':user.api_key.key}
         concept_id = Concept.objects.first().id
-        resp = self.api_client.get(uri='/api/v1/concept/%d/' % concept_id, format='json')
+        resp = self.api_client.get(uri='/api/v1/concept/%d/' % concept_id, format='json', data = auth_data)
         self.assertHttpOK(resp)
         self.assertEqual(self.deserialize(resp)['statistics']['mean'],300)
         self.assertEqual(self.deserialize(resp)['statistics']['std'],0)
         
         # get concepts list
-        resp = self.api_client.get(uri='/api/v1/concept/', format='json')
+        resp = self.api_client.get(uri='/api/v1/concept/', format='json', data = auth_data)
         self.assertHttpOK(resp)
         self.assertEqual(self.deserialize(resp)['objects'][0]['statistics']['mean'],300)
         

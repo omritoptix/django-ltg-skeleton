@@ -44,15 +44,18 @@ class SectionTest(ResourceTestCase):
         1. get a single section and make sure statistics for this section are returned
         2. get a list of sections and make sure statistics for a section is returned 
         '''
+        # get a user to authenticate with
+        user = User.objects.first()
+        auth_data = {'username':user.username, 'api_key':user.api_key.key}
         # get a single section
         section_id = Section.objects.last().id
-        resp = self.api_client.get(uri='/api/v1/section/%d/' % section_id, format='json')
+        resp = self.api_client.get(uri='/api/v1/section/%d/' % section_id, format='json', data = auth_data)
         self.assertHttpOK(resp)
         self.assertEqual(self.deserialize(resp)['statistics']['mean'],400)
         self.assertEqual(self.deserialize(resp)['statistics']['std'],0)
         
         # get sections list
-        resp = self.api_client.get(uri='/api/v1/section/', format='json')
+        resp = self.api_client.get(uri='/api/v1/section/', format='json', data = auth_data)
         self.assertHttpOK(resp)
         self.assertEqual(self.deserialize(resp)['objects'][0]['statistics']['mean'],400)
         

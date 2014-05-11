@@ -14,7 +14,8 @@ Created on April 22, 2014
 from ltg_backend_app.api.base import LtgResource
 from tastypie import fields
 from ltg_backend_app.models import Question
-from tastypie.authentication import Authentication
+from ltg_backend_app.api.authentication import LtgApiKeyAuthentication
+from tastypie.authorization import Authorization
 
 #===============================================================================
 # end imports
@@ -33,7 +34,8 @@ class QuestionResource(LtgResource):
     
     class Meta(LtgResource.Meta):
         queryset = Question.objects.all()
-        authentication = Authentication()
+        authentication = LtgApiKeyAuthentication()
+        authorization = Authorization()
         allowed_methods = ['get']
         
     def dehydrate_answer(self, bundle):

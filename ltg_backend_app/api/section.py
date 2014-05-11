@@ -14,8 +14,8 @@ Created on April 24, 2014
 from ltg_backend_app.api.base import LtgResource
 from tastypie import fields
 from ltg_backend_app.models import Section
-from tastypie.authentication import Authentication
 from tastypie.authorization import Authorization
+from ltg_backend_app.api.authentication import LtgApiKeyAuthentication
 
 #===============================================================================
 # end imports
@@ -33,7 +33,7 @@ class SectionResource(LtgResource):
     
     class Meta(LtgResource.Meta):
         queryset = Section.objects.all()
-        authentication = Authentication()
+        authentication = LtgApiKeyAuthentication()
         authorization = Authorization()
         allowed_methods = ['get']
     

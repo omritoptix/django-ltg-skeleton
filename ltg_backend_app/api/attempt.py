@@ -14,7 +14,6 @@ Created on April 27, 2014
 from ltg_backend_app.api.base import LtgResource
 from tastypie import fields, http
 from ltg_backend_app.models import Attempt, Question
-from tastypie.authorization import Authorization
 from ltg_backend_app.api.question import QuestionResource
 from ltg_backend_app.api.user_profile import UserProfileResource
 from tastypie.exceptions import ImmediateHttpResponse
@@ -23,6 +22,7 @@ from ltg_backend_app.api.authentication import LtgApiKeyAuthentication
 from tastypie.constants import ALL_WITH_RELATIONS, ALL
 from ltg_backend_app.forms import AttemptForm
 from ltg_backend_app.third_party_subclasses.tastypie_subclasses import ModelFormValidation
+from ltg_backend_app.api.authorization import UserObjectsOnlyAuthorization
 
 #===============================================================================
 # end imports
@@ -42,8 +42,9 @@ class AttemptResource(LtgResource):
     class Meta(LtgResource.Meta):
         queryset = Attempt.objects.all()
         authentication = LtgApiKeyAuthentication()
-        authorization = Authorization()
-        allowed_methods = ['post','get']
+        authorization = UserObjectsOnlyAuthorization()
+        allowed_methods = ['post','get','patch']
+        detail_allowed_methods = ['put','patch']
         validation = ModelFormValidation(form_class=AttemptForm)
         filtering = {
             'user_profile' : ALL_WITH_RELATIONS,
@@ -70,12 +71,6 @@ class AttemptResource(LtgResource):
             
         return bundle
     
-    def hydrate_user_profile(self, bundle):
-        # set the user profile to the requesting user profile
-        user_profile_uri = UserProfileResource().get_resource_uri(bundle.request.user.profile)
-        bundle.data['user_profile'] = user_profile_uri
-        
-        return bundle
     
     def dehydrate(self,bundle):
         # add the question index
