@@ -17,7 +17,7 @@ from ltg_backend_app.forms import UserScoreForm
 from ltg_backend_app.models import UserScore
 from ltg_backend_app.api.authentication import LtgApiKeyAuthentication
 from ltg_backend_app.api.user_profile import UserProfileResource
-from ltg_backend_app.third_party_subclasses.tastypie_subclasses import ModelFormValidation
+from ltg_backend_app.third_party_extensions.tastypie_extensions import ModelFormValidation
 from ltg_backend_app.api.authorization import UserObjectsOnlyAuthorization
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
 

@@ -21,7 +21,7 @@ from django.db.models.aggregates import Max
 from ltg_backend_app.api.authentication import LtgApiKeyAuthentication
 from tastypie.constants import ALL_WITH_RELATIONS, ALL
 from ltg_backend_app.forms import AttemptForm
-from ltg_backend_app.third_party_subclasses.tastypie_subclasses import ModelFormValidation
+from ltg_backend_app.third_party_extensions.tastypie_extensions import ModelFormValidation
 from ltg_backend_app.api.authorization import UserObjectsOnlyAuthorization
 
 #===============================================================================

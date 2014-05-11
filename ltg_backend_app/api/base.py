@@ -18,7 +18,7 @@ from django.core.urlresolvers import get_script_prefix, resolve
 import os
 import logging
 from tastypie.resources import ModelResource
-from ltg_backend_app.third_party_subclasses.tastypie_subclasses import MyDateSerializer
+from ltg_backend_app.third_party_extensions.tastypie_extensions import MyDateSerializer
 
 #===============================================================================
 # end imports
