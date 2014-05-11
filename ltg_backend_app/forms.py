@@ -94,7 +94,7 @@ class AttemptForm(LtgModelForm):
     form for creating attempt
     '''
     attempt = forms.IntegerField()
-    answer = forms.IntegerField(max_value=4)
+    answer = forms.IntegerField(min_value=0, max_value=4)
         
 class UserScoreForm(LtgModelForm):
     '''
@@ -105,7 +105,8 @@ class UserScoreForm(LtgModelForm):
     - date added as char field since django doesn't support iso-8601 date format , which is what tastypie receives, and thus
     raises an error of the date not being valid.
     '''
-    date = forms.CharField(required=True)
+    date = forms.CharField()
+    score = forms.IntegerField(min_value=200, max_value=800)
         
 class UserSectionScoreForm(UserScoreForm):
     '''
