@@ -30,7 +30,6 @@ class SectionResource(LtgResource):
     '''
     resource for the Section model
     '''
-    statistics = fields.DictField(attribute='statistics')
     
     class Meta(LtgResource.Meta):
         queryset = Section.objects.all()

@@ -12,7 +12,6 @@ Created on May 13, 2014
 #===============================================================================
 
 from ltg_backend_app.api.base import LtgResource
-from tastypie import fields
 from ltg_backend_app.models import WrongAnswersPercentage
 from ltg_backend_app.api.authentication import LtgApiKeyAuthentication
 from tastypie.authorization import Authorization

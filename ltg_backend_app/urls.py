@@ -29,6 +29,8 @@ from ltg_backend_app.api.user_concept_score import UserConceptScoreResource
 from ltg_backend_app.api.user_section_score import UserSectionScoreResource
 from ltg_backend_app.api.user_score import UserScoreResource
 from ltg_backend_app.api.question_statistics import QuestionStatisticsResource
+from ltg_backend_app.api.section_statistics import SectionStatisticsResource
+from ltg_backend_app.api.concept_statistics import ConceptStatisticsResource
 # from ltg_backend_app.api.api import *
 
 #===============================================================================
@@ -54,6 +56,8 @@ v1_api.register(AttemptResource())
 v1_api.register(UserConceptScoreResource())
 v1_api.register(UserSectionScoreResource())
 v1_api.register(UserScoreResource())
+v1_api.register(SectionStatisticsResource())
+v1_api.register(ConceptStatisticsResource())
 
 #register urls
 urlpatterns = patterns('',

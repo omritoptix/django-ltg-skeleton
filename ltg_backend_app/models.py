@@ -95,13 +95,6 @@ class Concept(LtgModel):
     def natural_key(self):
         return self.title
     
-    @cached_property
-    def statistics(self):
-        concept_scores = UserConceptScore.objects.filter(concept_id = self.id).values_list('score')
-        mean = numpy.mean(concept_scores)
-        std = numpy.std(concept_scores)
-        return {'mean':mean,'std':std}
-    
 class ConceptManager(models.Manager):
     def get_by_natural_key(self, title):
         return self.get(title=title)
@@ -117,13 +110,6 @@ class Section(LtgModel):
     
     def natural_key(self):
         return self.title
-    
-    @cached_property
-    def statistics(self):
-        section_scores = UserSectionScore.objects.filter(section_id = self.id).values_list('score')
-        mean = numpy.mean(section_scores)
-        std = numpy.std(section_scores)
-        return {'mean':mean,'std':std}
     
     
 class UserProfile(LtgModel):
@@ -276,6 +262,23 @@ class WrongAnswersPercentage(LtgModel):
     answer = models.SmallIntegerField(choices=ANSWER)
     percentage_wrong = models.DecimalField(max_digits=5,decimal_places=2)
     question_statistics = models.ForeignKey(QuestionStatistics)
+    
+class ConceptStatistics(LtgModel):
+    '''
+    will hold each concept statistics
+    '''
+    concept = models.ForeignKey(Concept)
+    mean_score = models.PositiveSmallIntegerField()
+    std_score = models.PositiveSmallIntegerField()
+    
+class SectionStatistics(LtgModel):
+    '''
+    will hold each section statistics
+    '''
+    section = models.ForeignKey(Section)
+    mean_score = models.PositiveSmallIntegerField()
+    std_score = models.PositiveSmallIntegerField()
+    
 #===============================================================================
 # end tables - models
 #===============================================================================

@@ -13,9 +13,12 @@ Created on May 12, 2014
 from __future__ import absolute_import
 from ltg_backend_app.celery import app
 from ltg_backend_app.models import Attempt, MAX_ALGORITHM_ATTEMPTS,\
-    QuestionStatistics, Question, MIN_ATTEMPT_DURATION
+    QuestionStatistics, Question, MIN_ATTEMPT_DURATION, Section,\
+    UserSectionScore, SectionStatistics, Concept, UserConceptScore,\
+    ConceptStatistics
 from ltg_backend_app.tasks_helpers import calc_time_statistics,\
     calc_percentage_right_and_score, calc_percentage_wrong
+import numpy
 
 #===============================================================================
 # end imports
@@ -72,6 +75,54 @@ def update_questions_statistics():
                 attempt_num += 1
             else:
                 is_attempt_valid = False
+                
+                
+@app.task
+def update_section_statistics():
+    '''
+    will update section statistics for:
+    mean score, std score
+    '''
+    # get all sections
+    section_set = Section.objects.all()
+    # iterate over each section and calc score mean and std
+    for section in section_set:
+        section_scores = UserSectionScore.objects.filter(section_id = section.id).values_list('score')
+        mean_score = numpy.mean(section_scores)
+        std_score = numpy.std(section_scores)
+        # check if statistics object for this section already exists
+        try:
+            section_statistics = SectionStatistics.objects.get(section_id = section.id)
+            section_statistics.mean_score = mean_score
+            section_statistics.mean_score = std_score
+            section_statistics.save()
+        #if statistics object for this section doesn't exist - create it
+        except SectionStatistics.DoesNotExist:
+            SectionStatistics.objects.create(section_id = section.id, mean_score = mean_score, std_score = std_score)
+            
+
+@app.task
+def update_concept_statistics():
+    '''
+    will update concept statistics for:
+    mean score, std score
+    '''
+    # get all concepts
+    concept_set = Concept.objects.all()
+    # iterate over each concept and calc score mean and std
+    for concept in concept_set:
+        concept_scores = UserConceptScore.objects.filter(concept_id = concept.id).values_list('score')
+        mean_score = numpy.mean(concept_scores)
+        std_score = numpy.std(concept_scores)
+        # check if statistics object for this concept already exists
+        try:
+            concept_statistics = ConceptStatistics.objects.get(concept_id = concept.id)
+            concept_statistics.mean_score = mean_score
+            concept_statistics.mean_score = std_score
+            concept_statistics.save()
+        #if statistics object for this concept doesn't exist - create it
+        except ConceptStatistics.DoesNotExist:
+            ConceptStatistics.objects.create(concept_id = concept.id, mean_score = mean_score, std_score = std_score)
                 
 
 #===============================================================================

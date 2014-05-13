@@ -293,7 +293,7 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
-# celery settings
+# celery settings. task schedules can be defined via the admin interface
 
 # set our scheduler to django celery scheduler
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
@@ -301,19 +301,11 @@ CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 BROKER_URL = os.environ.get('BROKER_URL', None)
 # celery result backend
 CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend'
-# task schedules
-CELERYBEAT_SCHEDULE = {
-    # Executes every Monday morning at 7:30 A.M
-#     'add-every-monday-morning': {
-#         'task': 'tasks.add',
-#         'schedule': crontab(hour=7, minute=30, day_of_week=1),
-#         'args': (16, 16),
-#     },
-    'update-questions-statistics-every-180-seconds': {
-        'task': 'ltg_backend_app.tasks.update_questions_statistics',
-        'schedule': timedelta(seconds=180),
-    },
-}
+# If set to True there will be no asynchronous background processing, all tasks that are getting called via celery will be run synchronously 
+# (so no need to start any additional celery workers - very useful for debugging).
+CELERY_ALWAYS_EAGER = DEBUG
+
+
 
  
 

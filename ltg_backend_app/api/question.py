@@ -12,7 +12,6 @@ Created on April 22, 2014
 #===============================================================================
 
 from ltg_backend_app.api.base import LtgResource
-from tastypie import fields
 from ltg_backend_app.models import Question
 from ltg_backend_app.api.authentication import LtgApiKeyAuthentication
 from tastypie.authorization import Authorization

@@ -51,13 +51,10 @@ class SectionTest(ResourceTestCase):
         section_id = Section.objects.last().id
         resp = self.api_client.get(uri='/api/v1/section/%d/' % section_id, format='json', data = auth_data)
         self.assertHttpOK(resp)
-        self.assertEqual(self.deserialize(resp)['statistics']['mean'],400)
-        self.assertEqual(self.deserialize(resp)['statistics']['std'],0)
         
         # get sections list
         resp = self.api_client.get(uri='/api/v1/section/', format='json', data = auth_data)
         self.assertHttpOK(resp)
-        self.assertEqual(self.deserialize(resp)['objects'][0]['statistics']['mean'],400)
         
     def test_post_section(self):
         '''

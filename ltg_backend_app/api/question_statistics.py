@@ -18,7 +18,6 @@ from ltg_backend_app.api.authentication import LtgApiKeyAuthentication
 from tastypie.authorization import Authorization
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
 from ltg_backend_app.api.question import QuestionResource
-from ltg_backend_app.api.wrong_answers_percentage import WrongAnswersPercentageResource
 
 #===============================================================================
 # end imports

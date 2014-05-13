@@ -38,12 +38,10 @@ class QuestionTest(ResourceTestCase):
         question_uri = '/api/v1/question/%d/' % (Question.objects.first().id)
         resp = self.api_client.get(uri=question_uri, format='json', data = auth_data)
         self.assertHttpOK(resp)
-        self.assertTrue(len(self.deserialize(resp)) > 0)
         
         #get questions
         resp = self.api_client.get(uri='/api/v1/question/', format='json', data = auth_data)
         self.assertHttpOK(resp)
-        self.assertTrue(len(self.deserialize(resp)['objects']) > 0)
         
     def test_post_question(self):
         '''

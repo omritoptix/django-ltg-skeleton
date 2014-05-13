@@ -1,6 +1,6 @@
 '''
-will hold our section resource
-Created on April 27, 2014
+will hold our section statistics resource
+Created on May 13, 2014
  
 @author: Omri Dagan
 @version: 1.0
@@ -12,34 +12,36 @@ Created on April 27, 2014
 #===============================================================================
 
 from ltg_backend_app.api.base import LtgResource
-from tastypie import fields
-from ltg_backend_app.models import Concept
+from ltg_backend_app.models import SectionStatistics
 from tastypie.authorization import Authorization
 from ltg_backend_app.api.authentication import LtgApiKeyAuthentication
-from tastypie.constants import ALL
+from tastypie.constants import ALL_WITH_RELATIONS
+from tastypie import fields
+from ltg_backend_app.api.section import SectionResource
 
 #===============================================================================
 # end imports
 #===============================================================================
 
 #===============================================================================
-# begin concept resource
+# begin section statistics resource
 #===============================================================================
 
-class ConceptResource(LtgResource):
+class SectionStatisticsResource(LtgResource):
     '''
-    resource for the concept model
+    resource for the section model
     '''
+    section = fields.ToOneField(SectionResource, attribute = 'section', full=True)
     
     class Meta(LtgResource.Meta):
-        queryset = Concept.objects.all()
+        queryset = SectionStatistics.objects.all()
         authentication = LtgApiKeyAuthentication()
         authorization = Authorization()
         allowed_methods = ['get']
         filtering = {
-               'title' : ALL,
+               'section' : ALL_WITH_RELATIONS,
            }
     
 #===============================================================================
-# end concept resource
+# end section statistics resource
 #===============================================================================

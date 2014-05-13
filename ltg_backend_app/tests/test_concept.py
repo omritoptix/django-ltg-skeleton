@@ -49,13 +49,10 @@ class ConceptTest(ResourceTestCase):
         concept_id = Concept.objects.first().id
         resp = self.api_client.get(uri='/api/v1/concept/%d/' % concept_id, format='json', data = auth_data)
         self.assertHttpOK(resp)
-        self.assertEqual(self.deserialize(resp)['statistics']['mean'],300)
-        self.assertEqual(self.deserialize(resp)['statistics']['std'],0)
         
         # get concepts list
         resp = self.api_client.get(uri='/api/v1/concept/', format='json', data = auth_data)
         self.assertHttpOK(resp)
-        self.assertEqual(self.deserialize(resp)['objects'][0]['statistics']['mean'],300)
         
     def test_post_concept(self):
         '''
