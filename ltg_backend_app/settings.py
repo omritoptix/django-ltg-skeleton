@@ -6,7 +6,10 @@ Created March 15, 2013
 @version: 1.0
 @copyright: LTG
 '''
-
+import djcelery
+# from celery.schedules import crontab
+from datetime import timedelta
+djcelery.setup_loader()
 import os
 
 DEBUG = os.environ.get('IS_DEBUG', 'TRUE') == 'TRUE'
@@ -220,6 +223,7 @@ INSTALLED_APPS += ('storages',)
 # INSTALLED_APPS = INSTALLED_APPS + ('debug_toolbar',)
 INSTALLED_APPS = INSTALLED_APPS + ('fixture_magic',)
 # INSTALLED_APPS = INSTALLED_APPS + ('django_facebook',)
+INSTALLED_APPS += ('djcelery', )
 
 #s3 storage
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
@@ -289,6 +293,27 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
+# celery settings
+
+# set our scheduler to django celery scheduler
+CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+# Broker settings.
+BROKER_URL = os.environ.get('BROKER_URL', None)
+# celery result backend
+CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend'
+# task schedules
+CELERYBEAT_SCHEDULE = {
+    # Executes every Monday morning at 7:30 A.M
+#     'add-every-monday-morning': {
+#         'task': 'tasks.add',
+#         'schedule': crontab(hour=7, minute=30, day_of_week=1),
+#         'args': (16, 16),
+#     },
+    'update-questions-statistics-every-180-seconds': {
+        'task': 'ltg_backend_app.tasks.update_questions_statistics',
+        'schedule': timedelta(seconds=180),
+    },
+}
 
  
 

@@ -28,6 +28,7 @@ from ltg_backend_app.api.attempt import AttemptResource
 from ltg_backend_app.api.user_concept_score import UserConceptScoreResource
 from ltg_backend_app.api.user_section_score import UserSectionScoreResource
 from ltg_backend_app.api.user_score import UserScoreResource
+from ltg_backend_app.api.question_statistics import QuestionStatisticsResource
 # from ltg_backend_app.api.api import *
 
 #===============================================================================
@@ -46,6 +47,7 @@ v1_api.register(AnonymousUserResource())
 v1_api.register(UserProfileResource())
 v1_api.register(AnonymousUserProfileResource())
 v1_api.register(QuestionResource())
+v1_api.register(QuestionStatisticsResource())
 v1_api.register(SectionResource())
 v1_api.register(ConceptResource())
 v1_api.register(AttemptResource())

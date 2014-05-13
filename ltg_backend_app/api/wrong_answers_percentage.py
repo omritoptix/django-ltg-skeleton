@@ -1,6 +1,6 @@
 '''
-will hold our question resource
-Created on April 22, 2014
+will hold our wrong answers percentage resource
+Created on May 13, 2014
  
 @author: Omri Dagan
 @version: 1.0
@@ -13,39 +13,29 @@ Created on April 22, 2014
 
 from ltg_backend_app.api.base import LtgResource
 from tastypie import fields
-from ltg_backend_app.models import Question
+from ltg_backend_app.models import WrongAnswersPercentage
 from ltg_backend_app.api.authentication import LtgApiKeyAuthentication
 from tastypie.authorization import Authorization
-from tastypie.constants import ALL, ALL_WITH_RELATIONS
 
 #===============================================================================
 # end imports
 #===============================================================================
 
 #===============================================================================
-# begin question resource
+# begin wrong answers percentage resource
 #===============================================================================
 
-class QuestionResource(LtgResource):
+class WrongAnswersPercentageResource(LtgResource):
     '''
-    resource for the question model
+    resource for the wrong answers percentage  model
     '''
-    
     class Meta(LtgResource.Meta):
-        queryset = Question.objects.all()
+        queryset = WrongAnswersPercentage.objects.all()
         authentication = LtgApiKeyAuthentication()
         authorization = Authorization()
-        allowed_methods = ['get']
-        filtering = {
-               'concepts' : ALL_WITH_RELATIONS,
-               'sections' : ALL_WITH_RELATIONS,
-               'index' : ALL,
-           }
-        ordering = ['index',]
+        allowed_methods = []
         
-    def dehydrate_answer(self, bundle):
-        return bundle.obj.get_answer_display()
     
 #===============================================================================
-# end question resource
+# end wrong answers percentage resource
 #===============================================================================
