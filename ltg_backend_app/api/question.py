@@ -16,6 +16,8 @@ from ltg_backend_app.models import Question
 from ltg_backend_app.api.authentication import LtgApiKeyAuthentication
 from tastypie.authorization import Authorization
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
+from tastypie import fields
+from ltg_backend_app.api.concept import ConceptResource
 
 #===============================================================================
 # end imports
@@ -29,6 +31,8 @@ class QuestionResource(LtgResource):
     '''
     resource for the question model
     '''
+    concepts = fields.ManyToManyField(ConceptResource,attribute='concepts')
+    sections = fields.ManyToManyField(ConceptResource,attribute='concepts')
     
     class Meta(LtgResource.Meta):
         queryset = Question.objects.all()
