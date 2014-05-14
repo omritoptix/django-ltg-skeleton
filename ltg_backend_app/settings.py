@@ -298,7 +298,7 @@ AUTHENTICATION_BACKENDS = (
 # set our scheduler to django celery scheduler
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 # Broker settings.
-BROKER_URL = os.environ.get('BROKER_URL', None)
+BROKER_URL = os.environ.get('CLOUDAMQP_URL', None)
 # celery result backend
 CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend'
 # If set to True there will be no asynchronous background processing, all tasks that are getting called via celery will be run synchronously 
