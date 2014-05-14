@@ -33,28 +33,37 @@ class UserProfileAdmin(admin.ModelAdmin):
     get_email.short_description = "Email"
     
 class QuestionAdmin(admin.ModelAdmin):
-    pass    
-
+    list_display = ('id','index','answer')
+        
 class AttemptAdmin(admin.ModelAdmin):
-    pass
-
+    list_display = ('id','user_profile', 'question', 'attempt', 'answer', 'duration')
+    
 class ConceptAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('id','title')
 
 class SectionAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('id','title')
 
-class QuestionSetAttemptAdmin(admin.ModelAdmin):
-    pass
+class QuestionStatisticsAdmin(admin.ModelAdmin):
+    list_display = ('id','question', 'attempt', 'mean_time','std_time','percentage_right','score', 'attempts_num')
 
-class ConceptScoreAdmin(admin.ModelAdmin):
-    pass
+class ConceptStatisticsAdmin(admin.ModelAdmin):
+    list_display = ('id','concept', 'mean_score', 'std_score')
 
-class SectionScoreAdmin(admin.ModelAdmin):
-    pass
+class SectionStatisticsAdmin(admin.ModelAdmin):
+    list_display = ('id','section', 'mean_score', 'std_score')
+
+class UserConceptScoreAdmin(admin.ModelAdmin):
+    list_display = ('id','user_profile', 'concept', 'score', 'date')
+
+class UserSectionScoreAdmin(admin.ModelAdmin):
+    list_display = ('id','user_profile', 'section', 'score', 'date')
+
+class UserScoreAdmin(admin.ModelAdmin):
+    list_display = ('id','user_profile', 'score', 'date')
 
 class ScoreTableAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('id','percentile', 'score')
 
 #===============================================================================
 # end admin models
@@ -70,6 +79,12 @@ admin.site.register(Attempt, AttemptAdmin)
 admin.site.register(Concept, ConceptAdmin)
 admin.site.register(Section, SectionAdmin)
 admin.site.register(ScoreTable, ScoreTableAdmin)
+admin.site.register(QuestionStatistics, QuestionStatisticsAdmin)
+admin.site.register(ConceptStatistics, ConceptStatisticsAdmin)
+admin.site.register(SectionStatistics, SectionStatisticsAdmin)
+admin.site.register(UserScore, UserScoreAdmin)
+admin.site.register(UserSectionScore, UserSectionScoreAdmin)
+admin.site.register(UserConceptScore, UserConceptScoreAdmin)
 
 #===============================================================================
 # end admin site registration
