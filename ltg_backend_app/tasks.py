@@ -47,6 +47,8 @@ def update_questions_statistics():
         while (is_attempt_valid and attempt_num <= MAX_ALGORITHM_ATTEMPTS):
             # if attempt exists for the question, iterate over all attempts for the question and calc the time statistics
             if question_attempt_qs.filter(attempt = attempt_num).exists():
+                # get the attempt num of this question,attempt pair
+                attempts_num = question_attempt_qs.filter(attempt = attempt_num).count()
                 # update the question attempt query set with the current attempt and filter upon duration time
                 question_specific_attempt_qs = question_attempt_qs.filter(attempt = attempt_num,duration__gt = MIN_ATTEMPT_DURATION) 
                 # get time statistics 
@@ -63,11 +65,12 @@ def update_questions_statistics():
                     question_statistics.std_time = std_time
                     question_statistics.percentage_right = percentage_right
                     question_statistics.score = score
+                    question_statistics.attempts_num = attempts_num
                     question_statistics.save()
                     
                 except QuestionStatistics.DoesNotExist:
                     # if there isn't an object, create it.
-                    question_statistics = QuestionStatistics.objects.create(question_id = question.id, attempt = attempt_num, mean_time = mean_time, std_time = std_time, percentage_right = percentage_right, score = score)
+                    question_statistics = QuestionStatistics.objects.create(question_id = question.id, attempt = attempt_num, mean_time = mean_time, std_time = std_time, percentage_right = percentage_right, score = score, attempts_num = attempts_num)
                     # calc the percentage wrong and update the relevant question
                     calc_percentage_wrong(question_specific_attempt_qs,question,question_statistics)
                     

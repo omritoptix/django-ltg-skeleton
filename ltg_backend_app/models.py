@@ -122,7 +122,7 @@ class UserProfile(LtgModel):
     
     def __unicode__(self):
         if (self.user):
-            return "profile with username:%s and email:%s" % (self.user.username, self.user.email)
+            return "username:%s , email:%s" % (self.user.username, self.user.email)
     
     def owner(self):
         '''
@@ -159,17 +159,12 @@ class UserConceptScore(Score):
     '''
     concept = models.ForeignKey(Concept)
     
-    def __unicode__(self):
-        return "concept:%s with score:%d for user:%s" % (self.concept.title, self.score, self.user_profile.user.email)
     
 class UserSectionScore(Score):
     '''
     will hold user section scores history for user
     '''
     section = models.ForeignKey(Section)
-    
-    def __unicode__(self):
-        return "section:%s with score:%d for user:%s" % (self.section.title, self.score, self.user_profile.user.email)
    
 
 class Tutor(object):
@@ -219,9 +214,6 @@ class Attempt(LtgModel):
     answer = models.PositiveSmallIntegerField(choices=ANSWER)
     duration = TimedeltaField()
     
-    def __unicode__(self):
-        if (self.question and self.user_profile):
-            return "Attempt no.%d, on question no.%d, for user:%s" % (self.attempt, self.question.index, self.user_profile.user.email)
 
     class Meta(LtgModel.Meta):
         unique_together = (("user_profile", "question","attempt"),)
@@ -234,9 +226,6 @@ class ScoreTable(models.Model):
     '''
     percentile = models.DecimalField(max_digits=5,decimal_places=2)
     score = models.PositiveSmallIntegerField()
-    
-    def __unicode__(self):
-        return "percentile:%.2f , score:%d" % (self.percentile,self.score)
         
         
 class QuestionStatistics(LtgModel):
@@ -246,6 +235,7 @@ class QuestionStatistics(LtgModel):
     '''
     question = models.ForeignKey(Question)
     attempt = models.PositiveSmallIntegerField()
+    attempts_num = models.IntegerField(default=0)
     mean_time = TimedeltaField()
     std_time = TimedeltaField()
     percentage_right = models.DecimalField(max_digits=5, decimal_places=2)
@@ -254,6 +244,7 @@ class QuestionStatistics(LtgModel):
     class Meta(LtgModel.Meta):
         unique_together = (("question","attempt"),)
         index_together = [["question", "attempt"],]
+
 
 class WrongAnswersPercentage(LtgModel):
     '''
@@ -271,6 +262,7 @@ class ConceptStatistics(LtgModel):
     mean_score = models.PositiveSmallIntegerField()
     std_score = models.PositiveSmallIntegerField()
     
+    
 class SectionStatistics(LtgModel):
     '''
     will hold each section statistics
@@ -278,6 +270,7 @@ class SectionStatistics(LtgModel):
     section = models.ForeignKey(Section)
     mean_score = models.PositiveSmallIntegerField()
     std_score = models.PositiveSmallIntegerField()
+    
     
 #===============================================================================
 # end tables - models

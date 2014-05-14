@@ -45,6 +45,7 @@ class QuestionStatisticsResource(LtgResource):
                'std_time' : ALL,
                'percentage' : ALL,
                'score' : ALL,
+               'attempts_num':ALL,
            }
         ordering = ['question','attempt',]
         
