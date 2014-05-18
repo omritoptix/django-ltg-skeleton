@@ -224,6 +224,7 @@ INSTALLED_APPS += ('storages',)
 INSTALLED_APPS = INSTALLED_APPS + ('fixture_magic',)
 # INSTALLED_APPS = INSTALLED_APPS + ('django_facebook',)
 INSTALLED_APPS += ('djcelery', )
+INSTALLED_APPS += ('social.apps.django_app.default', )
 
 #s3 storage
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
@@ -289,6 +290,8 @@ INTERNAL_IPS = (
 )
 
 AUTHENTICATION_BACKENDS = (
+    'social.backends.facebook.FacebookOAuth2',
+    'social.backends.twitter.TwitterOAuth',
     'ltg_backend_app.auth_backends.EmailAuthBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
@@ -304,6 +307,17 @@ CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend'
 # If set to True there will be no asynchronous background processing, all tasks that are getting called via celery will be run synchronously 
 # (so no need to start any additional celery workers - very useful for debugging).
 CELERY_ALWAYS_EAGER = DEBUG
+
+# python social auth settings
+LOGIN_REDIRECT_URL = '/'
+
+# facebook auth credentials and extra permissions
+SOCIAL_AUTH_FACEBOOK_KEY = os.environ.get('FACEBOOK_KEY','')
+SOCIAL_AUTH_FACEBOOK_SECRET = os.environ.get('FACEBOOK_SECRET','')
+
+# twitter auth credentials
+SOCIAL_AUTH_TWITTER_KEY = os.environ.get('TWITTER_KEY','')
+SOCIAL_AUTH_TWITTER_SECRET = os.environ.get('TWITTER_SECRET','')
 
 
 
