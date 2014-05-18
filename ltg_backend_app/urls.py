@@ -31,7 +31,6 @@ from ltg_backend_app.api.user_score import UserScoreResource
 from ltg_backend_app.api.question_statistics import QuestionStatisticsResource
 from ltg_backend_app.api.section_statistics import SectionStatisticsResource
 from ltg_backend_app.api.concept_statistics import ConceptStatisticsResource
-from ltg_backend_app.api.social_auth import SocialSignUpResource
 # from ltg_backend_app.api.api import *
 
 #===============================================================================
@@ -59,7 +58,7 @@ v1_api.register(UserSectionScoreResource())
 v1_api.register(UserScoreResource())
 v1_api.register(SectionStatisticsResource())
 v1_api.register(ConceptStatisticsResource())
-v1_api.register(SocialSignUpResource())
+
 
 #register urls
 urlpatterns = patterns('',
