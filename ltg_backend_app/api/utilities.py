@@ -36,6 +36,8 @@ from ltg_backend_app import settings
 from django.contrib.auth.models import User
 import uuid
 from ltg_backend_app.forms import ResetPasswordForm
+from social.apps.django_app import load_strategy
+from tastypie.exceptions import BadRequest
 
 #===============================================================================
 # end imports
@@ -146,6 +148,18 @@ class UtilitiesResource(LtgResource):
         '''       
         # get params
         post = simplejson.loads(request.body)
+        
+        # check if an already registered non-anonymous user tyring to click "skip register"
+        try:
+            user_profile = UserProfile.objects.get(uuid = post.get('uuid'),is_anonymous=False)
+            return self.create_response(request, {
+                 'success': False,
+                 'message': "This device is already connected with a registered or social account.Please sign in.",
+                 },HttpUnauthorized)
+        except:
+            pass
+        
+        # check if the anonymous user is new or existing user
         try:
             # check if user is already registered
             user_profile = UserProfile.objects.get(uuid = post.get('uuid'),is_anonymous=True)
@@ -153,7 +167,7 @@ class UtilitiesResource(LtgResource):
             user_profile_uri = UserProfileResource().get_resource_uri(user_profile)  
             return self.create_response(request, {
                  'success': True,
-                 'message': "User created successfully",
+                 'message': "User skipped register successfully",
                  'user_profile':user_profile_uri,
                  'username':user_profile.user.username,
                  'api_key':user_profile.user.api_key.key,
@@ -408,6 +422,23 @@ class UtilitiesResource(LtgResource):
                 'success': False,
                 'message': 'mail server not defined',
                 }, HttpApplicationError )
+            
+    def social_auth(self, request=None, **kwargs):
+        # TODO - add support for twitter and weibo
+        # get social auth details and credentails
+        post = simplejson.loads(request.body)
+        provider = post.get('provider')
+        access_token = post.get('access_token')
+        
+        # try to authenticate the user (what if there is no email??)
+        strategy = load_strategy(backend=provider)
+        # get/create the user 
+        user = strategy.backend.do_auth(access_token)
+        
+        if user and user.is_active:
+            pass
+        else:
+            raise BadRequest("Error authenticating user with this provider")
             
 #===============================================================================
 # end utilities resource
