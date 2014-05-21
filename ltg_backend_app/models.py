@@ -160,7 +160,7 @@ class LtgUserManager(BaseUserManager):
 class LtgUser(AbstractBaseUser,PermissionsMixin):
     
     email = models.EmailField(verbose_name='email address',max_length=255,unique=True,)
-    username = models.CharField(max_length=30, unique=True, default=_createHash)
+    username = models.CharField(max_length=30, default=_createHash)
     uuid = models.CharField(max_length=200,blank=True)
     first_name = models.CharField(max_length=30, blank=True)
     last_name = models.CharField(max_length=30, blank=True)

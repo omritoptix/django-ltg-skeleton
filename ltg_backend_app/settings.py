@@ -311,6 +311,8 @@ CELERY_ALWAYS_EAGER = DEBUG
 # python social auth settings
 LOGIN_REDIRECT_URL = '/'
 
+USER_MODEL = AUTH_USER_MODEL
+
 # facebook auth credentials and extra permissions
 SOCIAL_AUTH_FACEBOOK_KEY = os.environ.get('FACEBOOK_KEY','')
 SOCIAL_AUTH_FACEBOOK_SECRET = os.environ.get('FACEBOOK_SECRET','')
@@ -318,6 +320,18 @@ SOCIAL_AUTH_FACEBOOK_SECRET = os.environ.get('FACEBOOK_SECRET','')
 # twitter auth credentials
 SOCIAL_AUTH_TWITTER_KEY = os.environ.get('TWITTER_KEY','')
 SOCIAL_AUTH_TWITTER_SECRET = os.environ.get('TWITTER_SECRET','')
+
+SOCIAL_AUTH_PIPELINE = (
+    'social.pipeline.social_auth.social_details',
+    'social.pipeline.social_auth.social_uid',
+    'social.pipeline.social_auth.auth_allowed',
+    'social.pipeline.social_auth.social_user',
+    'social.pipeline.user.get_username',
+    'ltg_backend_app.third_party_extensions.python_social_auth_extensions.create_user',
+    'social.pipeline.social_auth.associate_user',
+    'social.pipeline.social_auth.load_extra_data',
+    'social.pipeline.user.user_details'
+)
 
 
 
