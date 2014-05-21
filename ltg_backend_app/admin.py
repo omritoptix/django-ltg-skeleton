@@ -12,6 +12,9 @@ Created on November 7, 2013
 #===============================================================================
 from django.contrib import admin
 from ltg_backend_app.models import *
+from django.contrib.auth.admin import UserAdmin
+from ltg_backend_app.forms import UserChangeForm, UserCreationForm
+
 #===============================================================================
 # end imports
 #===============================================================================
@@ -20,23 +23,12 @@ from ltg_backend_app.models import *
 # begin admin models
 #===============================================================================
 
-class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ('id','uuid','full_name','get_email')
-    search_fields=['user__email','user__first_name','user__last_name']
-    
-    def full_name(self,user_profile):
-        return ("%s %s" % (user_profile.user.last_name, user_profile.user.first_name))
-    full_name.short_description = "Full Name"
-    
-    def get_email(self, user_profile):
-        return user_profile.user.email
-    get_email.short_description = "Email"
     
 class QuestionAdmin(admin.ModelAdmin):
     list_display = ('id','index','answer')
         
 class AttemptAdmin(admin.ModelAdmin):
-    list_display = ('id','user_profile', 'question', 'attempt', 'answer', 'duration')
+    list_display = ('id','user', 'question', 'attempt', 'answer', 'duration')
     
 class ConceptAdmin(admin.ModelAdmin):
     list_display = ('id','title')
@@ -54,16 +46,41 @@ class SectionStatisticsAdmin(admin.ModelAdmin):
     list_display = ('id','section', 'mean_score', 'std_score')
 
 class UserConceptScoreAdmin(admin.ModelAdmin):
-    list_display = ('id','user_profile', 'concept', 'score', 'date')
+    list_display = ('id','user', 'concept', 'score', 'date')
 
 class UserSectionScoreAdmin(admin.ModelAdmin):
-    list_display = ('id','user_profile', 'section', 'score', 'date')
+    list_display = ('id','user', 'section', 'score', 'date')
 
 class UserScoreAdmin(admin.ModelAdmin):
-    list_display = ('id','user_profile', 'score', 'date')
+    list_display = ('id','user', 'score', 'date')
 
 class ScoreTableAdmin(admin.ModelAdmin):
     list_display = ('id','percentile', 'score')
+    
+class LtgUserAdmin(UserAdmin):
+    # The forms to add and change user instances
+    form = UserChangeForm
+    add_form = UserCreationForm
+
+    list_display = ('email','username','first_name', 'last_name', 'is_staff')
+    list_filter = ('is_staff', 'is_superuser', 'is_active', 'groups')
+    fieldsets = (
+        (None, {'fields': ('email','username','password')}),
+        (('Personal info'), {'fields': ('first_name', 'last_name',)}),
+        (('Permissions'), {'fields': ('is_active', 'is_staff', 'is_superuser',
+                                       'groups', 'user_permissions')}),
+        (('Important dates'), {'fields': ('last_login', 'date_joined')}),
+    )
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('email', 'password1', 'password2')}
+        ),
+    )
+    search_fields = ('email','username')
+    ordering = ('email',)
+    filter_horizontal = ()
+
 
 #===============================================================================
 # end admin models
@@ -72,8 +89,7 @@ class ScoreTableAdmin(admin.ModelAdmin):
 #===============================================================================
 # begin admin site regitration
 #===============================================================================
-
-admin.site.register(UserProfile, UserProfileAdmin)
+admin.site.register(LtgUser, LtgUserAdmin)
 admin.site.register(Question, QuestionAdmin)
 admin.site.register(Attempt, AttemptAdmin)
 admin.site.register(Concept, ConceptAdmin)

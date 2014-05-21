@@ -15,14 +15,14 @@ from ltg_backend_app.api.base import LtgResource
 from tastypie import fields, http
 from ltg_backend_app.models import Attempt, Question
 from ltg_backend_app.api.question import QuestionResource
-from ltg_backend_app.api.user_profile import UserProfileResource
 from tastypie.exceptions import ImmediateHttpResponse
 from django.db.models.aggregates import Max
-from ltg_backend_app.api.authentication import LtgApiKeyAuthentication
 from tastypie.constants import ALL_WITH_RELATIONS, ALL
 from ltg_backend_app.forms import AttemptForm
 from ltg_backend_app.third_party_extensions.tastypie_extensions import ModelFormValidation
 from ltg_backend_app.api.authorization import UserObjectsOnlyAuthorization
+from tastypie.authentication import ApiKeyAuthentication
+from ltg_backend_app.api.user import UserResource
 
 #===============================================================================
 # end imports
@@ -37,11 +37,11 @@ class AttemptResource(LtgResource):
     resource for the attempt model
     '''
     question = fields.ToOneField(QuestionResource,attribute='question')
-    user_profile = fields.ToOneField(UserProfileResource,attribute='user_profile')
+    user = fields.ToOneField(UserResource,attribute='user')
     
     class Meta(LtgResource.Meta):
         queryset = Attempt.objects.all()
-        authentication = LtgApiKeyAuthentication()
+        authentication = ApiKeyAuthentication()
         authorization = UserObjectsOnlyAuthorization()
         allowed_methods = ['post','get','patch']
         detail_allowed_methods = ['put','patch']
@@ -54,8 +54,8 @@ class AttemptResource(LtgResource):
         ordering = ['question','attempt',]
         
     def hydrate_attempt(self, bundle):
-        # get the attempt's user profile
-        user_profile = bundle.request.user.profile
+        # get the attempt's user
+        user = bundle.request.user
         # get the attempt's question
         try:
             question = QuestionResource().get_via_uri(bundle.data['question'])
@@ -63,7 +63,7 @@ class AttemptResource(LtgResource):
             raise ImmediateHttpResponse(response=http.HttpNotFound("question does not exist"))
         
         # find the max attempt made for this question by this user
-        max_attempt = Attempt.objects.filter(question_id = question.id,user_profile_id = user_profile.id).aggregate(Max('attempt'))
+        max_attempt = Attempt.objects.filter(question_id = question.id,user_id = user.id).aggregate(Max('attempt'))
         if (max_attempt['attempt__max'] is None):
             bundle.data['attempt'] = 1
         else:

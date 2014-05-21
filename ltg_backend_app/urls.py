@@ -18,9 +18,6 @@ import ltg_backend_app.views
 from ltg_backend_app.api.utilities import UtilitiesResource
 from ltg_backend_app.api.tutor import TutorResource
 from ltg_backend_app.api.user import UserResource
-from ltg_backend_app.api.anonymous_user import AnonymousUserResource
-from ltg_backend_app.api.user_profile import UserProfileResource
-from ltg_backend_app.api.anonymous_user_profile import AnonymousUserProfileResource
 from ltg_backend_app.api.question import QuestionResource
 from ltg_backend_app.api.section import SectionResource
 from ltg_backend_app.api.concept import ConceptResource
@@ -45,9 +42,6 @@ v1_api = Api(api_name='v1')
 v1_api.register(UtilitiesResource())
 v1_api.register(TutorResource())
 v1_api.register(UserResource())
-v1_api.register(AnonymousUserResource())
-v1_api.register(UserProfileResource())
-v1_api.register(AnonymousUserProfileResource())
 v1_api.register(QuestionResource())
 v1_api.register(QuestionStatisticsResource())
 v1_api.register(SectionResource())

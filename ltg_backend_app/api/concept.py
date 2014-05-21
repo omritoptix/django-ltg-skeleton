@@ -12,11 +12,10 @@ Created on April 27, 2014
 #===============================================================================
 
 from ltg_backend_app.api.base import LtgResource
-from tastypie import fields
 from ltg_backend_app.models import Concept
 from tastypie.authorization import Authorization
-from ltg_backend_app.api.authentication import LtgApiKeyAuthentication
 from tastypie.constants import ALL
+from tastypie.authentication import ApiKeyAuthentication
 
 #===============================================================================
 # end imports
@@ -33,7 +32,7 @@ class ConceptResource(LtgResource):
     
     class Meta(LtgResource.Meta):
         queryset = Concept.objects.all()
-        authentication = LtgApiKeyAuthentication()
+        authentication = ApiKeyAuthentication()
         authorization = Authorization()
         allowed_methods = ['get']
         filtering = {

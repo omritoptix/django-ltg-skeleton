@@ -13,11 +13,11 @@ Created on April 22, 2014
 
 from ltg_backend_app.api.base import LtgResource
 from ltg_backend_app.models import Question
-from ltg_backend_app.api.authentication import LtgApiKeyAuthentication
 from tastypie.authorization import Authorization
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
 from tastypie import fields
 from ltg_backend_app.api.concept import ConceptResource
+from tastypie.authentication import ApiKeyAuthentication
 
 #===============================================================================
 # end imports
@@ -36,7 +36,7 @@ class QuestionResource(LtgResource):
     
     class Meta(LtgResource.Meta):
         queryset = Question.objects.all()
-        authentication = LtgApiKeyAuthentication()
+        authentication = ApiKeyAuthentication()
         authorization = Authorization()
         allowed_methods = ['get']
         filtering = {

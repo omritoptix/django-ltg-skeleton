@@ -13,6 +13,8 @@ Created on April 16, 2014
 
 from django.contrib.auth.models import User
 from django.contrib.auth.backends import ModelBackend
+from ltg_backend_app.models import LtgUser
+from django.contrib.auth import get_user_model
 
 #===============================================================================
 # end imports
@@ -30,10 +32,11 @@ class EmailAuthBackend(ModelBackend):
     a username/password pair.
     """
     
-    def authenticate(self, username=None, password=None):
-        """ Authenticate a user based on email address as the user name. """
+    def authenticate(self, email=None, password=None):
+        """ Authenticate a user based on email address """
         try:
-            user = User.objects.get(email=username)
+            User = get_user_model()
+            user = User.objects.get(email=email)
             if user.check_password(password):
                 return user
         except User.DoesNotExist:

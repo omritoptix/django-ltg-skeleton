@@ -14,6 +14,7 @@ Created on May 12, 2014
 from ltg_backend_app.models import Section, SectionStatistics
 from django.contrib.auth.models import User
 from tastypie.test import ResourceTestCase
+from django.contrib.auth import get_user_model
 
 #===============================================================================
 # end imports
@@ -43,8 +44,9 @@ class SectionStatisticsTest(ResourceTestCase):
         2. get a list of section statistics
         '''
         # init authentication header
+        User = get_user_model()
         user = User.objects.first()
-        authentication_header = 'ApiKey '+user.username+':'+user.api_key.key
+        authentication_header = 'ApiKey '+user.email+':'+user.api_key.key
         # get a single question 
         ss_uri = '/api/v1/sectionstatistics/%d/' % (SectionStatistics.objects.first().id)
         resp = self.api_client.get(uri=ss_uri, format='json', authentication = authentication_header)

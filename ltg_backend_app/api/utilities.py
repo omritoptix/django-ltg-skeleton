@@ -12,25 +12,20 @@ Created on April 22, 2014
 #===============================================================================
 
 
-from tastypie.authentication import Authentication
+from tastypie.authentication import Authentication, ApiKeyAuthentication
 from django.conf.urls import url
 from tastypie.utils.urls import trailing_slash
 from django.utils import simplejson
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import login, get_user_model, authenticate
 from tastypie.http import HttpForbidden, HttpUnauthorized, HttpCreated,\
     HttpApplicationError, HttpAccepted, HttpNotFound, HttpBadRequest
-from ltg_backend_app.models import UserProfile
 from ltg_backend_app.api.user import UserResource
-from ltg_backend_app.api.authentication import LtgApiKeyAuthentication
 from django.template.loader import get_template
 from django.template.context import Context
 from django.utils.html import strip_tags
 from django.core.mail.message import EmailMultiAlternatives
 from smtplib import SMTPSenderRefused
 from tastypie.models import ApiKey
-from ltg_backend_app.api.user_profile import UserProfileResource
-from ltg_backend_app.api.anonymous_user import AnonymousUserResource
-from ltg_backend_app.api.anonymous_user_profile import AnonymousUserProfileResource
 from ltg_backend_app.api.base import LtgResource, is_send_grid
 from ltg_backend_app import settings
 from django.contrib.auth.models import User
@@ -102,24 +97,24 @@ class UtilitiesResource(LtgResource):
         post = simplejson.loads(request.body)
         password = post.get('password','')
         email = post.get('email','')
-        
+         
         # try to login the user using it's mail using our custom backend 'authenticate'
-        user = authenticate(username=email, password=password)
+        user = authenticate(email=email, password=password)
         if (user):
-            if user.is_active and not user.profile.is_anonymous:
+            if user.is_active:
                 login(request, user)
                 # get the user api key
                 api_key, created = ApiKey.objects.get_or_create(user=user)
                 if (created):
                     api_key.save()
-                # build user profile uri
-                user_profile_uri = UserProfileResource().get_resource_uri(user.profile)                    
+                # build user uri
+                user_uri = UserResource().get_resource_uri(user)                    
                 return self.create_response(request, {
                     'success': True,
                     'message':'Successfully logged in!',
-                    'user_profile': user_profile_uri,
+                    'user': user_uri,
                     'username':user.username,
-                    'api_key':api_key.key
+                    'api_key':user.api_key.key
                 })
             else:
                 return self.create_response(request, {
@@ -131,104 +126,7 @@ class UtilitiesResource(LtgResource):
                 'success': False,
                 'reason': 'Invalid email or password',
                 }, HttpUnauthorized )
-            
-            
-    def skip_register(self, request=None, **kwargs):
-        '''
-        will check if the user which skipped registration is already registered
-        by it's uuid. if not , it will register him.
-        @return success: will return a 201 code with the following object.
-        {
-            success: <Boolean>,
-            message: <String>,
-            user_profile:<String>,
-            username:<String>,
-            api_key:<String>
-        } 
-        '''       
-        # get params
-        post = simplejson.loads(request.body)
-        
-        # check if an already registered non-anonymous user tyring to click "skip register"
-        try:
-            user_profile = UserProfile.objects.get(uuid = post.get('uuid'),is_anonymous=False)
-            return self.create_response(request, {
-                 'success': False,
-                 'message': "This device is already connected with a registered or social account.Please sign in.",
-                 },HttpUnauthorized)
-        except:
-            pass
-        
-        # check if the anonymous user is new or existing user
-        try:
-            # check if user is already registered
-            user_profile = UserProfile.objects.get(uuid = post.get('uuid'),is_anonymous=True)
-            # build user profile uri
-            user_profile_uri = UserProfileResource().get_resource_uri(user_profile)  
-            return self.create_response(request, {
-                 'success': True,
-                 'message': "User skipped register successfully",
-                 'user_profile':user_profile_uri,
-                 'username':user_profile.user.username,
-                 'api_key':user_profile.user.api_key.key,
-                 },)  
-            
-        except UserProfile.DoesNotExist:
-            # register the user
-            return self.register(request,user_resource = AnonymousUserResource(), user_profile_resource = AnonymousUserProfileResource()) 
                  
-
-    def register(self, request=None, user_resource = UserResource(), user_profile_resource = UserProfileResource(), **kwargs):
-        '''
-        will try and register the user.
-        if the user was previously registered as anonymous user, will update it's user and user profile details.
-        @param user_resource : the resource which we will use to create the user (either UserResource or AnonymnousUserResource)
-        @param user_profile_resource : the resource which we will use to create the user profile (either UserProfileResource or AnonymnousProfileUserResource) 
-        @return success: will return a 201 code with the following object.
-        {
-            success: <Boolean>,
-            message: <String>,
-            user_profile:<String>,
-            username:<String>,
-            api_key:<String>
-        } 
-        '''
-        new_user = True
-        # get params
-        post = simplejson.loads(request.body)      
-        # if uuid exist - update the new user flag
-        try:
-            existing_user = UserProfile.objects.get(uuid=post.get('uuid',None)).user
-            new_user = False
-        except UserProfile.DoesNotExist:
-            pass
-        # create/update user from user resource
-        if (new_user):
-            user = user_resource.obj_create(user_resource.build_bundle(data=post))
-        else:
-            user = user_resource.obj_update(user_resource.build_bundle(obj=existing_user,data=post))
-        try:           
-            # update the post dict with the user we've just created/updated
-            post['user'] = user_resource.get_resource_uri(user)
-            # create/update user profile from user resource
-            if (new_user):
-                user_profile = user_profile_resource.obj_create(user_profile_resource.build_bundle(data=post))
-            else:
-                user_profile = user_profile_resource.obj_update(user_profile_resource.build_bundle(obj=existing_user.profile,data=post))
-            
-        except Exception as e:
-            user.obj.delete()
-            raise e
-                    
-        # build user profile uri
-        user_profile_uri = UserProfileResource().get_resource_uri(user_profile)
-        return self.create_response(request, {
-                     'success': True,
-                     'message': "User created successfully",
-                     'user_profile' : user_profile_uri,
-                     'username':user.obj.username,
-                     'api_key':user.obj.api_key.key,
-                     }, HttpCreated)            
         
     def forgot_password(self, request=None, **kwargs):
         '''
@@ -249,6 +147,7 @@ class UtilitiesResource(LtgResource):
             # make sure the email is an email of user in our system
             user = None
             try:
+                User = get_user_model()
                 user = User.objects.get(email=email, is_active = True)
             except User.DoesNotExist:
                 return self.create_response(request, {
@@ -308,7 +207,7 @@ class UtilitiesResource(LtgResource):
         password = post.get('password')
         
         #authenticate the user
-        LtgApiKeyAuthentication().is_authenticated(request)
+        ApiKeyAuthentication().is_authenticated(request)
 
         # if user is anonymous reply with unauthorized        
         if (request.user.is_anonymous()):
@@ -385,7 +284,7 @@ class UtilitiesResource(LtgResource):
         subject = post.get('subject', "No Subject Specified")
         
         #authenticate the user
-        LtgApiKeyAuthentication().is_authenticated(request)
+        ApiKeyAuthentication().is_authenticated(request)
             
         # if user is not anonymous set 'from email' it with it's mail
         if (not request.user.is_anonymous() and request.user.email):
@@ -422,23 +321,6 @@ class UtilitiesResource(LtgResource):
                 'success': False,
                 'message': 'mail server not defined',
                 }, HttpApplicationError )
-            
-    def social_auth(self, request=None, **kwargs):
-        # TODO - add support for twitter and weibo
-        # get social auth details and credentails
-        post = simplejson.loads(request.body)
-        provider = post.get('provider')
-        access_token = post.get('access_token')
-        
-        # try to authenticate the user (what if there is no email??)
-        strategy = load_strategy(backend=provider)
-        # get/create the user 
-        user = strategy.backend.do_auth(access_token)
-        
-        if user and user.is_active:
-            pass
-        else:
-            raise BadRequest("Error authenticating user with this provider")
             
 #===============================================================================
 # end utilities resource

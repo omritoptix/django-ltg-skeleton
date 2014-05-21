@@ -14,6 +14,7 @@ Created on April 22, 2014
 from tastypie.test import ResourceTestCase
 from ltg_backend_app.models import Question , ScoreTable
 from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 
 #===============================================================================
 # end imports
@@ -33,8 +34,9 @@ class QuestionTest(ResourceTestCase):
         1. get a single question
         2. get a list of questions 
         '''
+        User = get_user_model()
         user = User.objects.first()
-        auth_data = {'username':user.username,'api_key':user.api_key.key}
+        auth_data = {'username':user.email,'api_key':user.api_key.key}
         question_uri = '/api/v1/question/%d/' % (Question.objects.first().id)
         resp = self.api_client.get(uri=question_uri, format='json', data = auth_data)
         self.assertHttpOK(resp)

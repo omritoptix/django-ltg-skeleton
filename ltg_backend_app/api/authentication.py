@@ -12,7 +12,6 @@ Created on April 22, 2014
 #===============================================================================
 
 from tastypie.authentication import ApiKeyAuthentication
-import json
 
 #===============================================================================
 # end imports
@@ -22,17 +21,7 @@ import json
 # begin authentication
 #===============================================================================
 
-class LtgApiKeyAuthentication(ApiKeyAuthentication):
-    def extract_credentials(self, request):
-        username, api_key = super(LtgApiKeyAuthentication, self).extract_credentials(request)
-        if username == None and api_key == None and (request.method == 'POST' or request.method == 'PUT'):
-            post = json.loads(request.body)
-            username = post.get('username')
-            api_key = post.get('api_key')
-        return username, api_key
-            
-
-class LtgReadForFreeAuthentication(LtgApiKeyAuthentication):
+class LtgReadForFreeAuthentication(ApiKeyAuthentication):
     
     def is_authenticated(self, request, **kwargs):
         '''

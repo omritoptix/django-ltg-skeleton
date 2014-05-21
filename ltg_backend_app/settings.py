@@ -235,8 +235,9 @@ STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 S3_URL = 'http://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
 STATIC_URL = S3_URL
 
-#tell django about the user profile
+#tell django about the user profile - deprecated in django 1.5
 # AUTH_PROFILE_MODULE = "ticketz_backend_app.UserProfile"
+AUTH_USER_MODEL = 'ltg_backend_app.LtgUser'
 
 #for send grid
 try:
@@ -293,7 +294,6 @@ AUTHENTICATION_BACKENDS = (
     'social.backends.facebook.FacebookOAuth2',
     'social.backends.twitter.TwitterOAuth',
     'ltg_backend_app.auth_backends.EmailAuthBackend',
-    'django.contrib.auth.backends.ModelBackend',
 )
 
 # celery settings. task schedules can be defined via the admin interface
