@@ -47,7 +47,7 @@ class AttemptResource(LtgResource):
         detail_allowed_methods = ['put','patch']
         validation = ModelFormValidation(form_class=AttemptForm)
         filtering = {
-            'user_profile' : ALL_WITH_RELATIONS,
+            'user' : ALL_WITH_RELATIONS,
             'question' : ALL_WITH_RELATIONS,
             'attempt' : ALL,
         }
