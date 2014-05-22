@@ -48,7 +48,6 @@ class UserConceptScoreResource(UserScoreResource):
         authorization = UserObjectsOnlyAuthorization()
         queryset = UserConceptScore.objects.all()
         filtering = {
-               'user' : ALL_WITH_RELATIONS,
                'concept' : ALL_WITH_RELATIONS,
                'date' : ALL,
            }

@@ -44,7 +44,6 @@ class UserScoreResource(LtgResource):
         authorization = UserObjectsOnlyAuthorization()
         queryset = UserScore.objects.all()      
         filtering = {
-               'user' : ALL_WITH_RELATIONS,
                'date' : ALL,
            }
         ordering = ['date',]

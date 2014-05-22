@@ -48,7 +48,6 @@ class UserSectionScoreResource(UserScoreResource):
         authorization = UserObjectsOnlyAuthorization()
         queryset = UserSectionScore.objects.all()
         filtering = {
-               'user' : ALL_WITH_RELATIONS,
                'section' : ALL_WITH_RELATIONS,
                'date' : ALL,
            }
