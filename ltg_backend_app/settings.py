@@ -6,6 +6,7 @@ Created March 15, 2013
 @version: 1.0
 @copyright: LTG
 '''
+
 import djcelery
 # from celery.schedules import crontab
 from datetime import timedelta
@@ -237,6 +238,7 @@ STATIC_URL = S3_URL
 
 #tell django about the user profile - deprecated in django 1.5
 # AUTH_PROFILE_MODULE = "ticketz_backend_app.UserProfile"
+
 AUTH_USER_MODEL = 'ltg_backend_app.LtgUser'
 
 #for send grid
@@ -249,16 +251,8 @@ try:
 except:
     pass
 
-#for facebook auth
-# FACEBOOK_APP_SECRET = os.environ.get('FACEBOOK_APP_SECRET', '')
-# FACEBOOK_APP_ID = os.environ.get('FACEBOOK_APP_ID', '')
-
-#for twitter auth
-# TWITTER_KEY = os.environ.get('TWITTER_KEY', '')
-# TWITTER_SECRET = os.environ.get('TWITTER_SECRET', '')
-
 #hubspot api settings
-HUBSPOT_API_KEY = os.environ.get('HUBSPOT_API_KEY','12ac2329-070b-483a-a79e-61f9fbf544be')
+HUBSPOT_API_KEY = os.environ.get('HUBSPOT_API_KEY','')
 HUBSPOT_LIST_ID = os.environ.get('HUBSPOT_LIST_ID','59')
 
 
@@ -293,7 +287,8 @@ INTERNAL_IPS = (
 AUTHENTICATION_BACKENDS = (
     'social.backends.facebook.FacebookOAuth2',
     'social.backends.twitter.TwitterOAuth',
-    'ltg_backend_app.auth_backends.EmailAuthBackend',
+    'social.backends.google.GoogleOAuth2',
+    'django.contrib.auth.backends.ModelBackend'
 )
 
 # celery settings. task schedules can be defined via the admin interface
