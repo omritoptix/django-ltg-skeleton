@@ -14,14 +14,11 @@ Created on April 1st, 2014
 
 from django.db import models
 import datetime
-from django.contrib.auth.models import User, AbstractBaseUser, PermissionsMixin,\
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin,\
     BaseUserManager
 import logging
 from django.utils.timezone import utc
-from functools import wraps
 from timedelta.fields import TimedeltaField
-import numpy
-from django.utils.functional import cached_property
 from django.utils import timezone
 import uuid
 from ltg_backend_app import settings

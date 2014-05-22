@@ -17,7 +17,7 @@ from django.conf.urls import url
 from tastypie.utils.urls import trailing_slash
 from django.utils import simplejson
 from django.contrib.auth import login, get_user_model, authenticate
-from tastypie.http import HttpForbidden, HttpUnauthorized, HttpCreated,\
+from tastypie.http import HttpForbidden, HttpUnauthorized,\
     HttpApplicationError, HttpAccepted, HttpNotFound, HttpBadRequest
 from ltg_backend_app.api.user import UserResource
 from django.template.loader import get_template
@@ -31,8 +31,6 @@ from ltg_backend_app import settings
 from django.contrib.auth.models import User
 import uuid
 from ltg_backend_app.forms import ResetPasswordForm
-from social.apps.django_app import load_strategy
-from tastypie.exceptions import BadRequest
 
 #===============================================================================
 # end imports

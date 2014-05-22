@@ -11,7 +11,7 @@ Created on May 21st, 2014
 # begin imports
 #===============================================================================
 
-from tastypie.resources import Resource, BaseModelResource
+from tastypie.resources import BaseModelResource
 from tastypie.authentication import Authentication
 from tastypie.authorization import Authorization
 from social.apps.django_app.utils import load_strategy
