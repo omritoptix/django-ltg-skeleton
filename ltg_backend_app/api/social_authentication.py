@@ -17,14 +17,15 @@ from tastypie.authorization import Authorization
 from social.apps.django_app.utils import load_strategy
 from social.backends.oauth import BaseOAuth1, BaseOAuth2
 from tastypie.http import HttpBadRequest
-from tastypie.exceptions import BadRequest
+from tastypie.exceptions import BadRequest, ImmediateHttpResponse
 from django.core.urlresolvers import reverse
 from social.exceptions import MissingBackend
-from django.http.response import Http404
+from django.http.response import Http404, HttpResponse
 from tastypie.validation import FormValidation
 from ltg_backend_app.models import LtgUser
 from ltg_backend_app.api.user import UserResource
-from ltg_backend_app.forms import SocialSignUpForm
+from ltg_backend_app.forms import SocialAuthenticationForm
+import json
 
 #===============================================================================
 # end imports
@@ -42,7 +43,6 @@ class SocialAuthenticationResource(BaseModelResource):
         authentication = Authentication()
         authorization = Authorization()
         always_return_data = True
-        validation = FormValidation(form_class=SocialSignUpForm)
 
     def obj_create(self, bundle, request=None, **kwargs):
         """
@@ -51,6 +51,11 @@ class SocialAuthenticationResource(BaseModelResource):
         @param str backend: the backend to use, i.e "twitter"
         @param str uuid: the uuid of the device
         """
+        # validate params
+        social_auth_form = SocialAuthenticationForm(bundle.data)
+        if not (social_auth_form.is_valid()):
+            raise ImmediateHttpResponse(HttpBadRequest(json.dumps(social_auth_form.errors)))
+        
         # get params
         backend = bundle.data['backend']
         uuid = bundle.data.get('uuid')
@@ -81,7 +86,7 @@ class SocialAuthenticationResource(BaseModelResource):
         elif isinstance(backend, BaseOAuth2):
             token = bundle.data.get('access_token')
         else:
-            raise HttpBadRequest('Wrong backend type')
+            raise ImmediateHttpResponse(HttpBadRequest('Wrong backend type'))
         
         # authenticate the user
         user = strategy.backend.do_auth(token)

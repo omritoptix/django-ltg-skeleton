@@ -128,14 +128,13 @@ class UserChangeForm(forms.ModelForm):
         return self.initial["password"]
     
     
-class SocialSignUpForm(forms.Form):
+class SocialAuthenticationForm(forms.Form):
     """
     Form for creating new user via social authentication
     """
     backend = forms.CharField()
     access_token = forms.CharField
     uuid = forms.CharField()
-    email = forms.EmailField()
 #===============================================================================
 # end forms
 #===============================================================================
