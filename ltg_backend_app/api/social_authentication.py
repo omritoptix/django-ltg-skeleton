@@ -16,7 +16,7 @@ from tastypie.authentication import Authentication
 from tastypie.authorization import Authorization
 from social.apps.django_app.utils import load_strategy
 from social.backends.oauth import BaseOAuth1, BaseOAuth2
-from tastypie.http import HttpBadRequest
+from tastypie.http import HttpBadRequest, HttpNotFound
 from tastypie.exceptions import BadRequest, ImmediateHttpResponse
 from django.core.urlresolvers import reverse
 from social.exceptions import MissingBackend
@@ -72,7 +72,7 @@ class SocialAuthenticationResource(BaseModelResource):
                 redirect_uri=uri, **kwargs
             )
         except MissingBackend:
-            raise Http404('Backend not found')
+            raise ImmediateHttpResponse(HttpNotFound('Backend not found'))
         
         # get the backend for the strategy
         backend = strategy.backend

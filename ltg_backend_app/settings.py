@@ -316,6 +316,10 @@ SOCIAL_AUTH_FACEBOOK_SECRET = os.environ.get('FACEBOOK_SECRET','')
 SOCIAL_AUTH_TWITTER_KEY = os.environ.get('TWITTER_KEY','')
 SOCIAL_AUTH_TWITTER_SECRET = os.environ.get('TWITTER_SECRET','')
 
+# google auth credentials
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get('GOOGLE_KEY','')
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get('GOOGLE_SECRET','')
+
 SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.social_auth.social_details',
     'social.pipeline.social_auth.social_uid',
