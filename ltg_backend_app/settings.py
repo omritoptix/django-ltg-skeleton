@@ -253,7 +253,8 @@ except:
 
 #hubspot api settings
 HUBSPOT_API_KEY = os.environ.get('HUBSPOT_API_KEY','')
-HUBSPOT_LIST_ID = os.environ.get('HUBSPOT_LIST_ID','59')
+HUBSPOT_TUTORS_LIST_ID = os.environ.get('HUBSPOT_TUTORS_LIST_ID','59')
+HUBSPOT_USERS_LIST_ID = os.environ.get('HUBSPOT_TUTORS_LIST_ID','156')
 
 
 ADMIN_MAIL = os.environ.get('ADMIN_MAIL', 'info@ltgexam.com')

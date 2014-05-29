@@ -68,7 +68,7 @@ class TutorResource(Resource):
         return Tutor(**result)
     
     def get_object_list(self, request):
-        list_id = request.GET.get('list_id',settings.HUBSPOT_LIST_ID)
+        list_id = request.GET.get('list_id',settings.HUBSPOT_TUTORS_LIST_ID)
         contact_list = self._client().get_contact_list(list_id)
         
         results = []

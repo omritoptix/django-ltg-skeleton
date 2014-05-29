@@ -13,6 +13,8 @@ Created on May 13, 2014
 
 import numpy
 from ltg_backend_app.models import ScoreTable, ANSWER, WrongAnswersPercentage
+from ltg_backend_app.api.hubspot_client import HubSpotClient
+from ltg_backend_app import settings
 
 #===============================================================================
 # end imports
@@ -108,6 +110,19 @@ def calc_percentage_wrong(question_attempt_qs,question,question_statistics):
             except WrongAnswersPercentage.DoesNotExist:
                 wrong_answers_percentage = WrongAnswersPercentage.objects.create(question_statistics_id = question_statistics.id, answer = wrong_answer, percentage_wrong = percentage_wrong)
                 
+                
 #===============================================================================
 # end update_question_statistics task helpers
+#===============================================================================
+
+#===============================================================================
+# hubspot task helpers
+#===============================================================================
+
+def hubspot_client():
+        #define our api client
+        return HubSpotClient(settings.HUBSPOT_API_KEY)
+    
+#===============================================================================
+# end hubspot task helpers
 #===============================================================================

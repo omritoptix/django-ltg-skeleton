@@ -14,6 +14,8 @@ Created on May 21st, 2014
 from social.pipeline.user import USER_FIELDS
 from django.contrib.auth import get_user_model
 import uuid
+from ltg_backend_app.tasks import create_hubspot_contact
+from ltg_backend_app import settings
 
 #===============================================================================
 # end imports
@@ -43,9 +45,14 @@ def create_user(strategy, details, response, uid, user=None, *args, **kwargs):
     User = get_user_model()
     password = uuid.uuid4().hex[0:16]
     
+    # create the user 
+    user = User.objects.create_user(email=email, password=password, **fields)
+    # create the user in hubspot
+    create_hubspot_contact.delay(user=user,list_id=settings.HUBSPOT_USERS_LIST_ID)
+    
     return {
         'is_new': True,
-        'user': User.objects.create_user(email=email, password=password, **fields)
+        'user': user
     }
     
 #===============================================================================

@@ -35,6 +35,10 @@ class UserTest(ResourceTestCase):
         1. create a new user and make sure it was created
         2. post with duplicate mail fails
         3. post with invalid password fails  
+        
+        # note : on creation, a hubspot contact is also created.
+        when you run this test you might get an exception 409 conflict, since the user wer'e creating here may already exists
+        in hubspot.
         """
         User = get_user_model()
         # create a new user and make sure it was created

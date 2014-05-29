@@ -19,6 +19,8 @@ from ltg_backend_app.models import LtgUser
 from tastypie import fields
 from ltg_backend_app.api.authorization import UserAuthorization
 from tastypie.models import ApiKey
+from ltg_backend_app.tasks import create_hubspot_contact
+from ltg_backend_app import settings
 
 #===============================================================================
 # end imports
@@ -56,6 +58,8 @@ class UserResource(ModelResource):
         api_key = ApiKey.objects.get_or_create(user=bundle.obj)[0]
         api_key.key = api_key.generate_key()
         api_key.save()
+        # create the user in hubspot
+        create_hubspot_contact.delay(user=bundle.obj,list_id=settings.HUBSPOT_USERS_LIST_ID)
         
         return bundle
     
