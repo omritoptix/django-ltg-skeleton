@@ -13,8 +13,8 @@ Created on May 13, 2014
 
 from ltg_backend_app.api.base import LtgResource
 from ltg_backend_app.models import WrongAnswersPercentage
-from ltg_backend_app.api.authentication import LtgApiKeyAuthentication
 from tastypie.authorization import Authorization
+from tastypie.authentication import ApiKeyAuthentication
 
 #===============================================================================
 # end imports
@@ -30,7 +30,7 @@ class WrongAnswersPercentageResource(LtgResource):
     '''
     class Meta(LtgResource.Meta):
         queryset = WrongAnswersPercentage.objects.all()
-        authentication = LtgApiKeyAuthentication()
+        authentication = ApiKeyAuthentication()
         authorization = Authorization()
         allowed_methods = []
         

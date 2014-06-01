@@ -1,10 +1,11 @@
 [
     {
         "pk": 1, 
-        "model": "auth.user", 
+        "model": "ltg_backend_app.LtgUser", 
         "fields": {
             "username": "yariv", 
-            "first_name": "yariv", 
+            "first_name": "yariv",
+            "uuid":"12345",
             "last_name": "katz", 
             "is_active": true, 
             "is_superuser": true, 
@@ -19,11 +20,12 @@
     },
     {
         "pk": 2, 
-        "model": "auth.user", 
+        "model": "ltg_backend_app.LtgUser", 
         "fields": {
             "username": "omri", 
             "first_name": "omri", 
-            "last_name": "dagan", 
+            "last_name": "dagan",
+            "uuid":"123456", 
             "is_active": true, 
             "is_superuser": false, 
             "is_staff": true, 
@@ -37,11 +39,12 @@
     },
     {
         "pk": 3, 
-        "model": "auth.user", 
+        "model": "ltg_backend_app.LtgUser", 
         "fields": {
             "username": "chachi", 
             "first_name": "tzachi", 
-            "last_name": "bokaris", 
+            "last_name": "bokaris",
+            "uuid":"12345", 
             "is_active": false, 
             "is_superuser": false, 
             "is_staff": true, 
@@ -53,39 +56,6 @@
             "date_joined": "2013-11-07T13:20:47.037Z"
         }
     },
-    {
-    "pk": 1, 
-    "model": "ltg_backend_app.userprofile", 
-    "fields": {
-        "uuid": "f5861c66ab064a35b928bf7cd262d0", 
-        "user": 1, 
-        "modified_data": "2014-04-24T12:14:12.265Z", 
-        "is_anonymous": false, 
-        "creation_date": "2014-04-24T12:14:12Z"
-    	}
-	},
-	{
-    "pk": 2, 
-    "model": "ltg_backend_app.userprofile", 
-    "fields": {
-        "uuid": "f5861c66ab064a35b928bf7cd263d0", 
-        "user": 2, 
-        "modified_data": "2014-04-24T12:14:12.265Z", 
-        "is_anonymous": false, 
-        "creation_date": "2014-04-24T12:14:12Z"
-    	}
-	},
-	{
-    "pk": 3, 
-    "model": "ltg_backend_app.userprofile", 
-    "fields": {
-        "uuid": "f5861c56ab064a35b928bf7cd263d0", 
-        "user": 3, 
-        "modified_data": "2014-04-24T12:14:12.265Z", 
-        "is_anonymous": false, 
-        "creation_date": "2014-04-24T12:14:12Z"
-    	}
-	},
 	{
         "pk": 1, 
         "model": "tastypie.apikey", 

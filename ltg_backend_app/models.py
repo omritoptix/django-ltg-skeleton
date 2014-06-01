@@ -14,14 +14,14 @@ Created on April 1st, 2014
 
 from django.db import models
 import datetime
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin,\
+    BaseUserManager
 import logging
-from tastypie.models import create_api_key
 from django.utils.timezone import utc
-from functools import wraps
 from timedelta.fields import TimedeltaField
-import numpy
-from django.utils.functional import cached_property
+from django.utils import timezone
+import uuid
+from ltg_backend_app import settings
 
 #===============================================================================
 # end imports
@@ -37,6 +37,21 @@ ANSWER = (
     (2,  'C'),
     (3,  'D'),
     (4,  'E'),
+)
+
+LANGUAGE = (
+    (0,'English'),
+    (1,'Chinese'),
+)
+
+PLATFROM = (
+    (0,'Android'),
+    (1,'IOS'),
+)
+
+DEVICE = (
+    (0,'Phone'),
+    (1,'Tablet'),
 )
 
 # max attempts for a question to calc statistics for
@@ -55,6 +70,9 @@ MIN_ATTEMPT_DURATION = 5
 #===============================================================================
 
 logger = logging.getLogger()
+
+def _createHash():
+    return uuid.uuid4().hex[0:30]
 
 #===============================================================================
 # end globals
@@ -96,6 +114,7 @@ class Concept(LtgModel):
         return self.title
     
 class ConceptManager(models.Manager):
+    
     def get_by_natural_key(self, title):
         return self.get(title=title)
     
@@ -111,38 +130,92 @@ class Section(LtgModel):
     def natural_key(self):
         return self.title
     
+class LtgUserManager(BaseUserManager):
     
-class UserProfile(LtgModel):
-    '''
-    will hold the user profile model
-    '''
-    user = models.ForeignKey(User, unique=True)
-    uuid = models.CharField(max_length=200, default=None, unique=True)
-    is_anonymous = models.BooleanField(default=False)
+    def _create_user(self, email, password,is_staff,is_superuser, **extra_fields):
+        """
+        Creates and saves a User with the given email and password.
+        """
+        now = timezone.now()
+        if not email:
+            raise ValueError('Users must have an email address')
+
+        user = self.model(
+            email=self.normalize_email(email),
+            is_staff = is_staff,
+            is_superuser = is_superuser,
+            date_joined=now,
+            last_login=now,
+            **extra_fields
+        )
+
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
     
-    def __unicode__(self):
-        if (self.user):
-            return "username:%s , email:%s" % (self.user.username, self.user.email)
-    
-    def owner(self):
-        '''
-        will retrieve all owners of the instance
-        '''   
-        #list that will hold instance owners
-        owner = []
-        try: 
-            owner.append(self.user.username)
-        except: 
-            return []
+    def create_user(self, email, password=None,**extra_fields):
+        """
+        Creates and saves a user with the given email and password.        
+        User will not have admin site access.
+        """
+        return self._create_user(email, password, False,False, **extra_fields)
         
-        return owner
+    def create_superuser(self, email, password, **extra_fields):
+        """
+        Creates and saves a superuser with the given email and password.
+        Superuser will have admin site access and all permissions.
+        """
+        return self._create_user(email,password, True,True, **extra_fields)
+
+
+class LtgUser(AbstractBaseUser,PermissionsMixin):
+    """
+    Will represent our custom user.
+    reference to this model should be done via get_user_model() method of django auth.
+    """
+    
+    email = models.EmailField(verbose_name='email address',max_length=255,unique=True,)
+    username = models.CharField(max_length=30, default=_createHash)
+    uuid = models.CharField(max_length=200,blank=True)
+    first_name = models.CharField(max_length=30, blank=True)
+    last_name = models.CharField(max_length=30, blank=True)
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False,help_text='Designates whether the user can log into this admin site.')
+    date_joined = models.DateTimeField(default=timezone.now)
+    language = models.PositiveSmallIntegerField(choices=LANGUAGE,blank=True,null=True)
+    num_of_sessions = models.PositiveIntegerField(default=0)
+    test_date = models.DateTimeField(blank=True,null=True)
+    previous_GMAT_score = models.PositiveSmallIntegerField(blank=True,null=True)
+    target_GMAT_score = models.PositiveSmallIntegerField(blank=True,null=True)
+    post_GMAT_score = models.PositiveSmallIntegerField(blank=True,null=True)
+    platform_last_logged_in = models.PositiveSmallIntegerField(choices=PLATFROM,blank=True,null=True)
+    device_last_logged_in = models.PositiveSmallIntegerField(choices=DEVICE,blank=True,null=True)
+    tutor_id = models.PositiveIntegerField(blank=True,null=True)
+    
+    objects = LtgUserManager()
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username']
+
+    def get_full_name(self):
+        # The user is identified by their email address
+        return self.email
+
+    def get_short_name(self):
+        # The user is identified by their email address
+        return self.email
+
+    # On Python 3: def __str__(self):
+    def __unicode__(self):
+        return self.email
     
 class Score(LtgModel):
     '''
     will be used as abstract class for the other score models
     '''
     score = models.PositiveSmallIntegerField()
-    user_profile = models.ForeignKey(UserProfile)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL)
     date = models.DateTimeField()
     
     class Meta:
@@ -197,7 +270,7 @@ class Question(LtgModel):
     '''
     index = models.IntegerField(unique=True)
     answer = models.PositiveSmallIntegerField(choices=ANSWER)
-    attempts = models.ManyToManyField(UserProfile, through='Attempt')
+    attempts = models.ManyToManyField(settings.AUTH_USER_MODEL, through='Attempt')
     concepts = models.ManyToManyField(Concept)
     sections = models.ManyToManyField(Section)
     
@@ -208,7 +281,7 @@ class Attempt(LtgModel):
     '''
     will hold an attempt of a question by a user
     '''
-    user_profile = models.ForeignKey(UserProfile)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL)
     question = models.ForeignKey(Question)
     attempt = models.PositiveIntegerField()
     answer = models.PositiveSmallIntegerField(choices=ANSWER)
@@ -216,7 +289,7 @@ class Attempt(LtgModel):
     
 
     class Meta(LtgModel.Meta):
-        unique_together = (("user_profile", "question","attempt"),)
+        unique_together = (("user", "question","attempt"),)
         index_together = [["question", "attempt"],]
         
 class ScoreTable(models.Model):
@@ -276,39 +349,6 @@ class SectionStatistics(LtgModel):
 # end tables - models
 #===============================================================================
 
-
-#===============================================================================
-# begin signals
-#===============================================================================
-
-def disable_for_loaddata(signal_handler):
-    """
-    Decorator that turns off signal handlers when loading fixture data.
-    """
-    @wraps(signal_handler)
-    def wrapper(*args, **kwargs):
-        if kwargs['raw']:
-            return
-        signal_handler(*args, **kwargs)
-    return wrapper
-
-@disable_for_loaddata
-def create_api_key_wrapper(sender,**kwargs):
-    '''
-    will wrap the original create_api_key func in order
-    to prevent post save signal while using fixtures in testing since
-    causes integration error.
-    '''
-    create_api_key(sender,**kwargs)
-    
-# get a user profile for user, or create it if doesn't exist
-User.profile = property(lambda u: UserProfile.objects.get_or_create(user=u)[0])
-# on user save, create an api key for it
-models.signals.post_save.connect(create_api_key_wrapper, sender=User)
-
-#===============================================================================
-# end signals
-#===============================================================================
 
 
 

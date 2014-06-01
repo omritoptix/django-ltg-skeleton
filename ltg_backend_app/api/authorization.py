@@ -13,6 +13,7 @@ Created on April 22, 2014
 
 from tastypie.authorization import Authorization
 from tastypie.exceptions import Unauthorized
+from tastypie.authentication import ApiKeyAuthentication
 
 #===============================================================================
 # end imports
@@ -24,49 +25,61 @@ from tastypie.exceptions import Unauthorized
     
 class UserObjectsOnlyAuthorization(Authorization):
     '''
-    assumes the resource using this auth has a 'user_profile'/'user' as fk.
-    allow POST/GET/PUT per user profile.
+    assumes the resource using this auth has a 'user' as fk.
+    allow POST/GET/PUT. 
     deny DELETE.
     '''
-    def _get_user(self, obj):
-        '''
-        will get the user of the object
-        @param obj: django model
-        @return: a user model
-        '''
-        if hasattr(obj,'user_profile_id'):
-            return obj.user_profile.user
-        if hasattr(obj,'user_id'):
-            return obj.user
-        else:
-            raise Unauthorized("The resource can't use this authorization class since it does not have user/user_profile attributes.")
-    
     def read_list(self, object_list, bundle):
         # This assumes a ``QuerySet`` from ``ModelResource``.
-        if hasattr(bundle.obj,'user_profile_id'):
-            return object_list.filter(user_profile__user=bundle.request.user)
-        else:
-            return object_list.filter(user=bundle.request.user)
+        return object_list.filter(user=bundle.request.user)
         
     def read_detail(self, object_list, bundle):
         # Is the requested object owned by the user?
-        user = self._get_user(bundle.obj)
-        return user == bundle.request.user.profile
+        return bundle.obj.user == bundle.request.user
 
     def update_list(self, object_list, bundle):
         allowed = []
 
         # Since they may not all be saved, iterate over them.
         for obj in object_list:
-            user = self._get_user(bundle.obj)
-            if user == bundle.request.user:
+            if obj.user == bundle.request.user:
                 allowed.append(obj)
 
         return allowed
 
     def update_detail(self, object_list, bundle):
-        user = self._get_user(bundle.obj)
-        return user == bundle.request.user
+        return bundle.obj.user == bundle.request.user
+
+    def delete_list(self, object_list, bundle):
+        # Sorry user, no deletes for you!
+        raise Unauthorized("Sorry, no deletes.")
+
+    def delete_detail(self, object_list, bundle):
+        raise Unauthorized("Sorry, no deletes.")
+    
+class UserAuthorization(Authorization):
+    '''
+    custom authorization for user resource
+    allow POST/GET/PUT for detail only.
+    deny DELETE.
+    '''
+    def read_list(self, object_list, bundle):
+        # This assumes a ``QuerySet`` from ``ModelResource``.
+        raise Unauthorized("You are not allowed to view a list of objects for this resource.")
+        
+    def read_detail(self, object_list, bundle):
+        # authenticate the user
+        ApiKeyAuthentication().is_authenticated(bundle.request)
+        # Is the requested object owned by the user?
+        return bundle.obj == bundle.request.user
+
+    def update_list(self, object_list, bundle):
+        raise Unauthorized("You are not allowed to update a list of objects for this resource.")
+
+    def update_detail(self, object_list, bundle):
+        # authenticate the user
+        ApiKeyAuthentication().is_authenticated(bundle.request)
+        return bundle.obj == bundle.request.user
 
     def delete_list(self, object_list, bundle):
         # Sorry user, no deletes for you!

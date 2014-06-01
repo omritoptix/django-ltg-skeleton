@@ -6,6 +6,7 @@ Created March 15, 2013
 @version: 1.0
 @copyright: LTG
 '''
+
 import djcelery
 # from celery.schedules import crontab
 from datetime import timedelta
@@ -235,8 +236,10 @@ STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 S3_URL = 'http://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
 STATIC_URL = S3_URL
 
-#tell django about the user profile
+#tell django about the user profile - deprecated in django 1.5
 # AUTH_PROFILE_MODULE = "ticketz_backend_app.UserProfile"
+
+AUTH_USER_MODEL = 'ltg_backend_app.LtgUser'
 
 #for send grid
 try:
@@ -248,17 +251,10 @@ try:
 except:
     pass
 
-#for facebook auth
-# FACEBOOK_APP_SECRET = os.environ.get('FACEBOOK_APP_SECRET', '')
-# FACEBOOK_APP_ID = os.environ.get('FACEBOOK_APP_ID', '')
-
-#for twitter auth
-# TWITTER_KEY = os.environ.get('TWITTER_KEY', '')
-# TWITTER_SECRET = os.environ.get('TWITTER_SECRET', '')
-
 #hubspot api settings
-HUBSPOT_API_KEY = os.environ.get('HUBSPOT_API_KEY','12ac2329-070b-483a-a79e-61f9fbf544be')
-HUBSPOT_LIST_ID = os.environ.get('HUBSPOT_LIST_ID','59')
+HUBSPOT_API_KEY = os.environ.get('HUBSPOT_API_KEY','')
+HUBSPOT_TUTORS_LIST_ID = os.environ.get('HUBSPOT_TUTORS_LIST_ID','59')
+HUBSPOT_USERS_LIST_ID = os.environ.get('HUBSPOT_TUTORS_LIST_ID','156')
 
 
 ADMIN_MAIL = os.environ.get('ADMIN_MAIL', 'info@ltgexam.com')
@@ -292,8 +288,8 @@ INTERNAL_IPS = (
 AUTHENTICATION_BACKENDS = (
     'social.backends.facebook.FacebookOAuth2',
     'social.backends.twitter.TwitterOAuth',
-    'ltg_backend_app.auth_backends.EmailAuthBackend',
-    'django.contrib.auth.backends.ModelBackend',
+    'social.backends.google.GoogleOAuth2',
+    'django.contrib.auth.backends.ModelBackend'
 )
 
 # celery settings. task schedules can be defined via the admin interface
@@ -311,6 +307,8 @@ CELERY_ALWAYS_EAGER = DEBUG
 # python social auth settings
 LOGIN_REDIRECT_URL = '/'
 
+USER_MODEL = AUTH_USER_MODEL
+
 # facebook auth credentials and extra permissions
 SOCIAL_AUTH_FACEBOOK_KEY = os.environ.get('FACEBOOK_KEY','')
 SOCIAL_AUTH_FACEBOOK_SECRET = os.environ.get('FACEBOOK_SECRET','')
@@ -318,6 +316,22 @@ SOCIAL_AUTH_FACEBOOK_SECRET = os.environ.get('FACEBOOK_SECRET','')
 # twitter auth credentials
 SOCIAL_AUTH_TWITTER_KEY = os.environ.get('TWITTER_KEY','')
 SOCIAL_AUTH_TWITTER_SECRET = os.environ.get('TWITTER_SECRET','')
+
+# google auth credentials
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get('GOOGLE_KEY','')
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get('GOOGLE_SECRET','')
+
+SOCIAL_AUTH_PIPELINE = (
+    'social.pipeline.social_auth.social_details',
+    'social.pipeline.social_auth.social_uid',
+    'social.pipeline.social_auth.auth_allowed',
+    'social.pipeline.social_auth.social_user',
+    'social.pipeline.user.get_username',
+    'ltg_backend_app.third_party_extensions.python_social_auth_extensions.create_user',
+    'social.pipeline.social_auth.associate_user',
+    'social.pipeline.social_auth.load_extra_data',
+    'social.pipeline.user.user_details'
+)
 
 
 

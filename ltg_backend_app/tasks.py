@@ -17,7 +17,7 @@ from ltg_backend_app.models import Attempt, MAX_ALGORITHM_ATTEMPTS,\
     UserSectionScore, SectionStatistics, Concept, UserConceptScore,\
     ConceptStatistics
 from ltg_backend_app.tasks_helpers import calc_time_statistics,\
-    calc_percentage_right_and_score, calc_percentage_wrong
+    calc_percentage_right_and_score, calc_percentage_wrong, hubspot_client
 import numpy
 
 #===============================================================================
@@ -127,6 +127,15 @@ def update_concept_statistics():
         except ConceptStatistics.DoesNotExist:
             ConceptStatistics.objects.create(concept_id = concept.id, mean_score = mean_score, std_score = std_score)
                 
+                
+@app.task
+def create_hubspot_contact(user,list_id):
+    """
+    a task to add a contact to hubspot and attach it to a list
+    @param user: user auth model of our app
+    @param str list_id: list id we want to add the contact to.  
+    """
+    hubspot_client().add_contact(user=user,list_id=list_id)
 
 #===============================================================================
 # end tasks
