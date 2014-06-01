@@ -12,9 +12,6 @@ Created on May 20, 2014
 #===============================================================================
 
 from tastypie.test import ResourceTestCase
-from ltg_backend_app.models import LtgUser
-import pdb
-from django.test.utils import override_settings
 from django.contrib.auth import get_user_model
 
 #===============================================================================
@@ -42,7 +39,10 @@ class UserTest(ResourceTestCase):
         """
         User = get_user_model()
         # create a new user and make sure it was created
-        resp = self.api_client.post(uri='/api/v1/user/', format='json', data={'email':'omri2@ltgexam.com','password':'1234567899','uuid':'123123','first_name':'omri','last_name':'dagan'})
+        try:
+            resp = self.api_client.post(uri='/api/v1/user/', format='json', data={'email':'omri2@ltgexam.com','password':'1234567899','uuid':'123123','first_name':'omri','last_name':'dagan'})
+        except:
+            print "dfdf"
         self.assertHttpCreated(resp)
         # check new attempt was created with correct values
         recent_user = User.objects.latest('date_joined')
@@ -90,24 +90,26 @@ class UserTest(ResourceTestCase):
     def test_update_user(self):
         """
         test update of user details
-        1. update first name and last name - success
+        1. update first name, last name, language, platform - success
         2. update password, username - fails
         3. update email - fail
-        4. update other users details - unauthorized
+        4. update other user's details (not my user details) - unauthorized
         """
         # set authentication header
         User = get_user_model()
         user = User.objects.get(email="yariv@nerdeez.com")
         authentication_header = 'ApiKey '+user.email+':'+user.api_key.key
         
-        # update first name and last name
+        # update first name, last name, language, platform
         user_uri = '/api/v1/user/%d/' % user.id
-        resp = self.api_client.patch(uri=user_uri, format='json',data={'first_name':'doron','last_name':'nachshon'}, authentication=authentication_header)
+        resp = self.api_client.patch(uri=user_uri, format='json',data={'first_name':'doron','last_name':'nachshon','language':0,'platform_last_logged_in':0}, authentication=authentication_header)
         self.assertHttpAccepted(resp)
         # make sure first name and last name were updated
         user = User.objects.get(email="yariv@nerdeez.com")
         self.assertEqual(user.first_name,'doron')
         self.assertEqual(user.last_name,'nachshon')
+        self.assertEqual(user.language,0)
+        self.assertEqual(user.platform_last_logged_in,0)
         
         # update password, username - fails
         resp = self.api_client.patch(uri=user_uri, format='json',data={'password':'987654321','username':'AAA'}, authentication=authentication_header)
