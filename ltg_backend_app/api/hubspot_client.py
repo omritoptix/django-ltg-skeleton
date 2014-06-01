@@ -179,6 +179,9 @@ class HubSpotClient(object):
             # call the hubspot request handler
             resp = self._request_handler(url=url,method="post", data=data, headers=headers)
             contact_json = resp.json()
+            # save hubspot contact id to the user
+            user.hubspot_contact_id = contact_json['vid']
+            user.save()
         
         except Exception as e:
             raise ImmediateHttpResponse(HttpApplicationError(self._handle_exception(e.message)))
