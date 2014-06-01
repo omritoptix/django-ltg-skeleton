@@ -5,3 +5,4 @@ src
 .settings
 .pydevproject
 *data_generator.py
+fabfile.py
