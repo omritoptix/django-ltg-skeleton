@@ -95,7 +95,7 @@ class UserResource(ModelResource):
         will increment the current user session number
         """
         # authenticate the user
-        self.method_check(request, allowed=['put'])
+        self.method_check(request, allowed=['patch'])
         ApiKeyAuthentication().is_authenticated(request)
         if not request.user.is_authenticated():
             raise ImmediateHttpResponse(HttpUnauthorized("Operation not allowed for anonymous user."))

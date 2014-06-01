@@ -94,6 +94,7 @@ class UserTest(ResourceTestCase):
         2. update password, username - fails
         3. update email - fail
         4. update other user's details (not my user details) - unauthorized
+        5. increment session num for user
         """
         # set authentication header
         User = get_user_model()
@@ -132,6 +133,13 @@ class UserTest(ResourceTestCase):
         resp = self.api_client.patch(uri=user_uri, format='json',data={'last_name':'omri'}, authentication=authentication_header)
         self.assertHttpUnauthorized(resp)
         
+        # increment session num for user
+        num_of_sessions = user.num_of_sessions
+        increment_session_uri = '/api/v1/user/increment-session/'
+        resp = self.api_client.patch(uri=increment_session_uri, format='json',data={}, authentication=authentication_header)
+        self.assertHttpOK(resp)
+        user = User.objects.get(email="omri@ltgexam.com")
+        self.assertEqual(user.num_of_sessions, num_of_sessions + 1)
 #===============================================================================
 # end user test
 #===============================================================================
