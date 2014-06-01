@@ -39,6 +39,21 @@ ANSWER = (
     (4,  'E'),
 )
 
+LANGUAGE = (
+    (0,'English'),
+    (1,'Chinese'),
+)
+
+PLATFROM = (
+    (0,'Android'),
+    (1,'IOS'),
+)
+
+DEVICE = (
+    (0,'Phone'),
+    (1,'Tablet'),
+)
+
 # max attempts for a question to calc statistics for
 MAX_ALGORITHM_ATTEMPTS = 5
 # percentage right to return when no one answered this question yet
@@ -155,6 +170,10 @@ class LtgUserManager(BaseUserManager):
 
 
 class LtgUser(AbstractBaseUser,PermissionsMixin):
+    """
+    Will represent our custom user.
+    reference to this model should be done via get_user_model() method of django auth.
+    """
     
     email = models.EmailField(verbose_name='email address',max_length=255,unique=True,)
     username = models.CharField(max_length=30, default=_createHash)
@@ -164,7 +183,16 @@ class LtgUser(AbstractBaseUser,PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False,help_text='Designates whether the user can log into this admin site.')
     date_joined = models.DateTimeField(default=timezone.now)
-
+    language = models.PositiveSmallIntegerField(choices=LANGUAGE,blank=True,null=True)
+    num_of_sessions = models.PositiveIntegerField(default=0)
+    test_date = models.DateTimeField(blank=True,null=True)
+    previous_GMAT_score = models.PositiveSmallIntegerField(blank=True,null=True)
+    target_GMAT_score = models.PositiveSmallIntegerField(blank=True,null=True)
+    post_GMAT_score = models.PositiveSmallIntegerField(blank=True,null=True)
+    platform_last_logged_in = models.PositiveSmallIntegerField(choices=PLATFROM,blank=True,null=True)
+    device_last_logged_in = models.PositiveSmallIntegerField(choices=DEVICE,blank=True,null=True)
+    tutor_id = models.PositiveIntegerField(blank=True,null=True)
+    
     objects = LtgUserManager()
 
     USERNAME_FIELD = 'email'
