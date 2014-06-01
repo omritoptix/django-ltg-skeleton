@@ -167,8 +167,8 @@ class LtgUserManager(BaseUserManager):
         Superuser will have admin site access and all permissions.
         """
         return self._create_user(email,password, True,True, **extra_fields)
-
-
+    
+    
 class LtgUser(AbstractBaseUser,PermissionsMixin):
     """
     Will represent our custom user.
@@ -210,6 +210,11 @@ class LtgUser(AbstractBaseUser,PermissionsMixin):
     # On Python 3: def __str__(self):
     def __unicode__(self):
         return self.email
+    
+    def increment_session(self):
+        # increment user session 
+        self.num_of_sessions += 1
+        self.save()
     
 class Score(LtgModel):
     '''
