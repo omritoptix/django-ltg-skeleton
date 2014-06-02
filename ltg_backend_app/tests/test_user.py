@@ -12,10 +12,9 @@ Created on May 20, 2014
 #===============================================================================
 
 from tastypie.test import ResourceTestCase
-from ltg_backend_app.models import LtgUser
-import pdb
-from django.test.utils import override_settings
 from django.contrib.auth import get_user_model
+import datetime
+from django.utils.timezone import utc
 
 #===============================================================================
 # end imports
@@ -90,24 +89,27 @@ class UserTest(ResourceTestCase):
     def test_update_user(self):
         """
         test update of user details
-        1. update first name and last name - success
+        1. update first name, last name, language, platform - success
         2. update password, username - fails
         3. update email - fail
-        4. update other users details - unauthorized
+        4. update other user's details (not my user details) - unauthorized
+        5. test 'start-session' endpoint - need to update session num, last login, and other user details found in the payload
         """
         # set authentication header
         User = get_user_model()
         user = User.objects.get(email="yariv@nerdeez.com")
         authentication_header = 'ApiKey '+user.email+':'+user.api_key.key
         
-        # update first name and last name
+        # update first name, last name, language, platform
         user_uri = '/api/v1/user/%d/' % user.id
-        resp = self.api_client.patch(uri=user_uri, format='json',data={'first_name':'doron','last_name':'nachshon'}, authentication=authentication_header)
+        resp = self.api_client.patch(uri=user_uri, format='json',data={'first_name':'doron','last_name':'nachshon','language':0,'platform_last_logged_in':0}, authentication=authentication_header)
         self.assertHttpAccepted(resp)
         # make sure first name and last name were updated
         user = User.objects.get(email="yariv@nerdeez.com")
         self.assertEqual(user.first_name,'doron')
         self.assertEqual(user.last_name,'nachshon')
+        self.assertEqual(user.language,0)
+        self.assertEqual(user.platform_last_logged_in,0)
         
         # update password, username - fails
         resp = self.api_client.patch(uri=user_uri, format='json',data={'password':'987654321','username':'AAA'}, authentication=authentication_header)
@@ -129,6 +131,15 @@ class UserTest(ResourceTestCase):
         authentication_header = 'ApiKey '+user.email+':'+user.api_key.key
         resp = self.api_client.patch(uri=user_uri, format='json',data={'last_name':'omri'}, authentication=authentication_header)
         self.assertHttpUnauthorized(resp)
+        
+        # test 'start session' for user
+        num_of_sessions = user.num_of_sessions
+        increment_session_uri = '/api/v1/user/start-session/'
+        resp = self.api_client.post(uri=increment_session_uri, format='json',data={}, authentication=authentication_header)
+        self.assertHttpOK(resp)
+        user = User.objects.get(email="omri@ltgexam.com")
+        self.assertEqual(user.num_of_sessions, num_of_sessions + 1)
+        self.assertEqual(user.last_login,datetime.datetime.now().replace(microsecond=0,tzinfo=utc))
         
 #===============================================================================
 # end user test

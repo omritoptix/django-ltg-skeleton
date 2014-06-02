@@ -167,8 +167,8 @@ class LtgUserManager(BaseUserManager):
         Superuser will have admin site access and all permissions.
         """
         return self._create_user(email,password, True,True, **extra_fields)
-
-
+    
+    
 class LtgUser(AbstractBaseUser,PermissionsMixin):
     """
     Will represent our custom user.
@@ -192,6 +192,7 @@ class LtgUser(AbstractBaseUser,PermissionsMixin):
     platform_last_logged_in = models.PositiveSmallIntegerField(choices=PLATFROM,blank=True,null=True)
     device_last_logged_in = models.PositiveSmallIntegerField(choices=DEVICE,blank=True,null=True)
     tutor_id = models.PositiveIntegerField(blank=True,null=True)
+    hubspot_contact_id = models.PositiveIntegerField(blank=True,null=True) 
     
     objects = LtgUserManager()
 
@@ -209,6 +210,10 @@ class LtgUser(AbstractBaseUser,PermissionsMixin):
     # On Python 3: def __str__(self):
     def __unicode__(self):
         return self.email
+    
+    def increment_session(self):
+        # increment user session 
+        self.num_of_sessions += 1
     
 class Score(LtgModel):
     '''
