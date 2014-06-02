@@ -32,7 +32,7 @@ class QuestionResource(LtgResource):
     resource for the question model
     '''
     concepts = fields.ManyToManyField(ConceptResource,attribute='concepts')
-    sections = fields.ManyToManyField(ConceptResource,attribute='concepts')
+    sections = fields.ManyToManyField(ConceptResource,attribute='sections')
     
     class Meta(LtgResource.Meta):
         queryset = Question.objects.all()
