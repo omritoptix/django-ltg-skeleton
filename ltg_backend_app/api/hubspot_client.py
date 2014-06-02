@@ -16,6 +16,7 @@ import logging
 from tastypie.exceptions import ImmediateHttpResponse
 from tastypie.http import HttpApplicationError
 import json
+from django.contrib.auth import get_user_model
 
 #===============================================================================
 # end imports
@@ -29,6 +30,7 @@ BASE_API_URL = 'https://api.hubapi.com'
 GET_CONTACT_API = '/contacts/v1/contact/vid/%s/profile?'
 GET_CONTACT_LIST_API = '/contacts/v1/lists/%s/contacts/all?'
 CREATE_CONTACT_API = '/contacts/v1/contact/?'
+UPDATE_CONTACT_API = '/contacts/v1/contact/vid/%d/profile?'
 ADD_CONTACT_TO_LIST = '/contacts/v1/lists/%s/add?'
 API_KEY_QUERY_STRING = 'hapikey=%s'
 
@@ -153,23 +155,20 @@ class HubSpotClient(object):
         except Exception as e:
             raise ImmediateHttpResponse(HttpApplicationError(self._handle_exception(e.message)))
         
-    def add_contact(self,user,list_id,**kwargs):
+    def add_contact(self,user,list_id,*properties,**extra_properties):
         """
         will create a contact in hubspot and add it to a given list
         @param user: the auth user model of our app
         @param list_id: the list id which will add the user after creation
+        @param properties: properties to add to the hubspot contact on creation.
+        @param extra_properties: extra properties to add to the hubspot contact on creation.
         @return: void
+        
+        # note : properties names must exist in hubspot or else a 400 will be raised. 
         """
         # add the user to hubspot
         try:
-            # build the properties list of the user
-            properties = []
-            # build properties for the user
-            email = self._build_property('email', user.email)
-            first_name = self._build_property('firstname', user.first_name)
-            last_name = self._build_property('lastname', user.last_name)
-            # add properties to the list
-            properties.extend([first_name,last_name,email])
+            properties = self._build_user_properties_list(user.id,*properties,**extra_properties)
             # create the data object for the post request
             data = json.dumps({'properties':properties})
             # set request headers
@@ -188,6 +187,32 @@ class HubSpotClient(object):
         
         # add the recently created contact to a list
         self._add_contact_to_list(contact_id = contact_json['vid'], list_id=list_id)
+        
+    def update_contact(self,user,*properties,**extra_properties):
+        """
+        will update a contact in hubspot.
+        @param user: the auth user model of our app
+        @param properties: properties to update on hubspot
+        @return: void
+        """
+        try:
+            properties = self._build_user_properties_list(user.id,*properties,**extra_properties)
+            # create the data object for the post request
+            data = json.dumps({'properties':properties})
+            # set request headers
+            headers = {'content-type': 'application/json'}
+            # check user has a hubspot contact id
+            if user.hubspot_contact_id is None:
+                raise ImmediateHttpResponse(HttpApplicationError(self._handle_exception("can't update hubpost contact since user's hubspot_contact_id field is null")))
+            
+            # set the url
+            url = (BASE_API_URL + UPDATE_CONTACT_API + API_KEY_QUERY_STRING) % (user.hubspot_contact_id, self._api_key) 
+            # call the hubspot request handler
+            self._request_handler(url=url,method="post", data=data, headers=headers)
+        
+        except Exception as e:
+            raise ImmediateHttpResponse(HttpApplicationError(self._handle_exception(e.message)))
+
         
     def _add_contact_to_list(self,contact_id,list_id):
         """
@@ -208,19 +233,37 @@ class HubSpotClient(object):
     
         except Exception as e:
             raise ImmediateHttpResponse(HttpApplicationError(self._handle_exception(e.message)))
-            
-    def _build_property(self,key,value):
+        
+    def _build_user_properties_list(self,user_id,*properties,**extra_properties):
         """
-        will build property which matches the hubspot api convention
-        @param key: the property key, i.e 'email'
-        @param value: the property value , i.e 'omri@ltgexam.com'
-        @return: dict containing the key value matching the hubspot api property convention  
+        will build properties list according to hubspot convention for a specific user
+        @param user_id: the id of the user
+        @param properties: properties list
+        @param extra_properties: extra properties list
         """
-        contact_property = {}
-        contact_property['property'] = key
-        contact_property['value'] = value
-        return contact_property
+        # build properties as kwargs
+        properties_kwargs = get_user_model().objects.filter(id=user_id).values(*properties)[0]
+        # if there is any extra kwargs, add it
+        properties_kwargs.update(**extra_properties)
+        # build properties according to hubspot convention
+        return self._build_properties_list(**properties_kwargs)
+        
     
+    def _build_properties_list(self,**properties):
+        """
+        will be used to build properties list for the hubspot api
+        @return: list of properties matching hubspot convention
+        """
+        properties_list = []
+        
+        for key, value in properties.iteritems():
+            contact_property = {}
+            contact_property['property'] = key
+            contact_property['value'] = value
+            properties_list.append(contact_property)
+        
+        return properties_list
+        
 #===============================================================================
 # end client
 #===============================================================================

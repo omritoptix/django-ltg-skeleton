@@ -15,17 +15,19 @@ from tastypie.validation import FormValidation
 from tastypie.authentication import Authentication, ApiKeyAuthentication
 from ltg_backend_app.forms import UserForm
 from tastypie.resources import ModelResource
-from ltg_backend_app.models import LtgUser
+from ltg_backend_app.models import LtgUser, UserScore
 from tastypie import fields
 from ltg_backend_app.api.authorization import UserAuthorization
 from tastypie.models import ApiKey
-from ltg_backend_app.tasks import create_hubspot_contact
+from ltg_backend_app.tasks import create_hubspot_contact, update_hubspot_contact
 from ltg_backend_app import settings
 from tastypie.utils.urls import trailing_slash
 from django.conf.urls import url
-from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
-from tastypie.http import HttpGone, HttpMultipleChoices, HttpUnauthorized
-from tastypie.exceptions import Unauthorized, ImmediateHttpResponse
+from tastypie.http import HttpUnauthorized
+from tastypie.exceptions import ImmediateHttpResponse
+import datetime
+from django.utils.timezone import utc
+import time
 
 #===============================================================================
 # end imports
@@ -40,6 +42,9 @@ class UserResource(ModelResource):
     resource for our user model
     '''   
     username = fields.CharField(readonly=True,attribute='username')
+    num_of_sessions = fields.IntegerField(readonly=True,attribute='num_of_sessions')
+    hubspot_contact_id = fields.IntegerField(readonly=True,attribute='hubspot_contact_id',null=True)
+    
     class Meta:
         resource_name = 'user'
         allowed_methods = ['get','post','put','patch']
@@ -54,9 +59,9 @@ class UserResource(ModelResource):
         
     def prepend_urls(self):
         return [
-            url(r"^(?P<resource_name>%s)/increment-session%s$" %
+            url(r"^(?P<resource_name>%s)/start-session%s$" %
                 (self._meta.resource_name, trailing_slash()),
-                self.wrap_view('increment_session'), name="api_add_session"),
+                self.wrap_view('start_session'), name="api_start_session"),
         ]
     
 
@@ -71,13 +76,14 @@ class UserResource(ModelResource):
         api_key.key = api_key.generate_key()
         api_key.save()
         # create the user in hubspot
-        create_hubspot_contact.delay(user=bundle.obj,list_id=settings.HUBSPOT_USERS_LIST_ID)
+        properties = {'email','first_name','last_name','language'}
+        create_hubspot_contact.delay(bundle.obj,settings.HUBSPOT_USERS_LIST_ID, *properties)
         
         return bundle
     
     def obj_update(self, bundle, **kwargs):
         # email is not allowed to be updated
-        if (bundle.data['email']):
+        if ('email' in bundle.data):
             del bundle.data['email'] 
         bundle = super(UserResource, self).obj_update(bundle)
         
@@ -90,19 +96,43 @@ class UserResource(ModelResource):
         
         return bundle
     
-    def increment_session(self, request, **kwargs):
+    def start_session(self, request, **kwargs):
         """
-        will increment the current user session number
+        Indication that a user has started a new session.
+        will increment the current user session number, update last login details,
+        and update hubspot contact.
         """
         # authenticate the user
-        self.method_check(request, allowed=['patch'])
+        self.method_check(request, allowed=['post'])
         ApiKeyAuthentication().is_authenticated(request)
         if not request.user.is_authenticated():
             raise ImmediateHttpResponse(HttpUnauthorized("Operation not allowed for anonymous user."))
         
+        # update last logged in
+        user = request.user
+        user.last_login = datetime.datetime.now().replace(microsecond=0,tzinfo=utc)
         # increment user session
-        request.user.increment_session()
-        return self.create_response(request, {'message': 'session incremented successfully',},)
+        user.increment_session()
+        user.save()
+        # update hubspot contact 
+        if user.hubspot_contact_id is not None:
+            properties = {'num_of_sessions'}
+            # convert last login to unix timestamp at midnight , to match hubspot conventions
+            extra_properties = {'last_login':int(time.mktime(user.last_login.replace(second=0,minute=0,hour=0).timetuple())*1000)}
+            # check if user has test date and if so add it to properties
+            if user.test_date is not None:
+                test_date = {'test_date':int(time.mktime(user.test_date.replace(second=0,minute=0,hour=0).timetuple())*1000)}
+                extra_properties.update(test_date)
+            # check if user has score and if so add it to properties            
+            try:
+                user_score = {'user_score':user.userscore_set.latest('creation_date').score}
+                extra_properties.update(user_score) 
+            except UserScore.DoesNotExist:
+                pass
+            
+            update_hubspot_contact.delay(user, *properties,**extra_properties)
+        
+        return self.create_response(request, {'message': 'session started successfully',},)
         
     
 #===============================================================================

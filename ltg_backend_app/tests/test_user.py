@@ -13,6 +13,8 @@ Created on May 20, 2014
 
 from tastypie.test import ResourceTestCase
 from django.contrib.auth import get_user_model
+import datetime
+from django.utils.timezone import utc
 
 #===============================================================================
 # end imports
@@ -39,10 +41,7 @@ class UserTest(ResourceTestCase):
         """
         User = get_user_model()
         # create a new user and make sure it was created
-        try:
-            resp = self.api_client.post(uri='/api/v1/user/', format='json', data={'email':'omri2@ltgexam.com','password':'1234567899','uuid':'123123','first_name':'omri','last_name':'dagan'})
-        except:
-            print "dfdf"
+        resp = self.api_client.post(uri='/api/v1/user/', format='json', data={'email':'omri2@ltgexam.com','password':'1234567899','uuid':'123123','first_name':'omri','last_name':'dagan'})
         self.assertHttpCreated(resp)
         # check new attempt was created with correct values
         recent_user = User.objects.latest('date_joined')
@@ -94,7 +93,7 @@ class UserTest(ResourceTestCase):
         2. update password, username - fails
         3. update email - fail
         4. update other user's details (not my user details) - unauthorized
-        5. increment session num for user
+        5. test 'start-session' endpoint - need to update session num, last login, and other user details found in the payload
         """
         # set authentication header
         User = get_user_model()
@@ -133,13 +132,15 @@ class UserTest(ResourceTestCase):
         resp = self.api_client.patch(uri=user_uri, format='json',data={'last_name':'omri'}, authentication=authentication_header)
         self.assertHttpUnauthorized(resp)
         
-        # increment session num for user
+        # test 'start session' for user
         num_of_sessions = user.num_of_sessions
-        increment_session_uri = '/api/v1/user/increment-session/'
-        resp = self.api_client.patch(uri=increment_session_uri, format='json',data={}, authentication=authentication_header)
+        increment_session_uri = '/api/v1/user/start-session/'
+        resp = self.api_client.post(uri=increment_session_uri, format='json',data={}, authentication=authentication_header)
         self.assertHttpOK(resp)
         user = User.objects.get(email="omri@ltgexam.com")
         self.assertEqual(user.num_of_sessions, num_of_sessions + 1)
+        self.assertEqual(user.last_login,datetime.datetime.now().replace(microsecond=0,tzinfo=utc))
+        
 #===============================================================================
 # end user test
 #===============================================================================

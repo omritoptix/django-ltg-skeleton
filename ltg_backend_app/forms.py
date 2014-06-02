@@ -47,7 +47,7 @@ class UserForm(ModelForm):
               
     class Meta:
         model = LtgUser
-        fields = ("email", "first_name", "last_name","uuid",)
+        exclude = ['username']
         
         
 class ResetPasswordForm(forms.Form):

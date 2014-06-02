@@ -129,13 +129,28 @@ def update_concept_statistics():
                 
                 
 @app.task
-def create_hubspot_contact(user,list_id):
+def create_hubspot_contact(user,list_id,*properties,**extra_properties):
     """
     a task to add a contact to hubspot and attach it to a list
     @param user: user auth model of our app
-    @param str list_id: list id we want to add the contact to.  
+    @param str list_id: list id we want to add the contact to.
+    @param properties: list of properties to populate the hubspot contact
+    @param extra_properties: extra properties to add to the hubspot contact on creation.  
     """
-    hubspot_client().add_contact(user=user,list_id=list_id)
+    hubspot_client().add_contact(user,list_id,*properties,**extra_properties)
+    
+    
+@app.task
+def update_hubspot_contact(user,*properties,**extra_properties):
+    """
+    a task to update a contact on hubspot
+    @param user: user auth model of our app
+    @param properties: list of properties to populate the hubspot contact
+    @param extra_properties: extra properties to add to the hubspot contact on creation.  
+    """
+    hubspot_client().update_contact(user,*properties,**extra_properties)
+    
+    
 
 #===============================================================================
 # end tasks

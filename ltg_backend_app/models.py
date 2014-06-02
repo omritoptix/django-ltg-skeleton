@@ -214,7 +214,6 @@ class LtgUser(AbstractBaseUser,PermissionsMixin):
     def increment_session(self):
         # increment user session 
         self.num_of_sessions += 1
-        self.save()
     
 class Score(LtgModel):
     '''
