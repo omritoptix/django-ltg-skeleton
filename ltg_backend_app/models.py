@@ -130,6 +130,16 @@ class Section(LtgModel):
     def natural_key(self):
         return self.title
     
+class Flashcard(LtgModel):
+    """
+    will hold the flashcard model
+    """
+    index = models.IntegerField(unique=True)
+    
+    def __unicode__(self):
+        return str(self.index) 
+    
+
 class LtgUserManager(BaseUserManager):
     
     def _create_user(self, email, password,is_staff,is_superuser, **extra_fields):
@@ -173,8 +183,7 @@ class LtgUser(AbstractBaseUser,PermissionsMixin):
     """
     Will represent our custom user.
     reference to this model should be done via get_user_model() method of django auth.
-    """
-    
+    """ 
     email = models.EmailField(verbose_name='email address',max_length=255,unique=True,)
     username = models.CharField(max_length=30, default=_createHash)
     uuid = models.CharField(max_length=200,blank=True)
@@ -192,7 +201,8 @@ class LtgUser(AbstractBaseUser,PermissionsMixin):
     platform_last_logged_in = models.PositiveSmallIntegerField(choices=PLATFROM,blank=True,null=True)
     device_last_logged_in = models.PositiveSmallIntegerField(choices=DEVICE,blank=True,null=True)
     tutor_id = models.PositiveIntegerField(blank=True,null=True)
-    hubspot_contact_id = models.PositiveIntegerField(blank=True,null=True) 
+    hubspot_contact_id = models.PositiveIntegerField(blank=True,null=True)
+    flashcards_turned = models.ManyToManyField(Flashcard, through='FlashcardTurned') 
     
     objects = LtgUserManager()
 
@@ -243,7 +253,6 @@ class UserSectionScore(Score):
     will hold user section scores history for user
     '''
     section = models.ForeignKey(Section)
-   
 
 class Tutor(object):
     '''
@@ -296,6 +305,17 @@ class Attempt(LtgModel):
     class Meta(LtgModel.Meta):
         unique_together = (("user", "question","attempt"),)
         index_together = [["question", "attempt"],]
+        
+class FlashcardTurned(LtgModel):
+    """
+    will hold which flashcard was turned for each user
+    """
+    user = models.ForeignKey(settings.AUTH_USER_MODEL)
+    flashcard = models.ForeignKey(Flashcard)
+    
+    class Meta(LtgModel.Meta):
+        unique_together = (("user", "flashcard"),)
+    
         
 class ScoreTable(models.Model):
     '''

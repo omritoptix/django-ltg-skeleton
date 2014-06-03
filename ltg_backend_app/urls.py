@@ -29,6 +29,8 @@ from ltg_backend_app.api.question_statistics import QuestionStatisticsResource
 from ltg_backend_app.api.section_statistics import SectionStatisticsResource
 from ltg_backend_app.api.concept_statistics import ConceptStatisticsResource
 from ltg_backend_app.api.social_authentication import SocialAuthenticationResource
+from ltg_backend_app.api.flashcard import FlashcardResource
+from ltg_backend_app.api.flashcard_turned import FlashcardTurnedResource
 
 #===============================================================================
 # end imports
@@ -43,6 +45,7 @@ v1_api.register(UtilitiesResource())
 v1_api.register(TutorResource())
 v1_api.register(UserResource())
 v1_api.register(QuestionResource())
+v1_api.register(FlashcardResource())
 v1_api.register(QuestionStatisticsResource())
 v1_api.register(SectionResource())
 v1_api.register(ConceptResource())
@@ -53,6 +56,8 @@ v1_api.register(UserScoreResource())
 v1_api.register(SectionStatisticsResource())
 v1_api.register(ConceptStatisticsResource())
 v1_api.register(SocialAuthenticationResource())
+v1_api.register(FlashcardTurnedResource())
+
 
 
 #register urls
