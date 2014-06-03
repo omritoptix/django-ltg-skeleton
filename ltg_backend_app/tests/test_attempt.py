@@ -43,14 +43,15 @@ class AttemptTest(ResourceTestCase):
         authentication_header = 'ApiKey '+user.email+':'+user.api_key.key
          
         # get question uri for the attempt 
-        question_id = Question.objects.first().id
-        question_uri = '/api/v1/question/%d/' % question_id
+        question = Question.objects.first()
+        question_index = question.index
+        question_uri = '/api/v1/question/%d/' % question_index
         # post a new attempt
         resp = self.api_client.post(uri='/api/v1/attempt/', format='json', data={'question':question_uri,'answer':2,'duration':'1min,10sec'},authentication = authentication_header)
         self.assertHttpCreated(resp)
         # check new attempt was created with correct values
         attempt = Attempt.objects.latest('creation_date')
-        self.assertEqual(attempt.question_id,question_id)
+        self.assertEqual(attempt.question_id,question.id)
         self.assertEqual(attempt.user_id,user.id)
         self.assertEqual(attempt.answer, 2)
          
@@ -58,7 +59,7 @@ class AttemptTest(ResourceTestCase):
         resp = self.api_client.post(uri='/api/v1/attempt/', format='json', data={'question':question_uri,'answer':2,'duration':'1min,10sec'})
         self.assertHttpUnauthorized(resp)
          
-        # post with invalid question id fails
+        # post with invalid question index fails
         resp = self.api_client.post(uri='/api/v1/attempt/', format='json', data={'question':'/api/v1/question/99999999/','answer':2,'duration':'1min,10sec'},authentication = authentication_header)
         self.assertHttpNotFound(resp)
          

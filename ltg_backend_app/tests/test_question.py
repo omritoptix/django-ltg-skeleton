@@ -37,7 +37,7 @@ class QuestionTest(ResourceTestCase):
         User = get_user_model()
         user = User.objects.first()
         auth_data = {'username':user.email,'api_key':user.api_key.key}
-        question_uri = '/api/v1/question/%d/' % (Question.objects.first().id)
+        question_uri = '/api/v1/question/%d/' % (Question.objects.first().index)
         resp = self.api_client.get(uri=question_uri, format='json', data = auth_data)
         self.assertHttpOK(resp)
         
