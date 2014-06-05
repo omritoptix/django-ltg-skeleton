@@ -135,6 +135,8 @@ class Flashcard(LtgModel):
     will hold the flashcard model
     """
     index = models.IntegerField(unique=True)
+    section = models.ForeignKey(Section)
+    lesson = models.PositiveSmallIntegerField()
     
     def __unicode__(self):
         return str(self.index) 

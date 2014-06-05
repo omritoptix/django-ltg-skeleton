@@ -88,6 +88,8 @@ class FlashcardTurnedTest(ResourceTestCase):
         1. GET filtered by 'user' matching authorization header - success 
         2. GET filtered by 'user' not matching authorization header return empty list
         3. GET for flashcard_returned detail endpoint with none matching authorization header - unauthorized
+        4. GET filtered by section and lesson that exist for the user
+        5. GET filtered by section and lesson that exist for the user that doens't exist for the user 
         """
         # set authentication header
         User = get_user_model()
@@ -112,6 +114,22 @@ class FlashcardTurnedTest(ResourceTestCase):
         authentication_header2 = 'ApiKey '+user2.email+':'+user2.api_key.key
         resp = self.api_client.get(uri='/api/v1/flashcardturned/%d/' % flashcard_turned.id, format='json',authentication = authentication_header2)
         self.assertHttpUnauthorized(resp)
+        
+        # GET filtered by section and lesson that exist for the user
+        user = User.objects.get(email='yariv@nerdeez.com')
+        authentication_header = 'ApiKey '+user.email+':'+user.api_key.key
+        # filter only by section
+        resp = self.api_client.get(uri='/api/v1/flashcardturned/?flashcard__section=4', format='json',authentication = authentication_header)
+        self.assertNotEqual(self.deserialize(resp)['objects'], [])
+        # filter by section and lesson
+        resp = self.api_client.get(uri='/api/v1/flashcardturned/?flashcard__section=4&flashcard__lesson=1', format='json',authentication = authentication_header)
+        self.assertNotEqual(self.deserialize(resp)['objects'], [])
+        
+        # GET filtered by section and lesson that exist for the user that doens't exist for the user
+        resp = self.api_client.get(uri='/api/v1/flashcardturned/?flashcard__section=5&flashcard__lesson=1', format='json',authentication = authentication_header)
+        self.assertEqual(self.deserialize(resp)['objects'], [])
+        
+        
         
         
         

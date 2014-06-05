@@ -17,6 +17,9 @@ from tastypie.authorization import Authorization
 from tastypie.authentication import ApiKeyAuthentication
 from django.conf.urls import url
 from tastypie.bundle import Bundle
+from tastypie.constants import ALL_WITH_RELATIONS, ALL
+from tastypie import fields
+from ltg_backend_app.api.section import SectionResource
 
 #===============================================================================
 # end imports
@@ -30,12 +33,17 @@ class FlashcardResource(LtgResource):
     '''
     resource for the flashcard model
     '''
+    section = fields.ToOneField(SectionResource,attribute='section')
     
     class Meta(LtgResource.Meta):
         queryset = Flashcard.objects.all()
         authentication = ApiKeyAuthentication()
         authorization = Authorization()
         allowed_methods = []
+        filtering = {
+            'section' : ALL_WITH_RELATIONS,
+            'lesson' : ALL,
+        }
         
     def override_urls(self):
         # will get object by index and not by id

@@ -3,7 +3,9 @@
     "pk": 1, 
     "model": "ltg_backend_app.flashcard", 
     "fields": {
+        "lesson": 1, 
         "index": 100, 
+        "section": 4, 
         "modified_data": "2014-06-03T08:56:57.044Z", 
         "creation_date": "2014-06-03T08:56:57Z"
     }
@@ -12,7 +14,9 @@
     "pk": 2, 
     "model": "ltg_backend_app.flashcard", 
     "fields": {
+        "lesson": 1, 
         "index": 200, 
+        "section": 4, 
         "modified_data": "2014-06-03T08:56:58.888Z", 
         "creation_date": "2014-06-03T08:56:58Z"
     }
@@ -21,7 +25,9 @@
     "pk": 3, 
     "model": "ltg_backend_app.flashcard", 
     "fields": {
+        "lesson": 1, 
         "index": 300, 
+        "section": 5, 
         "modified_data": "2014-06-03T08:57:00.722Z", 
         "creation_date": "2014-06-03T08:57:00Z"
     }
@@ -30,7 +36,9 @@
     "pk": 4, 
     "model": "ltg_backend_app.flashcard", 
     "fields": {
+        "lesson": 1, 
         "index": 400, 
+        "section": 5, 
         "modified_data": "2014-06-03T08:57:02.117Z", 
         "creation_date": "2014-06-03T08:57:02Z"
     }
@@ -39,7 +47,9 @@
     "pk": 5, 
     "model": "ltg_backend_app.flashcard", 
     "fields": {
+        "lesson": 1, 
         "index": 500, 
+        "section": 6, 
         "modified_data": "2014-06-03T08:57:03.481Z", 
         "creation_date": "2014-06-03T08:57:03Z"
     }
@@ -48,7 +58,9 @@
     "pk": 6, 
     "model": "ltg_backend_app.flashcard", 
     "fields": {
+        "lesson": 1, 
         "index": 600, 
+        "section": 6, 
         "modified_data": "2014-06-03T08:57:06.552Z", 
         "creation_date": "2014-06-03T08:57:06Z"
     }
