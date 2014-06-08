@@ -41,7 +41,6 @@ class UserForm(ModelForm):
     first_name = forms.CharField(required=True,max_length=30)
     email = forms.EmailField(required=True,max_length=50,min_length=5)
     last_name = forms.CharField(required=True,max_length=30)
-    uuid = forms.CharField(required=True)
     password = forms.CharField(required=True, min_length=8)
               
     class Meta:

@@ -15,7 +15,7 @@ from tastypie.validation import FormValidation
 from tastypie.authentication import Authentication, ApiKeyAuthentication
 from ltg_backend_app.forms import UserForm
 from tastypie.resources import ModelResource
-from ltg_backend_app.models import LtgUser, UserScore
+from ltg_backend_app.models import LtgUser
 from tastypie import fields
 from ltg_backend_app.api.authorization import UserAuthorization
 from tastypie.models import ApiKey
