@@ -1,12 +1,16 @@
 '''
 Will contain the settings for our django app
 
-Created November 7, 2013
-@author: Yariv Katz
+Created March 15, 2013
+@author: Yariv Katz & Omri Dagan
 @version: 1.0
-@copyright: Nerdeez
+@copyright: LTG
 '''
 
+import djcelery
+# from celery.schedules import crontab
+from datetime import timedelta
+djcelery.setup_loader()
 import os
 
 DEBUG = os.environ.get('IS_DEBUG', 'TRUE') == 'TRUE'
@@ -38,7 +42,7 @@ ALLOWED_HOSTS = []
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
 # In a Windows environment this must be set to your system time zone.
-TIME_ZONE = 'Asia/Jerusalem'
+TIME_ZONE = 'UTC'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -86,7 +90,7 @@ STATICFILES_DIRS = (
 )
 
 
-#when sending mail the user will see this address
+# when sending mail the user will see this address
 FROM_EMAIL_ADDRESS = os.environ.get('FROM_EMAIL_ADDRESS', 'noreply@ltg.com')
 
 # List of finder classes that know how to find static files in
@@ -109,13 +113,14 @@ TEMPLATE_LOADERS = (
 
 
 MIDDLEWARE_CLASSES = (
-    'ltg_backend_app.crossdomain_middleware.XsSharing',
+#     'ltg_backend_app.middlewares.crossdomain_middleware.XsSharing',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     #'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'ltg_backend_app.middlewares.NonHtmlDebugToolbarMiddleware.NonHtmlDebugToolbarMiddleware',
 #     'ticketz_backend_app.exception_middleware.ProcessExceptionMiddleware',
 #     'ticketz_backend_app.jsonp_middleware.JsonpMiddleware',
     # Uncomment the next line for simple clickjacking protection:
@@ -137,7 +142,7 @@ INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.sites',
+#     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'grappelli',
@@ -147,6 +152,9 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
 )
 
+# configure tastypie swagger
+TASTYPIE_SWAGGER_API_MODULE = 'ltg_backend_app.urls.v1_api'
+
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
 # the site admins on every HTTP 500 error when DEBUG=False.
@@ -155,6 +163,10 @@ INSTALLED_APPS = (
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'root': {
+        'level': 'WARNING',
+        'handlers': ['console'],
+    },
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
@@ -165,7 +177,15 @@ LOGGING = {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
-        }
+        },
+        'sentry': {
+            'level': 'WARNING',
+            'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
     },
     'loggers': {
         'django.request': {
@@ -173,9 +193,18 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
+        'raven': {
+            'level': 'WARNING',
+            'handlers': ['console','sentry'],
+            'propagate': False,
+        },
     }
 }
 
+# add sentry handler to root logger if in prod
+ENABLE_SENTRY = os.environ.get('ENABLE_SENTRY', 'FALSE') == 'TRUE'
+if (ENABLE_SENTRY):
+    LOGGING['root']['handlers'] = ['console','sentry']
 
 # Parse database configuration from $DATABASE_URL
 import dj_database_url
@@ -185,20 +214,26 @@ DATABASES['default'] =  dj_database_url.config()
 # Honor the 'X-Forwarded-Proto' header for request.is_secure()
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 INSTALLED_APPS = INSTALLED_APPS + ('gunicorn',)
-INSTALLED_APPS = INSTALLED_APPS + ('south',)
+INSTALLED_APPS = INSTALLED_APPS + ('south',)    
 INSTALLED_APPS = INSTALLED_APPS + ('ltg_backend_app',)
 INSTALLED_APPS = INSTALLED_APPS + ('tastypie',)
-# INSTALLED_APPS = INSTALLED_APPS + ('django_facebook',)
+INSTALLED_APPS = INSTALLED_APPS + ('raven.contrib.django.raven_compat',)
+INSTALLED_APPS = INSTALLED_APPS + ('tastypie_swagger',)
+INSTALLED_APPS += ('storages',)
+# removed since caused import problems - return only when debugging and remove after
+# INSTALLED_APPS = INSTALLED_APPS + ('debug_toolbar',)
 
 #s3 storage
-# DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-# AWS_ACCESS_KEY_ID = os.environ.get('TICKETZ_ENV_AWS_ACCESS_KEY_ID', None)
-# AWS_SECRET_ACCESS_KEY = os.environ.get('TICKETZ_ENV_AWS_SECRET_ACCESS_KEY', None)
-# AWS_STORAGE_BUCKET_NAME = os.environ.get('TICKETZ_ENV_AWS_STORAGE_BUCKET_NAME', None)
-# STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID', None)
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY', None)
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', None)
+STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+S3_URL = 'http://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
+STATIC_URL = S3_URL
 
-#tell django about the user profile
-# AUTH_PROFILE_MODULE = "ticketz_backend_app.UserProfile"
+
+AUTH_USER_MODEL = 'ltg_backend_app.LtgUser'
 
 #for send grid
 try:
@@ -210,16 +245,8 @@ try:
 except:
     pass
 
-#for facebook auth
-# FACEBOOK_APP_SECRET = os.environ.get('FACEBOOK_APP_SECRET', '')
-# FACEBOOK_APP_ID = os.environ.get('FACEBOOK_APP_ID', '')
-
-#for twitter auth
-# TWITTER_KEY = os.environ.get('TWITTER_KEY', '')
-# TWITTER_SECRET = os.environ.get('TWITTER_SECRET', '')
-
-# ADMIN_MAIL = os.environ.get('ADMIN_MAIL', 'yariv@nerdeez.com')
-# ADMIN_PHONE = os.environ.get('ADMIN_PHONE', '0522441431')
+ADMIN_MAIL = os.environ.get('ADMIN_MAIL', 'info@ltgexam.com')
+ADMIN_PHONE = os.environ.get('ADMIN_PHONE', '+0000000000')
 
 os.environ['LANG'] = 'en_US.UTF-8'
 
@@ -247,9 +274,6 @@ INTERNAL_IPS = (
 )
 
 AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
+    'django.contrib.auth.backends.ModelBackend'
 )
-
- 
-
 

@@ -2,11 +2,11 @@ import re
  
 from django.utils.text import compress_string
 from django.utils.cache import patch_vary_headers
+from ltg_backend_app import settings
  
 from django import http
  
 try:
-    import settings 
     XS_SHARING_ALLOWED_ORIGINS = settings.XS_SHARING_ALLOWED_ORIGINS
     XS_SHARING_ALLOWED_METHODS = settings.XS_SHARING_ALLOWED_METHODS
     XS_SHARING_ALLOWED_HEADERS = settings.XS_SHARING_ALLOWED_HEADERS

@@ -1,0 +1,83 @@
+[
+    {
+        "pk": 1, 
+        "model": "ltg_backend_app.LtgUser", 
+        "fields": {
+            "username": "yariv", 
+            "first_name": "yariv",
+            "last_name": "katz", 
+            "is_active": true, 
+            "is_superuser": true, 
+            "is_staff": true, 
+            "last_login": "2013-11-12T15:02:10.419Z", 
+            "groups": [], 
+            "user_permissions": [], 
+            "password": "pbkdf2_sha256$10000$BfwmjoRHreI7$BNNRza87A+VIzSE6I4AtoIDlAWr0lgIFyZ+ELqKMpxg=", 
+            "email": "yariv@nerdeez.com", 
+            "date_joined": "2013-11-07T13:20:47.037Z"
+        }
+    },
+    {
+        "pk": 2, 
+        "model": "ltg_backend_app.LtgUser", 
+        "fields": {
+            "username": "omri", 
+            "first_name": "omri", 
+            "last_name": "dagan",
+            "is_active": true, 
+            "is_superuser": false, 
+            "is_staff": true, 
+            "last_login": "2013-11-12T15:02:10.419Z", 
+            "groups": [], 
+            "user_permissions": [], 
+            "password": "pbkdf2_sha256$10000$BfwmjoRHreI7$BNNRza87A+VIzSE6I4AtoIDlAWr0lgIFyZ+ELqKMpxg=", 
+            "email": "omri@ltgexam.com", 
+            "date_joined": "2013-11-07T13:20:47.037Z"
+        }
+    },
+    {
+        "pk": 3, 
+        "model": "ltg_backend_app.LtgUser", 
+        "fields": {
+            "username": "chachi", 
+            "first_name": "tzachi", 
+            "last_name": "bokaris",
+            "is_active": false, 
+            "is_superuser": false, 
+            "is_staff": true, 
+            "last_login": "2013-11-12T15:02:10.419Z", 
+            "groups": [], 
+            "user_permissions": [], 
+            "password": "pbkdf2_sha256$10000$BfwmjoRHreI7$BNNRza87A+VIzSE6I4AtoIDlAWr0lgIFyZ+ELqKMpxg=", 
+            "email": "tzachi@ltgexam.com", 
+            "date_joined": "2013-11-07T13:20:47.037Z"
+        }
+    },
+	{
+        "pk": 1, 
+        "model": "tastypie.apikey", 
+        "fields": {
+            "user": 1, 
+            "key": "12345678", 
+            "created": "2013-11-11T16:29:54.453Z"
+        }
+    },
+    {
+        "pk": 2, 
+        "model": "tastypie.apikey", 
+        "fields": {
+            "user": 2, 
+            "key": "12345678", 
+            "created": "2013-11-11T16:29:54.453Z"
+        }
+    },
+    {
+        "pk": 3, 
+        "model": "tastypie.apikey", 
+        "fields": {
+            "user": 3, 
+            "key": "12345678", 
+            "created": "2013-11-11T16:29:54.453Z"
+        }
+    }
+]
