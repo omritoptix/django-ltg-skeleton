@@ -7,10 +7,8 @@ Created March 15, 2013
 @copyright: LTG
 '''
 
-import djcelery
 # from celery.schedules import crontab
 from datetime import timedelta
-djcelery.setup_loader()
 import os
 
 DEBUG = os.environ.get('IS_DEBUG', 'TRUE') == 'TRUE'
@@ -220,6 +218,7 @@ INSTALLED_APPS = INSTALLED_APPS + ('tastypie',)
 INSTALLED_APPS = INSTALLED_APPS + ('raven.contrib.django.raven_compat',)
 INSTALLED_APPS = INSTALLED_APPS + ('tastypie_swagger',)
 INSTALLED_APPS += ('storages',)
+INSTALLED_APPS = INSTALLED_APPS + ('raven.contrib.django.raven_compat',)
 # removed since caused import problems - return only when debugging and remove after
 # INSTALLED_APPS = INSTALLED_APPS + ('debug_toolbar',)
 
