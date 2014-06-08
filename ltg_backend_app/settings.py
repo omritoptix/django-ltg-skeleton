@@ -90,7 +90,7 @@ STATICFILES_DIRS = (
 )
 
 
-#when sending mail the user will see this address
+# when sending mail the user will see this address
 FROM_EMAIL_ADDRESS = os.environ.get('FROM_EMAIL_ADDRESS', 'noreply@ltg.com')
 
 # List of finder classes that know how to find static files in
@@ -222,10 +222,6 @@ INSTALLED_APPS = INSTALLED_APPS + ('tastypie_swagger',)
 INSTALLED_APPS += ('storages',)
 # removed since caused import problems - return only when debugging and remove after
 # INSTALLED_APPS = INSTALLED_APPS + ('debug_toolbar',)
-INSTALLED_APPS = INSTALLED_APPS + ('fixture_magic',)
-# INSTALLED_APPS = INSTALLED_APPS + ('django_facebook',)
-INSTALLED_APPS += ('djcelery', )
-INSTALLED_APPS += ('social.apps.django_app.default', )
 
 #s3 storage
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
@@ -236,8 +232,6 @@ STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 S3_URL = 'http://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
 STATIC_URL = S3_URL
 
-#tell django about the user profile - deprecated in django 1.5
-# AUTH_PROFILE_MODULE = "ticketz_backend_app.UserProfile"
 
 AUTH_USER_MODEL = 'ltg_backend_app.LtgUser'
 
@@ -250,12 +244,6 @@ try:
     EMAIL_HOST_PASSWORD = os.environ['SENDGRID_PASSWORD']
 except:
     pass
-
-#hubspot api settings
-HUBSPOT_API_KEY = os.environ.get('HUBSPOT_API_KEY','')
-HUBSPOT_TUTORS_LIST_ID = os.environ.get('HUBSPOT_TUTORS_LIST_ID','59')
-HUBSPOT_USERS_LIST_ID = os.environ.get('HUBSPOT_TUTORS_LIST_ID','156')
-
 
 ADMIN_MAIL = os.environ.get('ADMIN_MAIL', 'info@ltgexam.com')
 ADMIN_PHONE = os.environ.get('ADMIN_PHONE', '+0000000000')
@@ -286,55 +274,6 @@ INTERNAL_IPS = (
 )
 
 AUTHENTICATION_BACKENDS = (
-    'social.backends.facebook.FacebookOAuth2',
-    'social.backends.twitter.TwitterOAuth',
-    'social.backends.google.GoogleOAuth2',
     'django.contrib.auth.backends.ModelBackend'
 )
-
-# celery settings. task schedules can be defined via the admin interface
-
-# set our scheduler to django celery scheduler
-CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
-# Broker settings.
-BROKER_URL = os.environ.get('CLOUDAMQP_URL', None)
-# celery result backend
-CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend'
-# If set to True there will be no asynchronous background processing, all tasks that are getting called via celery will be run synchronously 
-# (so no need to start any additional celery workers - very useful for debugging).
-CELERY_ALWAYS_EAGER = DEBUG
-
-# python social auth settings
-LOGIN_REDIRECT_URL = '/'
-
-USER_MODEL = AUTH_USER_MODEL
-
-# facebook auth credentials and extra permissions
-SOCIAL_AUTH_FACEBOOK_KEY = os.environ.get('FACEBOOK_KEY','')
-SOCIAL_AUTH_FACEBOOK_SECRET = os.environ.get('FACEBOOK_SECRET','')
-
-# twitter auth credentials
-SOCIAL_AUTH_TWITTER_KEY = os.environ.get('TWITTER_KEY','')
-SOCIAL_AUTH_TWITTER_SECRET = os.environ.get('TWITTER_SECRET','')
-
-# google auth credentials
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get('GOOGLE_KEY','')
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get('GOOGLE_SECRET','')
-
-SOCIAL_AUTH_PIPELINE = (
-    'social.pipeline.social_auth.social_details',
-    'social.pipeline.social_auth.social_uid',
-    'social.pipeline.social_auth.auth_allowed',
-    'social.pipeline.social_auth.social_user',
-    'social.pipeline.user.get_username',
-    'ltg_backend_app.third_party_extensions.python_social_auth_extensions.create_user',
-    'social.pipeline.social_auth.associate_user',
-    'social.pipeline.social_auth.load_extra_data',
-    'social.pipeline.user.user_details'
-)
-
-
-
- 
-
 

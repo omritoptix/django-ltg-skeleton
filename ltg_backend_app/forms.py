@@ -14,8 +14,7 @@ Created on April 7, 2014
 from django.contrib.auth.models import User
 from django import forms
 from django.forms.models import ModelForm
-from ltg_backend_app.models import UserConceptScore, Attempt,\
-    UserScore, UserSectionScore, LtgModel, LtgUser
+from ltg_backend_app.models import LtgModel, LtgUser
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 
 #===============================================================================
@@ -53,35 +52,6 @@ class UserForm(ModelForm):
 class ResetPasswordForm(forms.Form):
     password = forms.CharField(max_length=16,min_length=8)
     
-        
-class AttemptForm(LtgModelForm):
-    '''
-    form for creating attempt
-    '''
-    attempt = forms.IntegerField()
-    answer = forms.IntegerField(min_value=0, max_value=4)
-        
-class UserScoreForm(LtgModelForm):
-    '''
-    class for creating user score
-    
-    - didn't assign it to a specific model since causes trouble with the tastypie obj_create and the foreign keys (i.e user_profile).
-    
-    - date added as char field since django doesn't support iso-8601 date format , which is what tastypie receives, and thus
-    raises an error of the date not being valid.
-    '''
-    date = forms.CharField()
-    score = forms.IntegerField(min_value=200, max_value=800)
-        
-class UserSectionScoreForm(UserScoreForm):
-    '''
-    class for creating user section score
-    '''
-        
-class UserConceptScoreForm(UserScoreForm):
-    '''
-    form for creating user concept score
-    ''' 
     
 class UserCreationForm(forms.ModelForm):
     """A form for creating new users. Includes all the required
@@ -127,14 +97,6 @@ class UserChangeForm(forms.ModelForm):
         # field does not have access to the initial value
         return self.initial["password"]
     
-    
-class SocialAuthenticationForm(forms.Form):
-    """
-    Form for creating new user via social authentication
-    """
-    backend = forms.CharField()
-    access_token = forms.CharField
-    uuid = forms.CharField()
 #===============================================================================
 # end forms
 #===============================================================================

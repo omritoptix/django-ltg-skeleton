@@ -19,7 +19,6 @@ from django.utils import simplejson
 from django.contrib.auth import login, get_user_model, authenticate
 from tastypie.http import HttpForbidden, HttpUnauthorized,\
     HttpApplicationError, HttpAccepted, HttpNotFound, HttpBadRequest
-from ltg_backend_app.api.user import UserResource
 from django.template.loader import get_template
 from django.template.context import Context
 from django.utils.html import strip_tags
@@ -31,6 +30,7 @@ from ltg_backend_app import settings
 from django.contrib.auth.models import User
 import uuid
 from ltg_backend_app.forms import ResetPasswordForm
+from ltg_backend_app.api.user import UserResource
 
 #===============================================================================
 # end imports
@@ -56,21 +56,12 @@ class UtilitiesResource(LtgResource):
             url(r"^(?P<resource_name>%s)/login%s$" %
                 (self._meta.resource_name, trailing_slash()),
                 self.wrap_view('login'), name="api_login"),
-            url(r"^(?P<resource_name>%s)/register%s$" %
-                (self._meta.resource_name, trailing_slash()),
-                self.wrap_view('register'), name="api_register"),
-            url(r"^(?P<resource_name>%s)/skip-register%s$" %
-                (self._meta.resource_name, trailing_slash()),
-                self.wrap_view('skip_register'), name="api_skip_register"),
             url(r"^(?P<resource_name>%s)/forgot-password%s$" %
                 (self._meta.resource_name, trailing_slash()),
                 self.wrap_view('forgot_password'), name="api_forgot_password"),
             url(r"^(?P<resource_name>%s)/reset-password%s$" %
                 (self._meta.resource_name, trailing_slash()),
                 self.wrap_view('reset_password'), name="api_reset_password"),
-            url(r"^(?P<resource_name>%s)/register-facebook%s$" %
-                (self._meta.resource_name, trailing_slash()),
-                self.wrap_view('register_facebook'), name="api_register_facebook"),
             url(r"^(?P<resource_name>%s)/send-email%s$" %
                 (self._meta.resource_name, trailing_slash()),
                 self.wrap_view('send_email'), name="api_send_email"),
@@ -96,7 +87,7 @@ class UtilitiesResource(LtgResource):
         password = post.get('password','')
         email = post.get('email','')
          
-        # try to login the user using it's mail using our custom backend 'authenticate'
+        # try to login the user by mail and password
         user = authenticate(email=email, password=password)
         if (user):
             if user.is_active:
@@ -237,88 +228,12 @@ class UtilitiesResource(LtgResource):
                     'message': 'You must specify a new password',
                     }, HttpBadRequest )
             
-        
-        
-    def register_facebook(self, request=None, **kwargs):
-        '''
-        api for user facebook registration will get the following post params
-        @param facebook_user_id: the users id on facebook 
-        @param facebook_access_token: the users token on facebook 
-        @param uuid: device uuid
-        @return  
-                 success - 201 if created containing the following details
-                 {
-                     success: true
-                     message: 'registered a new device'
-                     api_key: 'api key for the user'
-                     username: 'username of the user',
-                     'phone_profile': '<profile object>'  
-                 }
-                 success - 202 if user exists containing the following details
-                 {
-                     success: true
-                     message: 'user is already registered'
-                     api_key: 'api key for the user'
-                     username: 'username of the user'
-                     'phone_profile': '<profile object>'    
-                 }
-        '''
-        
-        pass
             
     def send_email(self, request=None, **kwargs):
         '''
-        will send mail to info@ltgexam.com from the application users.
-        @param username: the requesting user username
-        @param api_key: the requesting user api_key
-        @param subject: the subject of the mail
-        @param message: the body of the mail
-        @return:
-            accepted - 202 if mail was successfully sent
+        TODO
         '''
-        #get the post params
-        post = simplejson.loads(request.body)
-        message = post.get('message', "No Message Spcified")
-        subject = post.get('subject', "No Subject Specified")
-        
-        #authenticate the user
-        ApiKeyAuthentication().is_authenticated(request)
-            
-        # if user is not anonymous set 'from email' it with it's mail
-        if (not request.user.is_anonymous() and request.user.email):
-            from_email = request.user.email
-        # else set 'from email' with it's uuid.
-        else:
-            try:
-                from_email ='anonymous@uuid-' + str(request.user.profile.uuid) + '.com'
-            except:
-                from_email = 'anonymous@ltg-user.com'
-                                    
-        #send the mail
-        if is_send_grid():
-            t = get_template('emails/contact_us_email.html')
-            html = t.render(Context({'message':message}))
-            text_content = strip_tags(html)
-            msg = EmailMultiAlternatives('Contact-Us: ' + subject, text_content, from_email, [settings.ADMIN_MAIL])
-            msg.attach_alternative(html, "text/html")
-            try:
-                msg.send()
-            except SMTPSenderRefused:
-                return self.create_response(request, {
-                    'success': False,
-                    'message': 'Failed to send mail',
-                    }, HttpApplicationError )
-            
-            return self.create_response(request, {
-                'success': True,
-                'message': 'email was successfully sent',
-                }, HttpAccepted )
-            
-        else:
-            return self.create_response(request, {
-                'success': False,
-                'message': 'mail server not defined',
-                }, HttpApplicationError )
+        pass
             
 #===============================================================================
 # end utilities resource
